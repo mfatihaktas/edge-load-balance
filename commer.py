@@ -107,10 +107,8 @@ def recv_msg(sock):
 def send_msg(msg, trans=TRANS):
 	# check(trans != 'UDP' or to_addr is not None, "Trans is UDP but to_addr is None.")
 	check(msg.dst_ip is not None, "Dst IP cannot be None")
-	check(msg.dst_port is not None, "Dst port cannot be None")
 
-	sock = create_sock(msg.dst_ip, msg.dst_port)
-
+	sock = create_sock(msg.dst_ip, LISTEN_PORT)
 	if msg is None:
 		header_ba = bytearray(msg_len_header(0))
 		if trans == 'TCP':
@@ -202,15 +200,15 @@ class CommerOnClient():
 		self.server_to_recv_results_thread.shutdown()
 		log(DEBUG, "done")
 
-	def reg(self, mid, sip):
-		self.mid_ip_m[mid] = sip
+	def reg(self, mid, mip):
+		self.mid_ip_m[mid] = mip
 
 	def send_msg(self, mid, msg):
 		check(mid in self.mid_ip_m, "Not registered", mid=mid)
 		msg.src_id = self._id
 		msg.src_ip = IP_ETH0
 		msg.dst_id = mid
-		msg.dst_ip = mid_ip_m[mid]
+		msg.dst_ip = self.mid_ip_m[mid]
 		send_msg(msg)
 
 # ***************************	 CommerOnWorker	 *************************** #

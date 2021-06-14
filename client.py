@@ -4,12 +4,12 @@ from config import *
 from plot_utils import *
 from rvs import *
 from msg import *
-from commer import PACKET_SIZE, CommerOnClient
+from commer import PACKET_SIZE, IP_ETH0, CommerOnClient
 
 class State(enum.Enum):
-  probe = 1
+	probe = 1
 	push = 2
-  off = 3
+	off = 3
 
 class Client():
 	def __init__(self, _id, d, inter_probe_num_reqs,
@@ -47,7 +47,7 @@ class Client():
 		return 'Client(' + '\n\t' + \
 			'id= {}'.format(self._id) + '\n\t' + \
 			'inter_probe_num_reqs= {}'.format(self.inter_probe_num_reqs) + '\n\t' + \
-      'mid_ip_m= {}'.format(self.mid_ip_m) + '\n\t' + \
+			'mid_ip_m= {}'.format(self.mid_ip_m) + '\n\t' + \
 			'num_reqs_to_finish= {}'.format(self.num_reqs_to_finish) + '\n\t' + \
 			'serv_time_rv= {}'.format(self.serv_time_rv) + '\n\t' + \
 			'size_inBs_rv= {}'.format(self.size_inBs_rv) + ')'

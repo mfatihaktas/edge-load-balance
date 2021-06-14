@@ -14,7 +14,7 @@ def get_wip_l(domain):
 	return record.answer
 
 class Master():
-	def __init__(self, _id, wip_l=None, worker_service_domain='edge-server'):
+	def __init__(self, _id, wip_l=None, worker_service_domain='edge-service'):
 		self._id = _id
 		self.wip_l = wip_l if wip_l is not None else get_wip_l(worker_service_domain)
 
@@ -81,7 +81,7 @@ def run(argv):
 	_id = 's' + m['i']
 	log_to_file('{}.log'.format(_id))
 
-	s = Server(_id, m['wip_l'])
+	mr = Master(_id, m['wip_l'])
 	# input("Enter to finish...\n")
 	# sys.exit()
 
@@ -90,7 +90,7 @@ def test(argv):
 	_id = 's' + m['i']
 	log_to_file('{}.log'.format(_id))
 
-	s = Server(_id, m['wip_l'])
+	mr = Master(_id, m['wip_l'])
 	input("Enter to finish...\n")
 	sys.exit()
 

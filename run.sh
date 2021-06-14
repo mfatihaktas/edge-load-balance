@@ -9,12 +9,12 @@ elif [ $1 = 'nt' ]; then
   $PY net_test.py
 elif [ $1 = 'c' ]; then
   [ -z "$2" ] && { echo "Which client [0, *] ?"; exit 1; }
-  $PY -u client.py --i=$2 --sid_ip_m='{"s0": "10.0.1.0"}'
-elif [ $1 = 's' ]; then
+  $PY -u client.py --i=$2 --mid_ip_m='{"m0": "10.0.1.0"}'
+elif [ $1 = 'm' ]; then
   pkill -f client.py
-  pkill -f server.py
+  pkill -f master.py
   [ -z "$2" ] && { echo "Which server [0, *] ?"; exit 1; }
-  $PY -u server.py --i=$2 --wip_l='["10.0.2.0"]' # 'null'
+  $PY -u master.py --i=$2 --wip_l='["10.0.2.0"]' # 'null'
 elif [ $1 = 'w' ]; then
   # rm *.png *.log
   [ -z "$2" ] && { echo "Which worker [0, *] ?"; exit 1; }
