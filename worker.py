@@ -2,7 +2,7 @@ import threading, time, sys, getopt, queue
 
 from debug_utils import *
 from commer import CommerOnWorker
-from msg import result_from_req
+from msg import result_from_req, Info
 
 class Worker():
 	def __init__(self, _id):
@@ -35,7 +35,7 @@ class Worker():
 			log(DEBUG, "finished serving")
 
 			## Empty info is interpreted as a request completion at the master
-			msg.payload = Info(result._id, {})
+			msg.payload = Info(req._id, {})
 			self.commer.send_info(msg)
 
 			result = result_from_req(req)

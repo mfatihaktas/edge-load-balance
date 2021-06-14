@@ -74,10 +74,10 @@ class Client():
 
 		log(DEBUG, "",
 				response_time = (result.epoch_arrived_client - result.epoch_departed_client),
-				time_from_c_to_s = (result.epoch_arrived_server - result.epoch_departed_client),
-				time_from_s_to_c = (result.epoch_arrived_client - result.epoch_departed_server),
+				time_from_c_to_s = (result.epoch_arrived_cluster - result.epoch_departed_client),
+				time_from_s_to_c = (result.epoch_arrived_client - result.epoch_departed_cluster),
 				time_from_s_to_w_to_s = result.serv_time,
-				num_server_fair_share = result.num_server_fair_share,
+				num_cluster_fair_share = result.num_cluster_fair_share,
 				result=result)
 
 		inter_result_time = t - self.last_time_result_recved

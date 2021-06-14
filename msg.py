@@ -1,4 +1,4 @@
-import jsonpickle
+import jsonpickle, pprint
 
 class Msg():
 	def __init__(self, _id, payload, src_id=None, src_ip=None, dst_id=None, dst_ip=None):
@@ -57,7 +57,7 @@ class Info(Payload):
 		self.m = m
 
 	def __repr__(self):
-		return "Info(m=\n {})".format(pprint.pformat(m))
+		return "Info(m=\n {})".format(pprint.pformat(self.m))
 
 class ReqRes(Payload):
 	def __init__(self, _id, typ, size_inBs, cid, cip, serv_time=None, probe=False):

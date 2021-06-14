@@ -14,7 +14,7 @@ class MyTopo(Topo):
 	def __init__(self):
 		Topo.__init__(self)
 
-		s0 = self.addHost('s0')
+		m0 = self.addHost('m0')
 		c0 = self.addHost('c0')
 		c1 = self.addHost('c1')
 		c2 = self.addHost('c2')
@@ -24,7 +24,7 @@ class MyTopo(Topo):
 		sw0 = self.addSwitch('sw0')
 
 		link_opts = dict(bw=1000, delay='1ms', loss=0, max_queue_size=1000, use_htb=True)
-		self.addLink(s0, sw0, **link_opts)
+		self.addLink(m0, sw0, **link_opts)
 		self.addLink(c0, sw0, **link_opts)
 		self.addLink(c1, sw0, **link_opts)
 		self.addLink(c2, sw0, **link_opts)
@@ -32,12 +32,12 @@ class MyTopo(Topo):
 		self.addLink(c4, sw0, **link_opts)
 		self.addLink(c5, sw0, **link_opts)
 
-def run_servers(server_l):
+def run_masters(m_l):
 	popens = {}
-	for i, s in enumerate(server_l):
-		s.cmdPrint('pwd')
-		popens[s] = s.popen('./run.sh s %s' % i)
-		log(DEBUG, "Started s{}".format(i))
+	for i, m in enumerate(m_l):
+		m.cmdPrint('pwd')
+		popens[m] = m.popen('./run.sh m %s' % i)
+		log(DEBUG, "Started m{}".format(i))
 
 	"""
 	# Monitor them and print output
@@ -52,20 +52,20 @@ def run_servers(server_l):
 	"""
 	log(INFO, "done.")
 
-def run_clients(client_l):
+def run_clients(c_l):
 	popens = {}
-	for i, s in enumerate(client_l):
-		s.cmdPrint('pwd')
-		popens[s] = s.popen('./run.sh c %s' % i)
+	for i, c in enumerate(c_l):
+		c.cmdPrint('pwd')
+		popens[c] = c.popen('./run.sh c %s' % i)
 		log(DEBUG, "Started c{}".format(i))
 
 if __name__ == '__main__':
 	setLogLevel('info')
 	net = Mininet(topo=MyTopo(), link=TCLink, controller=OVSController)
 
-	s0 = net.getNodeByName('s0')
-	s0.setIP(ip='10.0.1.0', prefixLen=32)
-	s0.setMAC(mac='00:00:00:00:01:00')
+	m0 = net.getNodeByName('m0')
+	m0.setIP(ip='10.0.1.0', prefixLen=32)
+	m0.setMAC(mac='00:00:00:00:01:00')
 
 	c0, c1 = net.getNodeByName('c0', 'c1')
 	c2, c3 = net.getNodeByName('c2', 'c3')
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 	c5.setMAC(mac='00:00:00:00:00:05')
 
 	## To fix "network is unreachable"
-	s0.setDefaultRoute(intf='s0-eth0')
+	m0.setDefaultRoute(intf='m0-eth0')
 	c0.setDefaultRoute(intf='c0-eth0')
 	c1.setDefaultRoute(intf='c1-eth0')
 	c2.setDefaultRoute(intf='c2-eth0')
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 	net.start()
 
   # run_tnodes([t11, t21, t31])
-	run_servers([s0])
+	run_masters([m0])
 	time.sleep(1)
 	run_clients([c0])
 	# run_clients([c0, c1])

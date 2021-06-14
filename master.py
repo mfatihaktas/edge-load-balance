@@ -38,7 +38,7 @@ class Master():
 
 		p = msg.payload
 		if p.is_req():
-			self.msg_req_q.put(p)
+			self.msg_req_q.put(msg)
 		elif p.is_info():
 			## Any info from a worker indicates a request completion
 			with self.lock:
