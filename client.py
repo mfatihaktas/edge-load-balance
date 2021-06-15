@@ -66,6 +66,7 @@ class Client():
 
 		check(msg.payload.is_result(), "Msg should contain a result")
 		result = msg.payload
+		check(result.cid == self._id, "result.cid should equal to cid")
 
 		t = time.time()
 		result.epoch_arrived_client = t
