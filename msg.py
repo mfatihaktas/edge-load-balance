@@ -54,6 +54,7 @@ class Payload():
 class InfoType(enum.Enum):
 	client_disconn = 1
 	worker_req_completion = 2
+	close = 3
 
 class Info(Payload):
 	def __init__(self, _id, typ: InfoType):

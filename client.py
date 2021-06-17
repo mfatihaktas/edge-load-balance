@@ -1,10 +1,10 @@
 import threading, time, sys, getopt, json, queue, enum
 
 from config import *
-from plot_utils import *
 from rvs import *
 from msg import *
 from commer import PACKET_SIZE, IP_ETH0, CommerOnClient
+from plot import plot_client
 
 class State(enum.Enum):
 	on = 1
@@ -128,11 +128,7 @@ class Client():
 		log(DEBUG, "done")
 
 	def run_send(self):
-		while True:
-			if self.state == State.off:
-				log(DEBUG, "Closed, terminating")
-				break
-
+		while self.state == State.on:
 			self.num_reqs_gened += 1
 			req = Request(_id = self.num_reqs_gened,
 										size_inBs = int(self.size_inBs_rv.sample()),
@@ -157,46 +153,13 @@ class Client():
 			log(DEBUG, "sleeping", inter_gen_time=inter_gen_time)
 			time.sleep(inter_gen_time)
 
+		if self._id == 'c0':
+			log(DEBUG, "Will send close msg to all masters")
+			time.sleep(1)
+			msg = Msg(_id=0, payload=Info(0, InfoType.close))
+			for mid in self.mid_l:
+				self.commer.send_msg(mid, msg)
 		log(DEBUG, "done")
-
-def plot_response_time(c):
-	fontsize = 14
-	## T over time
-	t0 = c.req_finished_l[0].epoch_arrived_client
-	t_l, T_l = [], []
-	for req in c.req_finished_l:
-		t_l.append(req.epoch_arrived_client - t0)
-		T_l.append(1000*(req.epoch_arrived_client - req.epoch_departed_client))
-	plot.plot(t_l, T_l, color=next(nice_color), marker='_', linestyle='None', mew=3, ms=5)
-	plot.ylabel('T (msec)', fontsize=fontsize)
-	plot.xlabel('t', fontsize=fontsize)
-	plot.legend(fontsize=fontsize)
-	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_{}_T_over_t.png".format(c._id), bbox_inches='tight')
-	plot.gcf().clear()
-
-	## CDF of T
-	add_cdf(T_l, plot.gca(), '', next(nice_color)) # drawline_x_l=[1000]
-	plot.xscale('log')
-	plot.xticks(rotation=70)
-	plot.ylabel('Pr{T < x}', fontsize=fontsize)
-	plot.xlabel('x (msec)', fontsize=fontsize)
-	plot.legend(fontsize=fontsize)
-	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_{}_cdf_T.png".format(c._id), bbox_inches='tight')
-	plot.gcf().clear()
-
-	## CDF of inter result times
-	add_cdf(c.inter_result_time_l, plot.gca(), '', next(nice_color)) # drawline_x_l=[1000*c.inter_job_gen_time_rv.mean()]
-	plot.xscale('log')
-	plot.xticks(rotation=70)
-	plot.ylabel('Pr{Inter result time < x}', fontsize=fontsize)
-	plot.xlabel('x (msec)', fontsize=fontsize)
-	plot.legend(fontsize=fontsize)
-	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_{}_cdf_interResultTime.png".format(c._id), bbox_inches='tight')
-
-	log(DEBUG, "done.")
 
 def parse_argv(argv):
 	m = {}
@@ -231,7 +194,7 @@ def run(argv):
 
 	time.sleep(3)
 	log(DEBUG, "", client=c)
-	plot_response_time(c)
+	plot_client(c)
 
 	time.sleep(100000)
 	c.close()
@@ -255,7 +218,7 @@ def test(argv):
 	# input("Enter to summarize job info...\n")
 	# time.sleep(3)
 	log(DEBUG, "", client=c)
-	plot_response_time(c)
+	plot_client(c)
 
 	# input("Enter to finish...\n")
 	# c.close()

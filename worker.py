@@ -3,14 +3,17 @@ import threading, time, sys, getopt, queue
 from debug_utils import *
 from commer import CommerOnWorker
 from msg import result_from_req, InfoType, Info
+from plot import plot_worker
 
 class Worker():
 	def __init__(self, _id):
 		self._id = _id
 
 		self.msg_q = queue.Queue()
-		self.commer = CommerOnWorker(_id, self.msg_q)
+		self.epoch__num_req_l = []
+		self.commer = CommerOnWorker(_id, self.handle_msg)
 
+		self.on = True
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
 		t.join()
@@ -18,10 +21,18 @@ class Worker():
 	def close(self):
 		log(DEBUG, "started")
 		self.commer.close()
+		self.on = False
 		log(DEBUG, "done")
 
+	def handle_msg(self, msg):
+		if msg.payload.is_info() and msg.payload.typ == InfoType.close:
+			self.close()
+		elif msg.payload.is_req():
+			self.msg_q.put(msg)
+			self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
+
 	def run(self):
-		while True:
+		while self.on:
 			msg = self.msg_q.get(block=True)
 			if msg is None:
 				log(DEBUG, "recved close signal")
@@ -33,6 +44,7 @@ class Worker():
 			log(DEBUG, "serving/sleeping", serv_time=req.serv_time)
 			time.sleep(req.serv_time)
 			log(DEBUG, "finished serving")
+			self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
 
 			msg.payload = Info(req._id, InfoType.worker_req_completion)
 			self.commer.send_info(msg)
@@ -42,6 +54,8 @@ class Worker():
 			# result.size_inBs = ?
 			msg.payload = result
 			self.commer.send_result(msg)
+
+		plot_worker(self)
 
 def parse_argv(argv):
 	m = {}

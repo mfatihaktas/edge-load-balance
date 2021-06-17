@@ -173,7 +173,7 @@ class CommerOnMaster():
 
 	def close(self):
 		log(DEBUG, "started")
-		self.server_to_recv_reqs_thread.shutdown()
+		self.server_to_recv_reqs.shutdown()
 		log(DEBUG, "done")
 
 	def send_to_worker(self, wip, msg):
@@ -214,11 +214,10 @@ class CommerOnClient():
 
 # ***************************	 CommerOnWorker	 *************************** #
 class CommerOnWorker():
-	def __init__(self, _id, msg_q):
+	def __init__(self, _id, handle_msg):
 		self._id = _id
-		self.msg_q = msg_q
 
-		self.server_to_recv_reqs = TCPServer(self._id, (IP_ETH0, LISTEN_PORT), self.handle_msg)
+		self.server_to_recv_reqs = TCPServer(self._id, (IP_ETH0, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
 
@@ -230,11 +229,6 @@ class CommerOnWorker():
 	def close(self):
 		log(DEBUG, "started")
 		self.server_to_recv_reqs_thread.shutdown()
-		log(DEBUG, "done")
-
-	def handle_msg(self, msg):
-		log(DEBUG, "started", msg=msg)
-		self.msg_q.put(msg)
 		log(DEBUG, "done")
 
 	def send_info(self, msg):

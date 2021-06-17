@@ -6,6 +6,7 @@ from priority_dict import *
 from debug_utils import *
 from commer import CommerOnMaster
 from msg import Msg, InfoType
+from plot import plot_master
 
 def get_wip_l(domain):
 	query = nslookup.Nslookup()
@@ -20,6 +21,8 @@ class RRQueue(): # Round Robin
 
 		self.cid_q_m = {}
 		self.next_cid_to_pop_q = deque()
+
+		self.num_dropped = 0
 
 	def reg(self, cid):
 		if cid not in self.cid_q_m:
@@ -41,6 +44,7 @@ class RRQueue(): # Round Robin
 		if len(q) == self.max_qlen:
 			msg_popped = q.popleft()
 			log(DEBUG, "Was full, popped the oldest req", msg_popped=msg_popped)
+			self.num_dropped += 1
 		q.append(msg)
 		log(DEBUG, "pushed", msg=msg)
 
@@ -105,12 +109,18 @@ class Master():
 		self.w_token_q = queue.Queue()
 		self.w_q = WQueue(self.wip_l, self.w_token_q, max_qlen=30)
 
+		self.on = True
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
 		t.join()
 
 	def __repr__(self):
 		return "Master(id= {}, wip_l= {})".format(self._id, self.wip_l)
+
+	def close(self):
+		self.commer.close()
+		self.on = False
+		log(DEBUG, "done")
 
 	def handle_msg(self, msg):
 		log(DEBUG, "handling", msg=msg)
@@ -125,11 +135,15 @@ class Master():
 				self.msg_q.unreg(msg.src_id)
 			elif p.typ == InfoType.worker_req_completion:
 				self.w_q.dec_qlen(msg.src_ip)
+			elif p.typ == InfoType.close:
+				for wip in self.wip_l:
+					self.commer.send_to_worker(wip, msg)
+				self.close()
 		else:
 			log(ERROR, "Unexpected payload type", payload=p)
 
 	def run(self):
-		while True:
+		while self.on:
 			log(DEBUG, "Waiting for msg")
 			self.msg_token_q.get(block=True)
 			msg = self.msg_q.pop()
