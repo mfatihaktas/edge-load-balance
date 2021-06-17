@@ -1,4 +1,4 @@
-import jsonpickle, pprint
+import jsonpickle, pprint, enum
 
 class Msg():
 	def __init__(self, _id, payload, src_id=None, src_ip=None, dst_id=None, dst_ip=None):
@@ -37,36 +37,41 @@ class ConnReply():
 		return "ConnReply(port_cluster_listening= {})".format(self.port_cluster_listening)
 
 class Payload():
-	def __init__(self, _id, typ, size_inBs):
+	def __init__(self, _id, p_typ, size_inBs):
 		self._id = _id
-		self.typ = typ
+		self.p_typ = p_typ
 		self.size_inBs = size_inBs
 
 	def is_req(self):
-		return self.typ == 'r'
+		return self.p_typ == 'r'
 
 	def is_result(self):
-		return self.typ == 's'
+		return self.p_typ == 's'
 
 	def is_info(self):
-		return self.typ == 'i'
+		return self.p_typ == 'i'
+
+class InfoType(enum.Enum):
+	client_disconn = 1
+	worker_req_completion = 2
 
 class Info(Payload):
-	def __init__(self, _id, m):
+	def __init__(self, _id, typ: InfoType):
 		super().__init__(_id, 'i', size_inBs=0)
-		self.m = m
+		self.typ = typ
 
 	def __repr__(self):
-		return "Info(m=\n {})".format(pprint.pformat(self.m))
+		return "Info(typ= {})".format(self.typ.name)
 
 class ReqRes(Payload):
-	def __init__(self, _id, typ, size_inBs, cid, cip, serv_time=None, probe=False):
-		super().__init__(_id, typ, size_inBs)
+	def __init__(self, _id, p_typ, size_inBs, cid, cip, serv_time=None, probe=False):
+		super().__init__(_id, p_typ, size_inBs)
 		self.cid = cid
 		self.cip = cip
 		self.serv_time = serv_time
 		self.probe = probe
 
+		self.mid = None
 		self.epoch_departed_client = None
 		self.epoch_arrived_cluster = None
 		self.epoch_departed_cluster = None
@@ -83,20 +88,21 @@ class Request(ReqRes):
 		super().__init__(_id, 'r', size_inBs, cid, cip, serv_time)
 
 	def __repr__(self):
-		return "Request(id= {}, cid= {}, size_inBs= {}, serv_time= {}, probe= {})".format(self._id, self.cid, self.size_inBs, self.serv_time, self.probe)
+		return "Request(id= {}, cid= {}, mid= {}, size_inBs= {}, serv_time= {}, probe= {})".format(self._id, self.cid, self.mid, self.size_inBs, self.serv_time, self.probe)
 
 class Result(ReqRes):
 	def __init__(self, _id, cid, cip, size_inBs=0):
 		super().__init__(_id, 's', size_inBs, cid, cip)
 
 	def __repr__(self):
-		return "Result(id= {}, cid= {}, probe= {})".format(self._id, self.cid, self.probe)
+		return "Result(id= {}, cid= {}, mid= {}, probe= {})".format(self._id, self.cid, self.mid, self.probe)
 
 def result_from_req(req):
 	r = Result(req._id, req.cid, req.cip)
 
 	r.serv_time = req.serv_time
 	r.probe = req.probe
+	r.mid = req.mid
 	r.epoch_departed_client = req.epoch_departed_client
 	r.epoch_arrived_cluster = req.epoch_arrived_cluster
 	r.epoch_departed_cluster = req.epoch_departed_cluster

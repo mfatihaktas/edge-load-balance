@@ -205,6 +205,7 @@ class CommerOnClient():
 
 	def send_msg(self, mid, msg):
 		check(mid in self.mid_ip_m, "Not registered", mid=mid)
+		msg.payload.mid = mid
 		msg.src_id = self._id
 		msg.src_ip = IP_ETH0
 		msg.dst_id = mid

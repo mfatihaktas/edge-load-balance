@@ -5,7 +5,7 @@ from config import *
 from priority_dict import *
 from debug_utils import *
 from commer import CommerOnMaster
-from msg import Msg
+from msg import Msg, InfoType
 
 def get_wip_l(domain):
 	query = nslookup.Nslookup()
@@ -27,12 +27,21 @@ class RRQueue(): # Round Robin
 			self.next_cid_to_pop_q.append(cid)
 			log(DEBUG, "reged", cid=cid)
 
+	def unreg(self, cid):
+		if cid in self.cid_q_m:
+			self.cid_q_m.pop(cid)
+			self.next_cid_to_pop_q.remove(cid)
+			log(DEBUG, "unreged", cid=cid)
+
 	def push(self, msg):
-		check(msg.payload.cid in self.cid_q_m, "Req is from an unknown client", msg=msg)
+		if msg.payload.cid not in self.cid_q_m:
+			self.reg(msg.payload.cid)
+
 		q = self.cid_q_m[msg.payload.cid]
 		if len(q) == self.max_qlen:
-			q.popleft()
-			q.append(msg)
+			msg_popped = q.popleft()
+			log(DEBUG, "Was full, popped the oldest req", msg_popped=msg_popped)
+		q.append(msg)
 		log(DEBUG, "pushed", msg=msg)
 
 	def pop(self):
@@ -58,16 +67,20 @@ class WQueue(): # Worker
 		self.lock = threading.Lock()
 
 	def inc_qlen(self, wip):
+		log(DEBUG, "started", wip=wip)
 		with self.lock:
 			self.wip_qlen_heap_m[wip] += 1
 			check(self.wip_qlen_heap_m[wip] <= self.max_qlen, "Q-len cannot be greater than max_qlen= {}".format(self.max_qlen))
+		log(DEBUG, "done", wip=wip, qlen=self.wip_qlen_heap_m[wip])
 
 	def dec_qlen(self, wip):
+		log(DEBUG, "started", wip=wip)
 		with self.lock:
 			self.wip_qlen_heap_m[wip] -= 1
 			check(self.wip_qlen_heap_m[wip] >= 0, "Q-len cannot be negative")
 
 			self.w_token_q.put(1)
+		log(DEBUG, "done", wip=wip, qlen=self.wip_qlen_heap_m[wip])
 
 	def pop(self):
 		with self.lock:
@@ -107,10 +120,12 @@ class Master():
 			self.msg_q.push(msg)
 			self.msg_token_q.put(1)
 		elif p.is_info():
-			## Any info from a worker indicates a request completion
-			self.w_q.dec_qlen(msg.src_ip)
+			if p.typ == InfoType.client_disconn:
+				self.msg_q.unreg(msg.src_id)
+			elif p.typ == InfoType.worker_req_completion:
+				self.w_q.dec_qlen(msg.src_ip)
 		else:
-			log(ERROR, "Unexpected payload type", payload=payload)
+			log(ERROR, "Unexpected payload type", payload=p)
 
 	def run(self):
 		while True:
@@ -153,7 +168,7 @@ def run(argv):
 
 def test(argv):
 	m = parse_argv(argv)
-	_id = 's' + m['i']
+	_id = 'm' + m['i']
 	log_to_file('{}.log'.format(_id))
 
 	mr = Master(_id, m['wip_l'])

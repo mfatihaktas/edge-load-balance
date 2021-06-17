@@ -7,9 +7,8 @@ from msg import *
 from commer import PACKET_SIZE, IP_ETH0, CommerOnClient
 
 class State(enum.Enum):
-	probe = 1
-	push = 2
-	off = 3
+	on = 1
+	off = 2
 
 class Client():
 	def __init__(self, _id, d, inter_probe_num_reqs,
@@ -31,15 +30,22 @@ class Client():
 
 		self.num_reqs_gened = 0
 		self.num_reqs_finished = 0
+		self.num_reqs_last_probed = 0
 
 		self.req_finished_l = []
 		self.last_time_result_recved = time.time()
 		self.inter_result_time_l = []
 
-		self.conned_mid = None
-		self.wait_for_probe = threading.Condition()
-		self.state = State.probe
-		t = threading.Thread(target=self.run, daemon=True)
+		self.assigned_mid = random.sample(self.mid_l, 1)[0]
+		self.waiting_for_probe = False
+		#self.wait_for_probe = threading.Condition()
+		self.state = State.on
+
+		self.msg_recved_q = queue.Queue()
+		t_recv = threading.Thread(target=self.run_recv, daemon=True)
+		t_recv.start()
+
+		t = threading.Thread(target=self.run_send, daemon=True)
 		t.start()
 		t.join()
 
@@ -62,55 +68,66 @@ class Client():
 		log(DEBUG, "done")
 
 	def handle_msg(self, msg):
-		log(DEBUG, "started", msg=msg)
+		log(DEBUG, "recved", msg=msg)
+		self.msg_recved_q.put(msg)
 
-		check(msg.payload.is_result(), "Msg should contain a result")
-		result = msg.payload
-		check(result.cid == self._id, "result.cid should equal to cid")
+	def run_recv(self):
+		while True:
+			msg = self.msg_recved_q.get(block=True)
 
-		t = time.time()
-		result.epoch_arrived_client = t
+			log(DEBUG, "handling", msg=msg)
+			check(msg.payload.is_result(), "Msg should contain a result")
+			result = msg.payload
+			check(result.cid == self._id, "result.cid should equal to cid")
 
-		self.req_finished_l.append(result)
+			if result.probe:
+				if self.waiting_for_probe:
+					if self.assigned_mid != msg.src_id:
+						msg_ = Msg(0, payload=Info(0, InfoType.client_disconn), src_id=self._id, src_ip=IP_ETH0)
+						self.commer.send_msg(self.assigned_mid, msg_)
 
-		log(DEBUG, "",
-				response_time = (result.epoch_arrived_client - result.epoch_departed_client),
-				time_from_c_to_s = (result.epoch_arrived_cluster - result.epoch_departed_client),
-				time_from_s_to_c = (result.epoch_arrived_client - result.epoch_departed_cluster),
-				time_from_s_to_w_to_s = result.serv_time,
-				num_cluster_fair_share = result.num_cluster_fair_share,
-				result=result)
+					self.assigned_mid = result.mid
+					self.num_reqs_last_probed = self.num_reqs_gened
+					self.waiting_for_probe = False
+					log(DEBUG, "Set conned mid", assigned_mid=self.assigned_mid)
+				else:
+					log(DEBUG, "Late probe result has been recved", msg=msg)
+					continue
 
-		inter_result_time = t - self.last_time_result_recved
-		self.inter_result_time_l.append(inter_result_time)
-		self.last_time_result_recved = t
-		log(DEBUG, "", inter_result_time=inter_result_time, job_serv_time=result.serv_time)
+		  ## Book keeping
+			t = time.time()
+			result.epoch_arrived_client = t
+			self.req_finished_l.append(result)
 
-		self.num_reqs_finished += 1
-		log(DEBUG, "", num_reqs_gened=self.num_reqs_gened, num_reqs_finished=self.num_reqs_finished)
+			log(DEBUG, "",
+					response_time = (result.epoch_arrived_client - result.epoch_departed_client),
+					time_from_c_to_s = (result.epoch_arrived_cluster - result.epoch_departed_client),
+					time_from_s_to_c = (result.epoch_arrived_client - result.epoch_departed_cluster),
+					time_from_s_to_w_to_s = result.serv_time,
+					num_cluster_fair_share = result.num_cluster_fair_share,
+					result=result)
 
-		if result.probe and self.state == State.probe:
-			notify_wait_for_probe = self.conned_mid is None
-			self.conned_mid = msg.src_id
-			self.state = State.push
+			inter_result_time = t - self.last_time_result_recved
+			self.inter_result_time_l.append(inter_result_time)
+			self.last_time_result_recved = t
+			log(DEBUG, "", inter_result_time=inter_result_time, job_serv_time=result.serv_time)
 
-			if notify_wait_for_probe:
-				with self.wait_for_probe:
-					self.wait_for_probe.notifyAll()
-					log(DEBUG, "wait_for_probe notified")
+			self.num_reqs_finished += 1
+			log(DEBUG, "", num_reqs_gened=self.num_reqs_gened, num_reqs_finished=self.num_reqs_finished)
 
-		log(DEBUG, "done", msg_id=msg._id)
-		if self.num_reqs_finished >= self.num_reqs_to_finish:
-			self.close()
+			log(DEBUG, "done", msg_id=msg._id)
+			if self.num_reqs_finished >= self.num_reqs_to_finish:
+				self.close()
 
 	def replicate(self, mid_l, msg):
 		log(DEBUG, "started", mid_l=mid_l, msg=msg)
+		# TODO: Send to masters in parallel
 		for mid in mid_l:
 			self.commer.send_msg(mid, msg)
 			log(DEBUG, "sent", mid=mid)
 		log(DEBUG, "done")
 
-	def run(self):
+	def run_send(self):
 		while True:
 			if self.state == State.off:
 				log(DEBUG, "Closed, terminating")
@@ -125,30 +142,20 @@ class Client():
 			req.epoch_departed_client = time.time()
 			msg = Msg(_id=self.num_reqs_gened, payload=req)
 
-			if self.state == State.probe:
+			## Send message to currently assigned master
+			self.commer.send_msg(self.assigned_mid, msg)
+			log(DEBUG, "sent", req=req, assigned_mid=self.assigned_mid)
+
+			## Send also its probe version if need to
+			if self.num_reqs_gened == 1 or \
+				 self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs:
 				msg.payload.probe = True
+				self.waiting_for_probe = True
+				self.replicate(random.sample(self.mid_l, self.d), msg)
 
-				if self.conned_mid is None:
-					self.replicate(self.mid_l, msg)
-
-					with self.wait_for_probe:
-						log(DEBUG, "waiting for first probe")
-						self.wait_for_probe.wait()
-				else:
-					self.replicate(random.sample(self.mid_l, self.d), msg)
-
-				self.num_reqs_last_probed = self.num_reqs_gened
-				self.state = State.push
-			else: # self.state = State.push
-				self.commer.send_msg(self.conned_mid, msg)
-				log(DEBUG, "sent", req=req, conned_mid=self.conned_mid)
-
-				if self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs:
-					self.state = State.probe
-
-				inter_gen_time = self.inter_gen_time_rv.sample()
-				log(DEBUG, "sleeping", inter_gen_time=inter_gen_time)
-				time.sleep(inter_gen_time)
+			inter_gen_time = self.inter_gen_time_rv.sample()
+			log(DEBUG, "sleeping", inter_gen_time=inter_gen_time)
+			time.sleep(inter_gen_time)
 
 		log(DEBUG, "done")
 
