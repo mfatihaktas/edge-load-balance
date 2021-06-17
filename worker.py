@@ -38,6 +38,7 @@ class Worker():
 			self.commer.send_info(msg)
 
 			result = result_from_req(req)
+			result.epoch_departed_cluster = time.time()
 			# result.size_inBs = ?
 			msg.payload = result
 			self.commer.send_result(msg)

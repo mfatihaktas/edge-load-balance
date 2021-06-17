@@ -94,7 +94,8 @@ class Client():
 					log(DEBUG, "Late probe result has been recved", msg=msg)
 					continue
 
-		  ## Book keeping
+			## Book keeping
+			log(DEBUG, "started book keeping", msg=msg)
 			t = time.time()
 			result.epoch_arrived_client = t
 			self.req_finished_l.append(result)
@@ -104,7 +105,6 @@ class Client():
 					time_from_c_to_s = (result.epoch_arrived_cluster - result.epoch_departed_client),
 					time_from_s_to_c = (result.epoch_arrived_client - result.epoch_departed_cluster),
 					time_from_s_to_w_to_s = result.serv_time,
-					num_cluster_fair_share = result.num_cluster_fair_share,
 					result=result)
 
 			inter_result_time = t - self.last_time_result_recved
@@ -159,41 +159,42 @@ class Client():
 
 		log(DEBUG, "done")
 
-def plot_response_time(self, c):
+def plot_response_time(c):
 	fontsize = 14
 	## T over time
-	t0 = self.req_finished_l[0].epoch_arrived_client
+	t0 = c.req_finished_l[0].epoch_arrived_client
 	t_l, T_l = [], []
-	for req in self.req_finished_l:
+	for req in c.req_finished_l:
 		t_l.append(req.epoch_arrived_client - t0)
 		T_l.append(1000*(req.epoch_arrived_client - req.epoch_departed_client))
+	plot.plot(t_l, T_l, color=next(nice_color), marker='_', linestyle='None', mew=3, ms=5)
 	plot.ylabel('T (msec)', fontsize=fontsize)
 	plot.xlabel('t', fontsize=fontsize)
 	plot.legend(fontsize=fontsize)
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_{}_T_over_t.png".format(self._id), bbox_inches='tight')
+	plot.savefig("plot_{}_T_over_t.png".format(c._id), bbox_inches='tight')
 	plot.gcf().clear()
 
 	## CDF of T
-	add_cdf(T_l, plot.gca(), sid, next(nice_color)) # drawline_x_l=[1000*self.max_delay]
+	add_cdf(T_l, plot.gca(), '', next(nice_color)) # drawline_x_l=[1000]
 	plot.xscale('log')
 	plot.xticks(rotation=70)
 	plot.ylabel('Pr{T < x}', fontsize=fontsize)
 	plot.xlabel('x (msec)', fontsize=fontsize)
 	plot.legend(fontsize=fontsize)
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_{}_cdf_T.png".format(self._id), bbox_inches='tight')
+	plot.savefig("plot_{}_cdf_T.png".format(c._id), bbox_inches='tight')
 	plot.gcf().clear()
 
 	## CDF of inter result times
-	add_cdf(self.inter_result_time_l, plot.gca(), '', next(nice_color)) # drawline_x_l=[1000*self.inter_job_gen_time_rv.mean()]
+	add_cdf(c.inter_result_time_l, plot.gca(), '', next(nice_color)) # drawline_x_l=[1000*c.inter_job_gen_time_rv.mean()]
 	plot.xscale('log')
 	plot.xticks(rotation=70)
 	plot.ylabel('Pr{Inter result time < x}', fontsize=fontsize)
 	plot.xlabel('x (msec)', fontsize=fontsize)
 	plot.legend(fontsize=fontsize)
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_{}_cdf_interResultTime.png".format(self._id), bbox_inches='tight')
+	plot.savefig("plot_{}_cdf_interResultTime.png".format(c._id), bbox_inches='tight')
 
 	log(DEBUG, "done.")
 
@@ -246,8 +247,8 @@ def test(argv):
 	mu = float(1/ES)
 	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
 						 mid_ip_m = m['mid_ip_m'],
-						 num_reqs_to_finish = 100,
-						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[1]),
+						 num_reqs_to_finish = 10,
+						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
 						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]))
 

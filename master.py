@@ -65,6 +65,7 @@ class WQueue(): # Worker
 				self.w_token_q.put(1)
 
 		self.lock = threading.Lock()
+		log(DEBUG, "WQueue constructed", w_token_q_len=self.w_token_q.qsize(), wip_l=wip_l)
 
 	def inc_qlen(self, wip):
 		log(DEBUG, "started", wip=wip)
@@ -102,7 +103,7 @@ class Master():
 		self.msg_q = RRQueue(max_qlen=5)
 
 		self.w_token_q = queue.Queue()
-		self.w_q = WQueue(wip_l, self.w_token_q, max_qlen=30)
+		self.w_q = WQueue(self.wip_l, self.w_token_q, max_qlen=30)
 
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
@@ -129,15 +130,20 @@ class Master():
 
 	def run(self):
 		while True:
+			log(DEBUG, "Waiting for msg")
 			self.msg_token_q.get(block=True)
 			msg = self.msg_q.pop()
 			check(msg is not None, "Msg must have arrived")
 
+			log(DEBUG, "Waiting for worker")
 			self.w_token_q.get(block=True)
+			log(DEBUG, "", w_token_q_len=self.w_token_q.qsize())
 			wip = self.w_q.pop()
 			check(wip is not None, "There should have been an available worker")
 
+			log(DEBUG, "Will send_to_worker", wip=wip)
 			self.commer.send_to_worker(wip, msg)
+			log(DEBUG, "Will inc_qlen", wip=wip)
 			self.w_q.inc_qlen(wip)
 
 def parse_argv(argv):
@@ -159,7 +165,7 @@ def parse_argv(argv):
 
 def run(argv):
 	m = parse_argv(argv)
-	_id = 's' + m['i']
+	_id = 'm' + m['i']
 	log_to_file('{}.log'.format(_id))
 
 	mr = Master(_id, m['wip_l'])
@@ -170,6 +176,7 @@ def test(argv):
 	m = parse_argv(argv)
 	_id = 'm' + m['i']
 	log_to_file('{}.log'.format(_id))
+	log(DEBUG, "", m=m)
 
 	mr = Master(_id, m['wip_l'])
 	input("Enter to finish...\n")

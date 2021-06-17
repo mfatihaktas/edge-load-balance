@@ -61,10 +61,11 @@ if __name__ == '__main__':
 	## To fix "network is unreachable"
 	m0.setDefaultRoute(intf='m0-eth0')
 	w0.setDefaultRoute(intf='w0-eth0')
+	w1.setDefaultRoute(intf='w1-eth0')
 	c0.setDefaultRoute(intf='c0-eth0')
 	c1.setDefaultRoute(intf='c1-eth0')
 
 	net.start()
-	# run_workers([w0, w1])
+	run_workers([w0, w1])
 	CLI(net)
 	net.stop()
