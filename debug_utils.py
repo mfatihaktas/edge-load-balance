@@ -1,4 +1,4 @@
-import inspect, pprint, logging, os
+import sys, inspect, pprint, logging, os
 
 from config import *
 
@@ -20,7 +20,7 @@ FORMAT = '%(levelname)s] %(func_name)s: %(msg)s'
 # logger.basicConfig(format=FORMAT, level=logging.DEBUG) # filename='c.log'
 formatter = logging.Formatter(FORMAT)
 
-if TEST:
+if not LOG_ONLY_TO_FILE:
 	sh = logging.StreamHandler()
 	sh.setFormatter(formatter)
 	logger.addHandler(sh)

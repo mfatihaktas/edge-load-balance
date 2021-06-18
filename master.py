@@ -4,7 +4,7 @@ from collections import deque
 from config import *
 from priority_dict import *
 from debug_utils import *
-from commer import CommerOnMaster
+from commer import CommerOnMaster, IP_ETH0
 from msg import Msg, InfoType
 from plot import plot_master
 
@@ -97,9 +97,9 @@ class WQueue(): # Worker
 		return wip
 
 class Master():
-	def __init__(self, _id, wip_l=None, worker_service_domain='edge-service'):
+	def __init__(self, _id, wip_l, worker_service_domain='edge-service'):
 		self._id = _id
-		self.wip_l = wip_l if wip_l is not None else get_wip_l(worker_service_domain)
+		self.wip_l = wip_l
 
 		self.commer = CommerOnMaster(_id, self.handle_msg)
 
@@ -174,30 +174,25 @@ def parse_argv(argv):
 			m['wip_l'] = json.loads(arg)
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
+
+	if 'i' not in m:
+		m['i'] = IP_ETH0
+
+	if 'wip_l' not in m:
+		m['wip_l'] = get_wip_l(worker_service_domain)
+
 	log(DEBUG, "", m=m)
 	return m
 
 def run(argv):
 	m = parse_argv(argv)
-	_id = 'm' + m['i']
+	_id = 'm-' + m['i']
 	log_to_file('{}.log'.format(_id))
+	log(DEBUG, "", m=m)
 
 	mr = Master(_id, m['wip_l'])
 	# input("Enter to finish...\n")
 	# sys.exit()
 
-def test(argv):
-	m = parse_argv(argv)
-	_id = 'm' + m['i']
-	log_to_file('{}.log'.format(_id))
-	log(DEBUG, "", m=m)
-
-	mr = Master(_id, m['wip_l'])
-	input("Enter to finish...\n")
-	sys.exit()
-
 if __name__ == '__main__':
-	if TEST:
-		test(sys.argv[1:])
-	else:
-		run(sys.argv[1:])
+	run(sys.argv[1:])

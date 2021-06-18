@@ -197,7 +197,7 @@ class CommerOnClient():
 
 	def close(self):
 		log(DEBUG, "started")
-		self.server_to_recv_results_thread.shutdown()
+		self.server_to_recv_results.shutdown()
 		log(DEBUG, "done")
 
 	def reg(self, mid, mip):
@@ -228,10 +228,10 @@ class CommerOnWorker():
 
 	def close(self):
 		log(DEBUG, "started")
-		self.server_to_recv_reqs_thread.shutdown()
+		self.server_to_recv_reqs.shutdown()
 		log(DEBUG, "done")
 
-	def send_info(self, msg):
+	def send_info_to_master(self, msg):
 		msg.dst_id = msg.src_id
 		msg.dst_ip = msg.src_ip
 		msg.src_id = self._id
@@ -239,7 +239,7 @@ class CommerOnWorker():
 		send_msg(msg)
 		log(DEBUG, "sent", msg=msg)
 
-	def send_result(self, msg):
+	def send_result_to_user(self, msg):
 		msg.dst_id = msg.payload.cid
 		msg.dst_ip = msg.payload.cip
 		msg.src_id = self._id

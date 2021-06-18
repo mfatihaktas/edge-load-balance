@@ -188,44 +188,16 @@ def run(argv):
 	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
 						 mid_ip_m = m['mid_ip_m'],
 						 num_reqs_to_finish = 100,
-						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[1]),
+						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
-						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[1]))
+						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]))
 
 	time.sleep(3)
 	log(DEBUG, "", client=c)
 	plot_client(c)
 
-	time.sleep(100000)
 	c.close()
 	sys.exit()
 
-def test(argv):
-	m = parse_argv(argv)
-	_id = 'c' + m['i']
-	log_to_file('{}.log'.format(_id))
-
-	# input("Enter to start...\n")
-	ES = 0.1 # 0.01
-	mu = float(1/ES)
-	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
-						 mid_ip_m = m['mid_ip_m'],
-						 num_reqs_to_finish = 10,
-						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
-						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
-						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]))
-
-	# input("Enter to summarize job info...\n")
-	# time.sleep(3)
-	log(DEBUG, "", client=c)
-	plot_client(c)
-
-	# input("Enter to finish...\n")
-	# c.close()
-	# sys.exit()
-
 if __name__ == '__main__':
-	if TEST:
-		test(sys.argv[1:])
-	else:
-		run(sys.argv[1:])
+	run(sys.argv[1:])

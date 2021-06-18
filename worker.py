@@ -1,7 +1,7 @@
 import threading, time, sys, getopt, queue
 
 from debug_utils import *
-from commer import CommerOnWorker
+from commer import CommerOnWorker, IP_ETH0
 from msg import result_from_req, InfoType, Info
 from plot import plot_worker
 
@@ -9,6 +9,7 @@ class Worker():
 	def __init__(self, _id):
 		self._id = _id
 
+		# TODO: Limit queue length
 		self.msg_q = queue.Queue()
 		self.epoch__num_req_l = []
 		self.commer = CommerOnWorker(_id, self.handle_msg)
@@ -41,19 +42,20 @@ class Worker():
 
 			# TODO: real processing goes in here
 			req = msg.payload
-			log(DEBUG, "serving/sleeping", serv_time=req.serv_time)
-			time.sleep(req.serv_time)
-			log(DEBUG, "finished serving")
-			self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
+			if not req.probe:
+				log(DEBUG, "serving/sleeping", serv_time=req.serv_time)
+				time.sleep(req.serv_time)
+				log(DEBUG, "finished serving")
+				self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
 
-			msg.payload = Info(req._id, InfoType.worker_req_completion)
-			self.commer.send_info(msg)
+				msg.payload = Info(req._id, InfoType.worker_req_completion)
+				self.commer.send_info_to_master(msg)
 
 			result = result_from_req(req)
 			result.epoch_departed_cluster = time.time()
 			# result.size_inBs = ?
 			msg.payload = result
-			self.commer.send_result(msg)
+			self.commer.send_result_to_user(msg)
 
 		plot_worker(self)
 
@@ -70,14 +72,17 @@ def parse_argv(argv):
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
+	if 'i' not in m:
+		m['i'] = IP_ETH0
+
 	return m
 
 if __name__ == '__main__':
 	m = parse_argv(sys.argv[1:])
-	_id = 'w' + m['i']
+	_id = 'w-' + m['i']
 	log_to_file('{}.log'.format(_id))
 
 	w = Worker(_id)
 
-	input("Enter to finish...\n")
-	sys.exit()
+	# input("Enter to finish...\n")
+	# sys.exit()

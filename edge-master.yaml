@@ -19,3 +19,5 @@ spec:
         image: mfatihaktas/edge-load-balance
         ports:
         - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/master.py", "--i=0", "--wip_l=null"]

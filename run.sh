@@ -13,9 +13,11 @@ elif [ $1 = 'c' ]; then
 elif [ $1 = 'm' ]; then
   pkill -f client.py
   pkill -f master.py
-  [ -z "$2" ] && { echo "Which server [0, *] ?"; exit 1; }
+  [ -z "$2" ] && { echo "Which master [0, *] ?"; exit 1; }
   # $PY -u master.py --i=$2 --wip_l='["10.0.2.0"]' # 'null'
   $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' # 'null'
+  # $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' 2>&1 > master.log
+  # $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' 2> master.log
 elif [ $1 = 'w' ]; then
   # rm *.png *.log
   [ -z "$2" ] && { echo "Which worker [0, *] ?"; exit 1; }
