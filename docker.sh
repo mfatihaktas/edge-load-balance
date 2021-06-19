@@ -1,19 +1,20 @@
 #!/bin/bash
 echo $1 $2 $3
 
+# Note: container host address: docker.for.mac.localhost
+
 DOCKER=docker
 IMG_NAME=mfatihaktas/edge-load-balance # :latest
 CONT_NAME=edge-service
 NET_NAME=edge-net
 
 if [ $1 = 'b' ]; then
-  $DOCKER image rm $IMG_NAME
   rm *.png *.log
   $DOCKER build -t $IMG_NAME .
 elif [ $1 = 'rn' ]; then
   $DOCKER run --name nginx  -d -p 8080:80 nginx
 elif [ $1 = 'ri' ]; then
-  $DOCKER run --name $CONT_NAME -it --rm $IMG_NAME /bin/bash
+  $DOCKER run --name $CONT_NAME -it --rm --net bridge $IMG_NAME /bin/bash
 elif [ $1 = 'rmd' ]; then
   [ -z "$2" ] && { echo "Which master [0, *] ?"; exit 1; }
   # $DOCKER run --name $CONT_NAME -it --rm $IMG_NAME ping localhost # Test that should work

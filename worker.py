@@ -1,7 +1,7 @@
 import threading, time, sys, getopt, queue
 
 from debug_utils import *
-from commer import CommerOnWorker, IP_ETH0
+from commer import CommerOnWorker, LISTEN_IP
 from msg import result_from_req, InfoType, Info
 from plot import plot_worker
 
@@ -22,6 +22,7 @@ class Worker():
 	def close(self):
 		log(DEBUG, "started")
 		self.commer.close()
+		self.msg_q.put(None)
 		self.on = False
 		log(DEBUG, "done")
 
@@ -73,13 +74,13 @@ def parse_argv(argv):
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
 	if 'i' not in m:
-		m['i'] = IP_ETH0
+		m['i'] = LISTEN_IP
 
 	return m
 
 if __name__ == '__main__':
 	m = parse_argv(sys.argv[1:])
-	_id = 'w-' + m['i']
+	_id = 'w_' + m['i']
 	log_to_file('{}.log'.format(_id))
 
 	w = Worker(_id)

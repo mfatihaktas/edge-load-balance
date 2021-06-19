@@ -3,7 +3,7 @@ import threading, time, sys, getopt, json, queue, enum
 from config import *
 from rvs import *
 from msg import *
-from commer import PACKET_SIZE, IP_ETH0, CommerOnClient
+from commer import CommerOnClient, PACKET_SIZE, LISTEN_IP, LISTEN_PORT
 from plot import plot_client
 
 class State(enum.Enum):
@@ -12,7 +12,7 @@ class State(enum.Enum):
 
 class Client():
 	def __init__(self, _id, d, inter_probe_num_reqs,
-							 mid_ip_m, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv):
+							 mid_ip_m, mport, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv):
 		self._id = _id
 		self.d = d
 		self.inter_probe_num_reqs = inter_probe_num_reqs
@@ -25,7 +25,7 @@ class Client():
 		self.mid_l = []
 		self.commer = CommerOnClient(_id, self.handle_msg)
 		for mid, mip in mid_ip_m.items():
-			self.commer.reg(mid, mip)
+			self.commer.reg(mid, mip, mport)
 			self.mid_l.append(mid)
 
 		self.num_reqs_gened = 0
@@ -83,7 +83,7 @@ class Client():
 			if result.probe:
 				if self.waiting_for_probe:
 					if self.assigned_mid != msg.src_id:
-						msg_ = Msg(0, payload=Info(0, InfoType.client_disconn), src_id=self._id, src_ip=IP_ETH0)
+						msg_ = Msg(0, payload=Info(0, InfoType.client_disconn), src_id=self._id, src_ip=LISTEN_IP)
 						self.commer.send_msg(self.assigned_mid, msg_)
 
 					self.assigned_mid = result.mid
@@ -133,7 +133,7 @@ class Client():
 			req = Request(_id = self.num_reqs_gened,
 										size_inBs = int(self.size_inBs_rv.sample()),
 										cid = self._id,
-										cip = IP_ETH0,
+										cip = LISTEN_IP,
 										serv_time = self.serv_time_rv.sample())
 			req.epoch_departed_client = time.time()
 			msg = Msg(_id=self.num_reqs_gened, payload=req)
@@ -173,20 +173,26 @@ def parse_argv(argv):
 			m['i'] = arg
 		elif opt == '--mid_ip_m':
 			m['mid_ip_m'] = json.loads(arg)
+		elif opt == '--mport':
+			m['mport'] = int(arg)
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
+	if 'mport' not in m:
+		m['mport'] = LISTEN_PORT
+
+	log(DEBUG, "", m=m)
 	return m
 
 def run(argv):
 	m = parse_argv(argv)
-	_id = 'c' + m['i']
+	_id = 'c_' + m['i']
 	log_to_file('{}.log'.format(_id))
 
 	ES = 0.1 # 0.01
 	mu = float(1/ES)
 	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
-						 mid_ip_m = m['mid_ip_m'],
+						 mid_ip_m = m['mid_ip_m'], mport=m['mport'],
 						 num_reqs_to_finish = 100,
 						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)

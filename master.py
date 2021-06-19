@@ -4,7 +4,7 @@ from collections import deque
 from config import *
 from priority_dict import *
 from debug_utils import *
-from commer import CommerOnMaster, IP_ETH0
+from commer import CommerOnMaster, LISTEN_IP
 from msg import Msg, InfoType
 from plot import plot_master
 
@@ -176,17 +176,17 @@ def parse_argv(argv):
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
 	if 'i' not in m:
-		m['i'] = IP_ETH0
+		m['i'] = LISTEN_IP
 
 	if 'wip_l' not in m:
-		m['wip_l'] = get_wip_l(worker_service_domain)
+		m['wip_l'] = get_wip_l('edge-service')
 
 	log(DEBUG, "", m=m)
 	return m
 
 def run(argv):
 	m = parse_argv(argv)
-	_id = 'm-' + m['i']
+	_id = 'm_' + m['i']
 	log_to_file('{}.log'.format(_id))
 	log(DEBUG, "", m=m)
 

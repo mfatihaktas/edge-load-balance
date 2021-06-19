@@ -1,9 +1,9 @@
-log/
-
 *.png
 *.pdf
 *.log
 *.out
+
+log/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -22,6 +22,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+bin/
 lib64/
 parts/
 sdist/

@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: edge-master
+  name: edge-client
   labels:
-    app: edge-master
+    app: edge-client
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: edge-master
+      app: edge-client
   template:
     metadata:
       labels:
-        app: edge-master
+        app: edge-client
     spec:
       containers:
-      - name: edge-master
+      - name: edge-client
         image: mfatihaktas/edge-load-balance
         ports:
         - containerPort: 5000
         command: ["python3", "-u"]
-        args: ["/home/app/master.py"]
+        args: ["/home/app/worker.py"]

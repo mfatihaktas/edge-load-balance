@@ -32,7 +32,7 @@ def log_to_file(filename):
 	# for hdlr in logger.handlers[:]: # remove all old handlers
 	#		logger.removeHandler(hdlr)
 
-	fh = logging.FileHandler(filename, mode='w')
+	fh = logging.FileHandler(filename, mode='w') # mode='w'
 	fh.setLevel(logging.DEBUG)
 	fh.setFormatter(formatter)
 	logger.addHandler(fh)

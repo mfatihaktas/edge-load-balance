@@ -6,33 +6,36 @@ from debug_utils import *
 MSG_LEN_HEADER_SIZE = 10
 PACKET_SIZE=1024*4 # 1024*10
 
-IP_ETH0 = None # Set below
+LISTEN_IP = None # Set below
 LISTEN_PORT = 5000
 PORT_ON_SERVER_TO_LISTEN_FOR_RESULTS = 4000
 PORT_ON_WORKER_TO_LISTEN_FOR_JOBS = 5000
 
 # ***************************  Commer utils  *************************** #
-def get_eth0_ip():
-	# search and bind to eth0 ip address
+def get_listen_ip(net_intf='eth0'):
 	intf_list = subprocess.getoutput("ifconfig -a | sed 's/[ \t].*//;/^$/d'").split('\n')
-	intf_eth0 = None
-	for intf in intf_list:
-		if 'eth0' in intf:
-			intf_eth0 = intf
+	intf = None
+	for intf_ in intf_list:
+		if net_intf in intf_:
+			intf = intf_
+	if intf is None:
+		log(DEBUG, "Could not find net interface", net_intf=net_intf)
+		return None
 
-	check(intf_eth0 is not None, "Could not find interface with eth0.")
-	intf_eth0_ip = subprocess.getoutput("ip address show dev " + intf_eth0).split()
-	intf_eth0_ip = intf_eth0_ip[intf_eth0_ip.index('inet') + 1].split('/')[0]
-	return intf_eth0_ip
+	intf_ip = subprocess.getoutput("ip address show dev " + intf).split()
+	intf_ip = intf_ip[intf_ip.index('inet') + 1].split('/')[0]
+	return intf_ip
 
-IP_ETH0 = get_eth0_ip()
+LISTEN_IP = get_listen_ip(net_intf='eth0')
+if LISTEN_IP is None:
+	LISTEN_IP = get_listen_ip(net_intf='en0')
 
 def msg_len_header(msg_size):
 	msg_size_str = str(msg_size)
 	return ('0' * (MSG_LEN_HEADER_SIZE - len(msg_size_str)) + msg_size_str).encode('utf-8')
 
 def create_sock(ip, port):
-	log(DEBUG, "started;", ip=ip, port=port)
+	log(DEBUG, "started", ip=ip, port=port)
 	try:
 		if TRANS == 'TCP':
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -104,11 +107,13 @@ def recv_msg(sock):
 	log(DEBUG, "done.", total_size_recved=total_size_recved)
 	return msg
 
-def send_msg(msg, trans=TRANS):
+def send_msg(msg, port=None, trans=TRANS):
 	# check(trans != 'UDP' or to_addr is not None, "Trans is UDP but to_addr is None.")
 	check(msg.dst_ip is not None, "Dst IP cannot be None")
+	if port is None:
+		port = LISTEN_PORT
 
-	sock = create_sock(msg.dst_ip, LISTEN_PORT)
+	sock = create_sock(msg.dst_ip, port)
 	if msg is None:
 		header_ba = bytearray(msg_len_header(0))
 		if trans == 'TCP':
@@ -117,7 +122,7 @@ def send_msg(msg, trans=TRANS):
 			sock.sendto(header_ba, to_addr)
 		return
 
-	msg.src_ip = IP_ETH0
+	msg.src_ip = LISTEN_IP
 	msg_str = msg.to_str().encode('utf-8')
 	msg_size = len(msg_str)
 	header = msg_len_header(msg_size)
@@ -167,7 +172,7 @@ class CommerOnMaster():
 	def __init__(self, _id, handle_msg):
 		self._id = _id
 
-		self.server_to_recv_reqs = TCPServer(self._id, (IP_ETH0, LISTEN_PORT), handle_msg)
+		self.server_to_recv_reqs = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
 
@@ -178,7 +183,7 @@ class CommerOnMaster():
 
 	def send_to_worker(self, wip, msg):
 		msg.src_id = self._id
-		msg.src_ip = IP_ETH0
+		msg.src_ip = LISTEN_IP
 		msg.dst_id = 'w'
 		msg.dst_ip = wip
 		send_msg(msg)
@@ -189,35 +194,37 @@ class CommerOnClient():
 	def __init__(self, _id, handle_msg):
 		self._id = _id
 
-		self.server_to_recv_results = TCPServer(self._id, (IP_ETH0, LISTEN_PORT), handle_msg)
+		self.server_to_recv_results = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_results_thread = threading.Thread(target=self.server_to_recv_results.serve_forever, daemon=True)
 		self.server_to_recv_results_thread.start()
 
-		self.mid_ip_m = {}
+		self.mid_addr_m = {}
 
 	def close(self):
 		log(DEBUG, "started")
 		self.server_to_recv_results.shutdown()
 		log(DEBUG, "done")
 
-	def reg(self, mid, mip):
-		self.mid_ip_m[mid] = mip
+	def reg(self, mid, mip, mport):
+		self.mid_addr_m[mid] = (mip, mport)
 
 	def send_msg(self, mid, msg):
-		check(mid in self.mid_ip_m, "Not registered", mid=mid)
+		check(mid in self.mid_addr_m, "Not registered", mid=mid)
+		mip, mport = self.mid_addr_m[mid]
+
 		msg.payload.mid = mid
 		msg.src_id = self._id
-		msg.src_ip = IP_ETH0
+		msg.src_ip = LISTEN_IP
 		msg.dst_id = mid
-		msg.dst_ip = self.mid_ip_m[mid]
-		send_msg(msg)
+		msg.dst_ip = mip
+		send_msg(msg, port=mport)
 
 # ***************************	 CommerOnWorker	 *************************** #
 class CommerOnWorker():
 	def __init__(self, _id, handle_msg):
 		self._id = _id
 
-		self.server_to_recv_reqs = TCPServer(self._id, (IP_ETH0, LISTEN_PORT), handle_msg)
+		self.server_to_recv_reqs = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
 
@@ -235,7 +242,7 @@ class CommerOnWorker():
 		msg.dst_id = msg.src_id
 		msg.dst_ip = msg.src_ip
 		msg.src_id = self._id
-		msg.src_ip = IP_ETH0
+		msg.src_ip = LISTEN_IP
 		send_msg(msg)
 		log(DEBUG, "sent", msg=msg)
 
@@ -243,6 +250,6 @@ class CommerOnWorker():
 		msg.dst_id = msg.payload.cid
 		msg.dst_ip = msg.payload.cip
 		msg.src_id = self._id
-		msg.src_ip = IP_ETH0
+		msg.src_ip = LISTEN_IP
 		send_msg(msg)
 		log(DEBUG, "sent", msg=msg)
