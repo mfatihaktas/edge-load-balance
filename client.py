@@ -164,7 +164,7 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
