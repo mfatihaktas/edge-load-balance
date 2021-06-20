@@ -170,9 +170,7 @@ class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 # ***************************  CommerOnMaster  *************************** #
 class CommerOnMaster():
-	def __init__(self, _id, handle_msg):
-		self._id = _id
-
+	def __init__(self, handle_msg):
 		self.server_to_recv_reqs = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
@@ -192,9 +190,7 @@ class CommerOnMaster():
 
 # ***************************  CommerOnClient  *************************** #
 class CommerOnClient():
-	def __init__(self, _id, handle_msg):
-		self._id = _id
-
+	def __init__(self, handle_msg):
 		self.server_to_recv_results = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_results_thread = threading.Thread(target=self.server_to_recv_results.serve_forever, daemon=True)
 		self.server_to_recv_results_thread.start()
@@ -222,9 +218,7 @@ class CommerOnClient():
 
 # ***************************	 CommerOnWorker	 *************************** #
 class CommerOnWorker():
-	def __init__(self, _id, handle_msg):
-		self._id = _id
-
+	def __init__(self, handle_msg):
 		self.server_to_recv_reqs = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()

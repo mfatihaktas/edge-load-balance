@@ -101,7 +101,7 @@ class Master():
 		self._id = _id
 		self.wip_l = wip_l
 
-		self.commer = CommerOnMaster(_id, self.handle_msg)
+		self.commer = CommerOnMaster(self.handle_msg)
 
 		self.msg_token_q = queue.Queue()
 		self.msg_q = RRQueue(max_qlen=5)

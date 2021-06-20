@@ -18,24 +18,6 @@ class Msg():
 def msg_from_str(s):
 	return jsonpickle.decode(s)
 
-class ConnReq():
-	def __init__(self, port_client_listening):
-		self.port_client_listening = port_client_listening
-
-		self.size_inBs = 0
-
-	def __repr__(self):
-		return "ConnReq(port_client_listening= {})".format(self.port_client_listening)
-
-class ConnReply():
-	def __init__(self, port_cluster_listening):
-		self.port_cluster_listening = port_cluster_listening
-
-		self.size_inBs = 0
-
-	def __repr__(self):
-		return "ConnReply(port_cluster_listening= {})".format(self.port_cluster_listening)
-
 class Payload():
 	def __init__(self, _id, p_typ, size_inBs):
 		self._id = _id
@@ -50,6 +32,24 @@ class Payload():
 
 	def is_info(self):
 		return self.p_typ == 'i'
+
+	def is_update(self):
+		return self.p_typ == 'u'
+
+class UpdateType(enum.Enum):
+	from_client = 1
+	from_master = 2
+	from_worker = 3
+
+class Update(Payload):
+	def __init__(self, _id, typ: UpdateType, m):
+		super().__init__(_id, 'u', size_inBs=0)
+		self.typ = typ
+
+		self.m = m
+
+	def __repr__(self):
+		return "Update(typ= {}, \n\t m=\n {})".format(self.typ.name, pprint.pformat(self.m))
 
 class InfoType(enum.Enum):
 	client_disconn = 1

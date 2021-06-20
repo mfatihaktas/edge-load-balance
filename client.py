@@ -23,7 +23,7 @@ class Client():
 		self.size_inBs_rv = size_inBs_rv
 
 		self.mid_l = []
-		self.commer = CommerOnClient(_id, self.handle_msg)
+		self.commer = CommerOnClient(self.handle_msg)
 		for mid, mip in mid_ip_m.items():
 			self.commer.reg(mid, mip, mport)
 			self.mid_l.append(mid)
@@ -164,7 +164,7 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport=', 'num_reqs_to_finish='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
@@ -175,6 +175,8 @@ def parse_argv(argv):
 			m['mid_ip_m'] = json.loads(arg)
 		elif opt == '--mport':
 			m['mport'] = int(arg)
+		elif opt == '--num_reqs_to_finish':
+			m['num_reqs_to_finish'] = float(arg)
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
@@ -193,7 +195,7 @@ def run(argv):
 	mu = float(1/ES)
 	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
 						 mid_ip_m = m['mid_ip_m'], mport=m['mport'],
-						 num_reqs_to_finish = 100,
+						 num_reqs_to_finish = m['num_reqs_to_finish'],
 						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
 						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]))

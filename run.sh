@@ -11,9 +11,11 @@ elif [ $1 = 'nt' ]; then
   $PY net_test.py
 elif [ $1 = 'c' ]; then
   [ -z "$2" ] && { echo "Which client [0, *] ?"; exit 1; }
-  $PY -u client.py --i=$2 --mid_ip_m='{"m0": "10.0.1.0"}'
+  $PY -u client.py --i=$2 num_reqs_to_finish=100 --mid_ip_m='{"m0": "10.0.1.0"}'
 elif [ $1 = 'cm' ]; then
-  $PY -u client.py --i=$2 --mid_ip_m='{"m0": "192.168.49.2"}' --mport=30000
+  # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "192.168.49.2"}' --mport=30000
+  # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "10.106.162.193"}' --mport=30000
+  $PY -u client.py --i=$2 num_reqs_to_finish=100 --mid_ip_m='{"m0": "127.0.0.1"}' --mport=51697
 elif [ $1 = 'm' ]; then
   pkill -f client.py
   pkill -f master.py
