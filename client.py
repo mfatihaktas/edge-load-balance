@@ -3,7 +3,7 @@ import threading, time, sys, getopt, json, queue, enum
 from config import *
 from rvs import *
 from msg import *
-from commer import CommerOnClient, PACKET_SIZE, LISTEN_IP, LISTEN_PORT
+from commer import CommerOnClient, PACKET_SIZE, LISTEN_IP, LISTEN_PORT, send_msg
 from plot import plot_client
 
 class State(enum.Enum):
@@ -12,7 +12,8 @@ class State(enum.Enum):
 
 class Client():
 	def __init__(self, _id, d, inter_probe_num_reqs,
-							 mid_ip_m, mport, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv):
+							 mid_ip_m, mport, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv,
+							 dashboard_server_ip):
 		self._id = _id
 		self.d = d
 		self.inter_probe_num_reqs = inter_probe_num_reqs
@@ -21,9 +22,10 @@ class Client():
 		self.inter_gen_time_rv = inter_gen_time_rv
 		self.serv_time_rv = serv_time_rv
 		self.size_inBs_rv = size_inBs_rv
+		self.dashboard_server_ip = dashboard_server_ip
 
 		self.mid_l = []
-		self.commer = CommerOnClient(self.handle_msg)
+		self.commer = CommerOnClient(self._id, self.handle_msg)
 		for mid, mip in mid_ip_m.items():
 			self.commer.reg(mid, mip, mport)
 			self.mid_l.append(mid)
@@ -41,6 +43,8 @@ class Client():
 		#self.wait_for_probe = threading.Condition()
 		self.state = State.on
 
+		self.num_updates_sent = 0
+
 		self.msg_recved_q = queue.Queue()
 		t_recv = threading.Thread(target=self.run_recv, daemon=True)
 		t_recv.start()
@@ -56,7 +60,8 @@ class Client():
 			'mid_ip_m= {}'.format(self.mid_ip_m) + '\n\t' + \
 			'num_reqs_to_finish= {}'.format(self.num_reqs_to_finish) + '\n\t' + \
 			'serv_time_rv= {}'.format(self.serv_time_rv) + '\n\t' + \
-			'size_inBs_rv= {}'.format(self.size_inBs_rv) + ')'
+			'size_inBs_rv= {}'.format(self.size_inBs_rv) + '\n\t' + \
+			'dashboard_server_ip= {}'.format(self.dashboard_server_ip) + ')'
 
 	def close(self):
 		if self.state == State.off:
@@ -89,7 +94,7 @@ class Client():
 					self.assigned_mid = result.mid
 					self.num_reqs_last_probed = self.num_reqs_gened
 					self.waiting_for_probe = False
-					log(DEBUG, "Set conned mid", assigned_mid=self.assigned_mid)
+					log(DEBUG, "Set assigned_mid", assigned_mid=self.assigned_mid)
 				else:
 					log(DEBUG, "Late probe result has been recved", msg=msg)
 					continue
@@ -115,9 +120,31 @@ class Client():
 			self.num_reqs_finished += 1
 			log(DEBUG, "", num_reqs_gened=self.num_reqs_gened, num_reqs_finished=self.num_reqs_finished)
 
+			self.send_update_to_dashboard(T=1000*(result.epoch_arrived_client - result.epoch_departed_client))
+
 			log(DEBUG, "done", msg_id=msg._id)
 			if self.num_reqs_finished >= self.num_reqs_to_finish:
 				self.close()
+
+	def send_update_to_dashboard(self, T):
+		if self.dashboard_server_ip is None:
+			return
+
+		log(DEBUG, "started", T=T)
+		self.num_updates_sent += 1
+
+		m = {'cid': self._id,
+				 'mid': self.assigned_mid,
+				 'T': T}
+		msg = Msg(_id = self.num_updates_sent,
+							payload = Update(_id=self.num_updates_sent, typ=UpdateType.from_client, m=m),
+							src_id = self._id,
+							src_ip = LISTEN_IP,
+							dst_id = 'd',
+							dst_ip = self.dashboard_server_ip)
+		send_msg(msg)
+
+		log(DEBUG, "done", m=m)
 
 	def replicate(self, mid_l, msg):
 		log(DEBUG, "started", mid_l=mid_l, msg=msg)
@@ -164,7 +191,7 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport=', 'num_reqs_to_finish='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport=', 'num_reqs_to_finish=', 'dashboard_server_ip='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
@@ -177,6 +204,8 @@ def parse_argv(argv):
 			m['mport'] = int(arg)
 		elif opt == '--num_reqs_to_finish':
 			m['num_reqs_to_finish'] = float(arg)
+		elif opt == '--dashboard_server_ip':
+			m['dashboard_server_ip'] = arg
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
@@ -194,13 +223,13 @@ def run(argv):
 	ES = 0.1 # 0.01
 	mu = float(1/ES)
 	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
-						 mid_ip_m = m['mid_ip_m'], mport=m['mport'],
+						 mid_ip_m = m['mid_ip_m'], mport = m['mport'],
 						 num_reqs_to_finish = m['num_reqs_to_finish'],
 						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
-						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]))
+						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]),
+						 dashboard_server_ip=m['dashboard_server_ip'] if 'dashboard_server_ip' in m else None)
 
-	time.sleep(3)
 	log(DEBUG, "", client=c)
 	plot_client(c)
 

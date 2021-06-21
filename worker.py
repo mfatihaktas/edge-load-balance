@@ -12,7 +12,7 @@ class Worker():
 		# TODO: Limit queue length
 		self.msg_q = queue.Queue()
 		self.epoch__num_req_l = []
-		self.commer = CommerOnWorker(self.handle_msg)
+		self.commer = CommerOnWorker(self._id, self.handle_msg)
 
 		self.on = True
 		t = threading.Thread(target=self.run, daemon=True)

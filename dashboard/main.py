@@ -6,13 +6,10 @@ sys.path.append(parent_dir)
 import pprint
 
 from flask import Flask, request, render_template
-from flask_socketio import SocketIO
 from server import DashboardServer
 from debug_utils import *
 
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder='static')
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -28,5 +25,4 @@ def index():
 if __name__ == '__main__':
 	server = DashboardServer()
 
-	# app.run(host='0.0.0.0', port=5001) # debug=True
-	socketio.run(app, host='0.0.0.0', port=5001)
+	app.run(host='0.0.0.0', port=5001) # debug=True

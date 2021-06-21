@@ -4,8 +4,8 @@ from collections import deque
 from config import *
 from priority_dict import *
 from debug_utils import *
-from commer import CommerOnMaster, LISTEN_IP
-from msg import Msg, InfoType
+from commer import CommerOnMaster, LISTEN_IP, send_msg
+from msg import Msg, InfoType, UpdateType, Update
 from plot import plot_master
 
 def get_wip_l(domain):
@@ -97,17 +97,20 @@ class WQueue(): # Worker
 		return wip
 
 class Master():
-	def __init__(self, _id, wip_l, worker_service_domain='edge-service'):
+	def __init__(self, _id, wip_l, dashboard_server_ip=None):
 		self._id = _id
 		self.wip_l = wip_l
+		self.dashboard_server_ip = dashboard_server_ip
 
-		self.commer = CommerOnMaster(self.handle_msg)
+		self.commer = CommerOnMaster(self._id, self.handle_msg)
 
 		self.msg_token_q = queue.Queue()
 		self.msg_q = RRQueue(max_qlen=5)
 
 		self.w_token_q = queue.Queue()
 		self.w_q = WQueue(self.wip_l, self.w_token_q, max_qlen=30)
+
+		self.num_updates_sent = 0
 
 		self.on = True
 		t = threading.Thread(target=self.run, daemon=True)
@@ -122,6 +125,27 @@ class Master():
 		self.on = False
 		log(DEBUG, "done")
 
+	def send_update_to_dashboard(self):
+		if self.dashboard_server_ip is None:
+			return
+
+		log(DEBUG, "started")
+		self.num_updates_sent += 1
+
+		m = {'mid': self._id,
+				 'epoch': time.time(),
+				 'w_qlen_l': [qlen for wip, qlen in self.w_q.wip_qlen_heap_m.items()]}
+
+		msg = Msg(_id = self.num_updates_sent,
+							payload = Update(_id=self.num_updates_sent, typ=UpdateType.from_master, m=m),
+							src_id = self._id,
+							src_ip = LISTEN_IP,
+							dst_id = 'd',
+							dst_ip = self.dashboard_server_ip)
+		send_msg(msg)
+
+		log(DEBUG, "done", m=m)
+
 	def handle_msg(self, msg):
 		log(DEBUG, "handling", msg=msg)
 
@@ -135,6 +159,7 @@ class Master():
 				self.msg_q.unreg(msg.src_id)
 			elif p.typ == InfoType.worker_req_completion:
 				self.w_q.dec_qlen(msg.src_ip)
+				self.send_update_to_dashboard()
 			elif p.typ == InfoType.close:
 				for wip in self.wip_l:
 					self.commer.send_to_worker(wip, msg)
@@ -160,10 +185,12 @@ class Master():
 			log(DEBUG, "Will inc_qlen", wip=wip)
 			self.w_q.inc_qlen(wip)
 
+			self.send_update_to_dashboard()
+
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'wip_l='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'wip_l=', 'dashboard_server_ip='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
@@ -172,6 +199,8 @@ def parse_argv(argv):
 			m['i'] = arg
 		elif opt == '--wip_l':
 			m['wip_l'] = json.loads(arg)
+		elif opt == '--dashboard_server_ip':
+			m['dashboard_server_ip'] = arg
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
@@ -190,7 +219,8 @@ def run(argv):
 	log_to_file('{}.log'.format(_id))
 	log(DEBUG, "", m=m)
 
-	mr = Master(_id, m['wip_l'])
+	mr = Master(_id, m['wip_l'],
+							dashboard_server_ip=m['dashboard_server_ip'] if 'dashboard_server_ip' in m else None)
 	# input("Enter to finish...\n")
 	# sys.exit()
 

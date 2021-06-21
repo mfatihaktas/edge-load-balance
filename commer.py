@@ -22,7 +22,7 @@ def get_listen_ip(net_intf='eth0'):
 		log(DEBUG, "Could not find net interface", net_intf=net_intf)
 		return None
 
-	intf_ip = subprocess.getoutput("ip address show dev " + net_intf).split()
+	intf_ip = subprocess.getoutput("ip address show dev " + intf).split()
 	# log(DEBUG, "", intf_ip=intf_ip)
 	intf_ip = intf_ip[intf_ip.index('inet') + 1].split('/')[0]
 	return intf_ip
@@ -169,7 +169,9 @@ class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 # ***************************  CommerOnMaster  *************************** #
 class CommerOnMaster():
-	def __init__(self, handle_msg):
+	def __init__(self, _id, handle_msg):
+		self._id = _id
+
 		self.server_to_recv_reqs = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
@@ -189,7 +191,9 @@ class CommerOnMaster():
 
 # ***************************  CommerOnClient  *************************** #
 class CommerOnClient():
-	def __init__(self, handle_msg):
+	def __init__(self, _id, handle_msg):
+		self._id = _id
+
 		self.server_to_recv_results = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_results_thread = threading.Thread(target=self.server_to_recv_results.serve_forever, daemon=True)
 		self.server_to_recv_results_thread.start()
@@ -217,7 +221,9 @@ class CommerOnClient():
 
 # ***************************	 CommerOnWorker	 *************************** #
 class CommerOnWorker():
-	def __init__(self, handle_msg):
+	def __init__(self, _id, handle_msg):
+		self._id = _id
+
 		self.server_to_recv_reqs = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()

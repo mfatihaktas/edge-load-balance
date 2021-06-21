@@ -1,0 +1,17 @@
+
+
+from commer import LISTEN_PORT, send_msg
+
+class DashboardClient():
+	def __init__(self, server_ip):
+		self.server_ip = server_ip
+
+		log(DEBUG, "constructed;", self=self)
+
+	def __repr__(self):
+		return 'DashboardClient(server_ip= {})'.format(self.server_ip)
+
+	def send_update(self):
+		log(DEBUG, "started")
+		self.server_to_recv_reqs.shutdown()
+		log(DEBUG, "done")

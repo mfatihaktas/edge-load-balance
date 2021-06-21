@@ -33,7 +33,7 @@ class TestClient():
 			time.sleep(self.inter_update_time)
 
 			mid = random.randint(1, 3)
-			m = {'cid': 'c0',
+			m = {'cid': self._id,
 					 'mid': 'cl-{}'.format(mid),
 					 'T': random.randint(1, 10)}
 			self.send_update(m)
@@ -63,15 +63,18 @@ class TestMaster():
 		while True:
 			time.sleep(self.inter_update_time)
 
-			m = {'mid': 'cl-0',
+			m = {'mid': self._id,
 					 'epoch': epoch,
 					 'w_qlen_l': [random.randint(1, 10) for _ in range(self.num_worker)]}
 			epoch += random.randint(1, 5)
 			self.send_update(m)
 
 if __name__ == '__main__':
-	tc = TestClient(_id='tc', inter_update_time=2, dashboard_server_ip='192.168.2.148')
+	tc = TestClient(_id='c0', inter_update_time=1, dashboard_server_ip='192.168.2.148')
+	tc = TestClient(_id='c1', inter_update_time=1, dashboard_server_ip='192.168.2.148')
+	tc = TestClient(_id='c2', inter_update_time=1, dashboard_server_ip='192.168.2.148')
 
-	tc = TestMaster(_id='tm', num_worker=10, inter_update_time=2.5, dashboard_server_ip='192.168.2.148')
+	tc = TestMaster(_id='cl-0', num_worker=10, inter_update_time=2, dashboard_server_ip='192.168.2.148')
+	tc = TestMaster(_id='cl-1', num_worker=10, inter_update_time=2.5, dashboard_server_ip='192.168.2.148')
 
 	input("Enter...")
