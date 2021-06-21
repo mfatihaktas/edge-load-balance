@@ -6,6 +6,8 @@ sys.path.append(parent_dir)
 import threading, queue
 from collections import deque
 
+import matplotlib.patches as mpatches
+
 from debug_utils import *
 from plot_utils import *
 from commer import TCPServer, LISTEN_IP, LISTEN_PORT
@@ -45,8 +47,12 @@ class InfoQ():
 		return self.id__info_m_q[_id]
 
 class ClientInfo():
-	def __init__(self):
-		self.client_info_q = InfoQ(max_qlen=20)
+	def __init__(self, max_qlen=20):
+		self.max_qlen = max_qlen
+
+		self.client_info_q = InfoQ(max_qlen)
+
+		self.mid_color_m = {}
 
 	def __repr__(self):
 		return 'ClientInfo:\n' + \
@@ -59,6 +65,11 @@ class ClientInfo():
 		self.plot(cid)
 		log(DEBUG, "done")
 
+	def color_for_mid(self, mid):
+		if mid not in self.mid_color_m:
+			self.mid_color_m[mid] = next(nice_color)
+		return self.mid_color_m[mid]
+
 	def plot(self, cid):
 		log(DEBUG, "started", cid=cid)
 		info_m_q = self.client_info_q.get_info_m_q(cid)
@@ -68,18 +79,27 @@ class ClientInfo():
 		i = 0
 		while i < len(info_m_q):
 			_i = i
-			T_l = []
-			while i < len(info_m_q) and (i == 0 or info_m_q[i]['mid'] == info_m_q[i-1]['mid']):
-				T_l.append(info_m_q[i]['T'])
+			T_l = [info_m_q[i]['T']]
+			while i < len(info_m_q)-1 and info_m_q[i]['mid'] == info_m_q[i+1]['mid']:
 				i += 1
-			x_l = list(range(_i, i))
-			plot.plot(x_l, T_l, label='mid= {}'.format(info_m_q[i-1]['mid']), color=next(nice_color), marker='x', linestyle='None', mew=3, ms=5)
+				T_l.append(info_m_q[i]['T'])
+
+			x_l = list(range(_i, i+1))
+			# plot.plot(x_l, T_l, label='Cluster id= {}'.format(info_m_q[i-1]['mid']), color=next(nice_color), marker='x', linestyle='None', mew=3, ms=5)
+			mid = info_m_q[_i]['mid']
+			plot.bar(x_l, height=T_l, color=self.color_for_mid(mid)) # label='Cluster id= {}'.format(mid)
 			plot.xticks([])
 
-		plot.legend(fontsize=fontsize)
+			if i == _i:
+				i += 1
+
+		label_patch_l = []
+		for mid, color in self.mid_color_m.items():
+			label_patch_l.append(mpatches.Patch(color=color, label='Cluster id= {}'.format(mid)))
+		plot.legend(handles=label_patch_l, fontsize=fontsize, bbox_to_anchor=(1.025, 1))
 		plot.ylabel('T (msec)', fontsize=fontsize)
-		# plot.xlabel('t', fontsize=fontsize)
-		plot.title('cid= {}'.format(cid))
+		plot.xlabel('The last {} requests (at most)'.format(self.max_qlen), fontsize=fontsize)
+		plot.title('Client id= {}'.format(cid))
 		plot.gcf().set_size_inches(6, 4)
 		plot.savefig("static/image/plot_{}.png".format(cid), bbox_inches='tight')
 		plot.gcf().clear()
@@ -109,7 +129,7 @@ class MasterInfo():
 		te = info_m_q[-1]['epoch']
 		x_l, y_l, yerr_l = [], [], []
 		for info_m in info_m_q:
-			x_l.append(te - info_m['epoch'])
+			x_l.append(info_m['epoch'] - te)
 
 			w_qlen_l = info_m['w_qlen_l']
 			w_qlen_mean, w_qlen_std = np.mean(w_qlen_l), np.std(w_qlen_l)
@@ -120,7 +140,7 @@ class MasterInfo():
 		# plot.legend(fontsize=fontsize)
 		plot.xlabel('Time (sec)', fontsize=fontsize)
 		plot.ylabel('Avg worker queue length', fontsize=fontsize)
-		plot.title('mid= {}'.format(mid))
+		plot.title('Cluster id= {}'.format(mid) + '\n' + '(Error bars show stdev)')
 		plot.gcf().set_size_inches(6, 4)
 		plot.savefig("static/image/plot_{}.png".format(mid), bbox_inches='tight')
 		plot.gcf().clear()
@@ -137,7 +157,6 @@ class DashboardServer():
 
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
-		# t.join()
 
 	def close(self):
 		self.commer.close()

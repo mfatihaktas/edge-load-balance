@@ -17,7 +17,6 @@ class TestClient():
 
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
-		# t.join()
 
 	def send_update(self, m):
 		msg = Msg(_id = 0,
@@ -33,8 +32,9 @@ class TestClient():
 		while True:
 			time.sleep(self.inter_update_time)
 
+			mid = random.randint(1, 3)
 			m = {'cid': 'c0',
-					 'mid': 'm0',
+					 'mid': 'cl-{}'.format(mid),
 					 'T': random.randint(1, 10)}
 			self.send_update(m)
 
@@ -63,7 +63,7 @@ class TestMaster():
 		while True:
 			time.sleep(self.inter_update_time)
 
-			m = {'mid': 'm0',
+			m = {'mid': 'cl-0',
 					 'epoch': epoch,
 					 'w_qlen_l': [random.randint(1, 10) for _ in range(self.num_worker)]}
 			epoch += random.randint(1, 5)
