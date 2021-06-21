@@ -26,6 +26,8 @@ elif [ $1 = 'm' ]; then
 elif [ $1 = 'w' ]; then
   # rm *.png *.log
   $PY -u worker.py --i=$2
+elif [ $1 = 'f' ]; then
+  $PY dashboard/main.py
 elif [ $1 = 'tc' ]; then
   rm *.pcap
   tcpdump -i s0-eth0 'port 5000' -w tcpdump_s0.pcap

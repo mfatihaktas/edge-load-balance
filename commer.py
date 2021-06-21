@@ -90,7 +90,7 @@ def recv_msg(sock):
 	msg_str = recv_size(msg_len, recv)
 	msg = msg_from_str(msg_str)
 	total_size_recved += len(msg_str)
-	log(DEBUG, "recved", msg=msg)
+	log(DEBUG, "recved", msg_id=msg._id)
 
 	if msg.payload.size_inBs > 0:
 		total_size_to_recv = msg.payload.size_inBs
@@ -161,9 +161,8 @@ class MsgHandler(socketserver.BaseRequestHandler):
 		self.server.handle_msg(msg)
 
 class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-	def __init__(self, _id, server_addr, handle_msg):
+	def __init__(self, server_addr, handle_msg):
 		socketserver.TCPServer.__init__(self, server_addr, MsgHandler)
-		self._id = _id
 		self.handle_msg = handle_msg
 
 		log(DEBUG, "constructed", server_addr=server_addr)
@@ -171,7 +170,7 @@ class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 # ***************************  CommerOnMaster  *************************** #
 class CommerOnMaster():
 	def __init__(self, handle_msg):
-		self.server_to_recv_reqs = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
+		self.server_to_recv_reqs = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
 
@@ -191,7 +190,7 @@ class CommerOnMaster():
 # ***************************  CommerOnClient  *************************** #
 class CommerOnClient():
 	def __init__(self, handle_msg):
-		self.server_to_recv_results = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
+		self.server_to_recv_results = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_results_thread = threading.Thread(target=self.server_to_recv_results.serve_forever, daemon=True)
 		self.server_to_recv_results_thread.start()
 
@@ -219,7 +218,7 @@ class CommerOnClient():
 # ***************************	 CommerOnWorker	 *************************** #
 class CommerOnWorker():
 	def __init__(self, handle_msg):
-		self.server_to_recv_reqs = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
+		self.server_to_recv_reqs = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_reqs_thread = threading.Thread(target=self.server_to_recv_reqs.serve_forever, daemon=True)
 		self.server_to_recv_reqs_thread.start()
 

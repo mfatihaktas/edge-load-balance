@@ -3,12 +3,17 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
+import threading, queue
+from collections import deque
+
+from debug_utils import *
+from plot_utils import *
 from commer import TCPServer, LISTEN_IP, LISTEN_PORT
 from msg import Update, UpdateType
 
 class CommerOnDashboardServer():
 	def __init__(self, handle_msg):
-		self.server_to_recv_updates = TCPServer(self._id, (LISTEN_IP, LISTEN_PORT), handle_msg)
+		self.server_to_recv_updates = TCPServer((LISTEN_IP, LISTEN_PORT), handle_msg)
 		self.server_to_recv_updates_thread = threading.Thread(target=self.server_to_recv_updates.serve_forever, daemon=True)
 		self.server_to_recv_updates_thread.start()
 
@@ -30,7 +35,7 @@ class InfoQ():
 		log(DEBUG, "started", id=_id, info_m=info_m)
 
 		if _id not in self.id__info_m_q:
-			self.id__info_m_q[_id] = deque(maxlen=max_qlen)
+			self.id__info_m_q[_id] = deque(maxlen=self.max_qlen)
 		q = self.id__info_m_q[_id]
 		q.append(info_m)
 
@@ -41,7 +46,7 @@ class InfoQ():
 
 class ClientInfo():
 	def __init__(self):
-		self.client_info_q = InfoQ()
+		self.client_info_q = InfoQ(max_qlen=20)
 
 	def __repr__(self):
 		return 'ClientInfo:\n' + \
@@ -58,6 +63,7 @@ class ClientInfo():
 		log(DEBUG, "started", cid=cid)
 		info_m_q = self.client_info_q.get_info_m_q(cid)
 
+		fontsize = 14
 		## T over requests
 		i = 0
 		while i < len(info_m_q):
@@ -68,20 +74,20 @@ class ClientInfo():
 				i += 1
 			x_l = list(range(_i, i))
 			plot.plot(x_l, T_l, label='mid= {}'.format(info_m_q[i-1]['mid']), color=next(nice_color), marker='x', linestyle='None', mew=3, ms=5)
-			plot.xticks(x_l, " ")
+			plot.xticks([])
 
 		plot.legend(fontsize=fontsize)
 		plot.ylabel('T (msec)', fontsize=fontsize)
 		# plot.xlabel('t', fontsize=fontsize)
 		plot.title('cid= {}'.format(cid))
 		plot.gcf().set_size_inches(6, 4)
-		plot.savefig("image/plot_{}.png".format(cid), bbox_inches='tight')
+		plot.savefig("static/image/plot_{}.png".format(cid), bbox_inches='tight')
 		plot.gcf().clear()
 		log(DEBUG, "done", cid=cid)
 
 class MasterInfo():
 	def __init__(self):
-		self.master_info_q = InfoQ()
+		self.master_info_q = InfoQ(max_qlen=20)
 
 	def __repr__(self):
 		return 'MasterInfo:\n' + \
@@ -98,6 +104,7 @@ class MasterInfo():
 		log(DEBUG, "started", mid=mid)
 		info_m_q = self.master_info_q.get_info_m_q(mid)
 
+		fontsize = 14
 		## Worker load over time
 		te = info_m_q[-1]['epoch']
 		x_l, y_l, yerr_l = [], [], []
@@ -107,17 +114,17 @@ class MasterInfo():
 			w_qlen_l = info_m['w_qlen_l']
 			w_qlen_mean, w_qlen_std = np.mean(w_qlen_l), np.std(w_qlen_l)
 			y_l.append(w_qlen_mean)
-			y_err_l.append(w_qlen_std)
+			yerr_l.append(w_qlen_std)
 
 		plot.errorbar(x_l, y_l, yerr=yerr_l, color=next(nice_color), marker='o', linestyle='None', mew=3, ms=5)
 		# plot.legend(fontsize=fontsize)
 		plot.xlabel('Time (sec)', fontsize=fontsize)
-		plot.ylabel('Average queue length across workers', fontsize=fontsize)
-		plot.title('cid= {}'.format(cid))
+		plot.ylabel('Avg worker queue length', fontsize=fontsize)
+		plot.title('mid= {}'.format(mid))
 		plot.gcf().set_size_inches(6, 4)
-		plot.savefig("image/plot_{}.png".format(cid), bbox_inches='tight')
+		plot.savefig("static/image/plot_{}.png".format(mid), bbox_inches='tight')
 		plot.gcf().clear()
-		log(DEBUG, "done", cid=cid)
+		log(DEBUG, "done", mid=mid)
 
 class DashboardServer():
 	def __init__(self):
@@ -130,7 +137,7 @@ class DashboardServer():
 
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
-		t.join()
+		# t.join()
 
 	def close(self):
 		self.commer.close()
@@ -138,7 +145,7 @@ class DashboardServer():
 		log(DEBUG, "done")
 
 	def handle_msg(self, msg):
-		self.msg_q.put()
+		self.msg_q.put(msg)
 
 	def run(self):
 		while True:

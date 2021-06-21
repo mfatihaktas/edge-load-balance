@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edge service dashboard</title>
+</head>
+<body>
+    <h1>Edge service dashboard</h1>
+    {% for img_path in img_path_l %}
+    <img src="{{url_for('static', filename=img_path)}}" alt="{{img_path}}">
+    {% endfor %}
+</body>
+</html>
