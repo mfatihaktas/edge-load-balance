@@ -40,13 +40,16 @@ class RRQueue(): # Round Robin
 		if msg.payload.cid not in self.cid_q_m:
 			self.reg(msg.payload.cid)
 
+		r = True
 		q = self.cid_q_m[msg.payload.cid]
 		if len(q) == self.max_qlen:
 			msg_popped = q.popleft()
 			log(DEBUG, "Was full, popped the oldest req", msg_popped=msg_popped)
 			self.num_dropped += 1
+			r = False
 		q.append(msg)
 		log(DEBUG, "pushed", msg=msg)
+		return r
 
 	def pop(self):
 		for _ in range(len(self.cid_q_m)):
@@ -152,11 +155,12 @@ class Master():
 		p = msg.payload
 		if p.is_req():
 			p.epoch_arrived_cluster = time.time()
-			self.msg_q.push(msg)
-			self.msg_token_q.put(1)
+			if self.msg_q.push(msg):
+				self.msg_token_q.put(1)
 		elif p.is_info():
 			if p.typ == InfoType.client_disconn:
-				self.msg_q.unreg(msg.src_id)
+				# self.msg_q.unreg(msg.src_id)
+				pass
 			elif p.typ == InfoType.worker_req_completion:
 				self.w_q.dec_qlen(msg.src_ip)
 				self.send_update_to_dashboard()
@@ -190,7 +194,7 @@ class Master():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'wip_l=', 'dashboard_server_ip='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'wip_l=', 'worker_service=', 'dashboard_server_ip='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
@@ -199,6 +203,8 @@ def parse_argv(argv):
 			m['i'] = arg
 		elif opt == '--wip_l':
 			m['wip_l'] = json.loads(arg)
+		elif opt == '--worker_service':
+			m['worker_service'] = arg
 		elif opt == '--dashboard_server_ip':
 			m['dashboard_server_ip'] = arg
 		else:
@@ -208,7 +214,8 @@ def parse_argv(argv):
 		m['i'] = LISTEN_IP
 
 	if 'wip_l' not in m:
-		m['wip_l'] = get_wip_l('edge-service')
+		check('worker_service' in m, 'wip_l not set, worker_service should have been set')
+		m['wip_l'] = get_wip_l(m['worker_service'])
 
 	if 'dashboard_server_ip' not in m:
 		m['dashboard_server_ip'] = 'dashboard-service'

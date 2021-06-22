@@ -27,9 +27,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: edge-service
+  name: edge-worker-service
   labels:
-    app: edge-service
+    app: edge-worker-service
 spec:
   clusterIP: None
   selector:
@@ -59,14 +59,14 @@ spec:
         ports:
         - containerPort: 5000
         command: ["python3", "-u"]
-        args: ["/home/app/master.py"]
+        args: ["/home/app/master.py", "--worker_service=edge-worker-service"]
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: edge-nodeport
+  name: edge-master-nodeport
 spec:
   selector:
     app: edge-master

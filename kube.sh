@@ -12,7 +12,9 @@ elif [ $1 = 'log' ]; then
   $KUBECTL logs -p $POD_NAME
 elif [ $1 = 'en' ]; then
   # Assigns an external ip to a service (LoadBalancer). This is needed only in minikube.
-  minikube service edge-nodeport
+  minikube service edge-master-nodeport
+elif [ $1 = 'en2' ]; then
+  minikube service edge-master-nodeport-$2
 elif [ $1 = 'ed' ]; then
   minikube service dashboard-service
 elif [ $1 = 't' ]; then

@@ -3,24 +3,32 @@ echo $1 $2 $3
 
 PY=python3
 
-if [ $1 = 'n' ]; then
-  $PY net.py
-elif [ $1 = 's' ]; then
+if [ $1 = 's' ]; then
   source ./bin/activate
-elif [ $1 = 'nt' ]; then
-  $PY net_test.py
+elif [ $1 = 'n' ]; then
+  $PY net_single_master.py
+elif [ $1 = 'n2' ]; then
+  $PY net_two_masters.py
 elif [ $1 = 'c' ]; then
   [ -z "$2" ] && { echo "Which client [0, *] ?"; exit 1; }
-  $PY -u client.py --i=$2 --mean_inter_gen_time=0.1 --num_reqs_to_finish=1000000 --mid_ip_m='{"m0": "10.0.1.0"}' --dashboard_server_ip='10.0.3.0'
+  $PY -u client.py --i=$2 --mean_inter_gen_time=0.1 --num_reqs_to_finish=10000 --mid_addr_m='{"m0": ["10.0.0.0", "null"]}' --dashboard_server_ip='10.0.3.0'
+elif [ $1 = 'c2' ]; then
+  $PY -u client.py --i=0 --d=2 --mean_inter_gen_time=0.1 --num_reqs_to_finish=10000 --mid_addr_m='{"m0": ["10.0.0.0", "null"], "m1": ["10.0.0.1", "null"]}' --inter_probe_num_reqs=10 --dashboard_server_ip='10.0.3.0'
 elif [ $1 = 'cm' ]; then
-  # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "192.168.49.2"}' --mport=30000
-  # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "10.106.162.193"}' --mport=30000
-  $PY -u client.py --i=$2 --mean_inter_gen_time=1 --num_reqs_to_finish=1000000000 --mid_ip_m='{"m0": "127.0.0.1"}' --mport=$3 # --dashboard_server_ip='dashboard-service'
+  # $PY -u client.py --i=$2 --mid_addr_m='{"m0": ["192.168.49.2", "null"]}' --mport=30000
+  # $PY -u client.py --i=$2 --mid_addr_m='{"m0": ["10.106.162.193", "null"]}' --mport=30000
+  $PY -u client.py --i=$2 --mean_inter_gen_time=1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3']}' --dashboard_server_ip='dashboard-service'
+elif [ $1 = 'cm2' ]; then
+  $PY -u client.py --i=$2 --mean_inter_gen_time=1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3'], "m1": ["127.0.0.1", '$4']}' --dashboard_server_ip='dashboard-service'
 elif [ $1 = 'm' ]; then
-  # $PY -u master.py --i=$2 --wip_l='["10.0.2.0"]'
-  $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' --dashboard_server_ip='10.0.3.0'
-  # $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' 2>&1 > master.log
-  # $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' 2> master.log
+  # $PY -u master.py --i=$2 --wip_l='["10.0.1.0"]'
+  $PY -u master.py --i=$2 --wip_l='["10.0.1.0","10.0.1.1"]' --dashboard_server_ip='10.0.3.0'
+  # $PY -u master.py --i=$2 --wip_l='["10.0.1.0","10.0.1.1"]' 2>&1 > master.log
+  # $PY -u master.py --i=$2 --wip_l='["10.0.1.0","10.0.1.1"]' 2> master.log
+elif [ $1 = 'm0' ]; then
+  $PY -u master.py --i=0 --wip_l='["10.0.1.0"]' --dashboard_server_ip='10.0.3.0'
+elif [ $1 = 'm1' ]; then
+  $PY -u master.py --i=1 --wip_l='["10.0.1.1"]' --dashboard_server_ip='10.0.3.0'
 elif [ $1 = 'w' ]; then
   # rm *.png *.log
   $PY -u worker.py --i=$2

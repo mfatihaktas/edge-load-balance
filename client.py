@@ -12,12 +12,12 @@ class State(enum.Enum):
 
 class Client():
 	def __init__(self, _id, d, inter_probe_num_reqs,
-							 mid_ip_m, mport, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv,
+							 mid_addr_m, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv,
 							 dashboard_server_ip):
 		self._id = _id
 		self.d = d
 		self.inter_probe_num_reqs = inter_probe_num_reqs
-		self.mid_ip_m = mid_ip_m
+		self.mid_addr_m = mid_addr_m
 		self.num_reqs_to_finish = num_reqs_to_finish
 		self.inter_gen_time_rv = inter_gen_time_rv
 		self.serv_time_rv = serv_time_rv
@@ -26,8 +26,10 @@ class Client():
 
 		self.mid_l = []
 		self.commer = CommerOnClient(self._id, self.handle_msg)
-		for mid, mip in mid_ip_m.items():
-			self.commer.reg(mid, mip, mport)
+		for mid, (mip, mport) in mid_addr_m.items():
+			if mport == 'null':
+				mport = LISTEN_PORT
+			self.commer.reg(mid, mip, int(mport))
 			self.mid_l.append(mid)
 
 		self.num_reqs_gened = 0
@@ -57,7 +59,7 @@ class Client():
 		return 'Client(' + '\n\t' + \
 			'id= {}'.format(self._id) + '\n\t' + \
 			'inter_probe_num_reqs= {}'.format(self.inter_probe_num_reqs) + '\n\t' + \
-			'mid_ip_m= {}'.format(self.mid_ip_m) + '\n\t' + \
+			'mid_addr_m= {}'.format(self.mid_addr_m) + '\n\t' + \
 			'num_reqs_to_finish= {}'.format(self.num_reqs_to_finish) + '\n\t' + \
 			'serv_time_rv= {}'.format(self.serv_time_rv) + '\n\t' + \
 			'size_inBs_rv= {}'.format(self.size_inBs_rv) + '\n\t' + \
@@ -77,7 +79,7 @@ class Client():
 		self.msg_recved_q.put(msg)
 
 	def run_recv(self):
-		while True:
+		while self.state == State.on:
 			msg = self.msg_recved_q.get(block=True)
 
 			log(DEBUG, "handling", msg=msg)
@@ -97,7 +99,7 @@ class Client():
 					log(DEBUG, "Set assigned_mid", assigned_mid=self.assigned_mid)
 				else:
 					log(DEBUG, "Late probe result has been recved", msg=msg)
-					continue
+				continue
 
 			## Book keeping
 			log(DEBUG, "started book keeping", msg=msg)
@@ -167,11 +169,12 @@ class Client():
 
 			## Send message to currently assigned master
 			self.commer.send_msg(self.assigned_mid, msg)
-			log(DEBUG, "sent", req=req, assigned_mid=self.assigned_mid)
+			log(DEBUG, "sent", req=req)
 
 			## Send also its probe version if need to
-			if self.num_reqs_gened == 1 or \
-				 self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs:
+			if self.waiting_for_probe == False and \
+				 (self.num_reqs_gened == 1 or \
+					self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs):
 				msg.payload.probe = True
 				self.waiting_for_probe = True
 				self.replicate(random.sample(self.mid_l, self.d), msg)
@@ -191,31 +194,35 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport=', 'num_reqs_to_finish=', 'dashboard_server_ip=', 'mean_inter_gen_time='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'd=', 'mid_addr_m=', 'num_reqs_to_finish=', 'dashboard_server_ip=', 'mean_inter_gen_time=', 'inter_probe_num_reqs='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
 	for opt, arg in opts:
 		if opt == '--i':
 			m['i'] = arg
-		elif opt == '--mid_ip_m':
-			m['mid_ip_m'] = json.loads(arg)
-		elif opt == '--mport':
-			m['mport'] = int(arg)
+		elif opt == '--d':
+			m['d'] = int(arg)
+		elif opt == '--mid_addr_m':
+			print("mid_addr_m= {}".format(arg))
+			m['mid_addr_m'] = json.loads(arg)
 		elif opt == '--num_reqs_to_finish':
-			m['num_reqs_to_finish'] = float(arg)
+			m['num_reqs_to_finish'] = int(arg)
 		elif opt == '--dashboard_server_ip':
 			m['dashboard_server_ip'] = arg
 		elif opt == '--mean_inter_gen_time':
 			m['mean_inter_gen_time'] = float(arg)
+		elif opt == '--inter_probe_num_reqs':
+			m['inter_probe_num_reqs'] = float(arg)
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
-	if 'mport' not in m:
-		m['mport'] = LISTEN_PORT
-
+	if 'd' not in m:
+		m['d'] = 1
 	if 'dashboard_server_ip' not in m:
 		m['dashboard_server_ip'] = None
+	if 'inter_probe_num_reqs' not in m:
+		m['inter_probe_num_reqs'] = float('Inf')
 
 	log(DEBUG, "", m=m)
 	return m
@@ -227,8 +234,8 @@ def run(argv):
 
 	ES = 0.1 # 0.01
 	mu = float(1/ES)
-	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
-						 mid_ip_m = m['mid_ip_m'], mport = m['mport'],
+	c = Client(_id, d = m['d'], inter_probe_num_reqs = m['inter_probe_num_reqs'],
+						 mid_addr_m = m['mid_addr_m'],
 						 num_reqs_to_finish = m['num_reqs_to_finish'],
 						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[m['mean_inter_gen_time']*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
