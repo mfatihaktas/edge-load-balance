@@ -22,8 +22,10 @@ def get_listen_ip(net_intf='eth0'):
 		log(DEBUG, "Could not find net interface", net_intf=net_intf)
 		return None
 
+	if intf == 'en0:':
+		intf = 'en0'
 	intf_ip = subprocess.getoutput("ip address show dev " + intf).split()
-	# log(DEBUG, "", intf_ip=intf_ip)
+	# log(DEBUG, "", intf=intf, intf_ip=intf_ip)
 	intf_ip = intf_ip[intf_ip.index('inet') + 1].split('/')[0]
 	return intf_ip
 

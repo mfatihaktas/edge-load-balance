@@ -17,8 +17,6 @@ elif [ $1 = 'cm' ]; then
   # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "10.106.162.193"}' --mport=30000
   $PY -u client.py --i=$2 --num_reqs_to_finish=100 --mid_ip_m='{"m0": "127.0.0.1"}' --mport=51697
 elif [ $1 = 'm' ]; then
-  pkill -f client.py
-  pkill -f master.py
   # $PY -u master.py --i=$2 --wip_l='["10.0.2.0"]'
   $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' --dashboard_server_ip='10.0.3.0'
   # $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' 2>&1 > master.log
@@ -28,9 +26,12 @@ elif [ $1 = 'w' ]; then
   $PY -u worker.py --i=$2
 elif [ $1 = 'd' ]; then
   rm dashboard/static/image/*.png
-  $PY dashboard/main.py
-elif [ $1 = 'f' ]; then
-  $PY dashboard/main.py
+  $PY dashboard/dashboard.py
+elif [ $1 = 'k' ]; then
+  pkill -f client.py
+  pkill -f master.py
+  pkill -f worker.py
+  pkill -f dashboard.py
 elif [ $1 = 'tc' ]; then
   rm *.pcap
   tcpdump -i s0-eth0 'port 5000' -w tcpdump_s0.pcap

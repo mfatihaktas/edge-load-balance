@@ -1,3 +1,3 @@
 
-LOG_ONLY_TO_FILE = True # False # True
+LOG_ONLY_TO_FILE = True
 TRANS = 'TCP' # 'UDP'

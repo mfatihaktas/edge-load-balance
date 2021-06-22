@@ -23,6 +23,8 @@ def index():
 												 img_path_l=img_path_l)
 
 if __name__ == '__main__':
+	log_to_file('d.log')
+
 	server = DashboardServer()
 
 	app.run(host='0.0.0.0', port=5001) # debug=True

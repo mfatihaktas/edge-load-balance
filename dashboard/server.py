@@ -101,7 +101,7 @@ class ClientInfo():
 		plot.xlabel('The last {} requests (at most)'.format(self.max_qlen), fontsize=fontsize)
 		plot.title('Client id= {}'.format(cid))
 		plot.gcf().set_size_inches(6, 4)
-		plot.savefig("static/image/plot_{}.png".format(cid), bbox_inches='tight')
+		plot.savefig("dashboard/static/image/plot_{}.png".format(cid), bbox_inches='tight')
 		plot.gcf().clear()
 		log(DEBUG, "done", cid=cid)
 
@@ -142,7 +142,7 @@ class MasterInfo():
 		plot.ylabel('Avg worker queue length', fontsize=fontsize)
 		plot.title('Cluster id= {}'.format(mid) + '\n' + '(Error bars show stdev)')
 		plot.gcf().set_size_inches(6, 4)
-		plot.savefig("static/image/plot_{}.png".format(mid), bbox_inches='tight')
+		plot.savefig("dashboard/static/image/plot_{}.png".format(mid), bbox_inches='tight')
 		plot.gcf().clear()
 		log(DEBUG, "done", mid=mid)
 
