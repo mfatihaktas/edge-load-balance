@@ -52,7 +52,7 @@ elif [ $1 = 'rmi' ]; then
 elif [ $1 = 'push' ]; then
   $DOCKER push $IMG_NAME
 elif [ $1 = 'pull' ]; then
-  $DOCKER pull $2
+  $DOCKER pull $IMG_NAME
 elif [ $1 = 'cn' ]; then
   $DOCKER network create --subnet=192.168.0.0/16 $NET_NAME
 elif [ $1 = 'rn' ]; then
