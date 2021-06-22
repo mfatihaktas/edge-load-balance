@@ -109,6 +109,8 @@ class MasterInfo():
 	def __init__(self):
 		self.master_info_q = InfoQ(max_qlen=20)
 
+		self.mid_color_m = {}
+
 	def __repr__(self):
 		return 'MasterInfo:\n' + \
 			     '\t master_info_q=\n {}'.format(self.master_info_q)
@@ -119,6 +121,11 @@ class MasterInfo():
 		self.master_info_q.put(mid, info_m)
 		self.plot(mid)
 		log(DEBUG, "done")
+
+	def color_for_mid(self, mid):
+		if mid not in self.mid_color_m:
+			self.mid_color_m[mid] = next(nice_color)
+		return self.mid_color_m[mid]
 
 	def plot(self, mid):
 		log(DEBUG, "started", mid=mid)
@@ -136,7 +143,7 @@ class MasterInfo():
 			y_l.append(w_qlen_mean)
 			yerr_l.append(w_qlen_std)
 
-		plot.errorbar(x_l, y_l, yerr=yerr_l, color=next(nice_color), marker='o', linestyle='None', mew=3, ms=5)
+		plot.errorbar(x_l, y_l, yerr=yerr_l, color=self.color_for_mid(mid), marker='o', linestyle='None', mew=3, ms=5)
 		# plot.legend(fontsize=fontsize)
 		plot.xlabel('Time (sec)', fontsize=fontsize)
 		plot.ylabel('Avg worker queue length', fontsize=fontsize)

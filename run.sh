@@ -11,11 +11,11 @@ elif [ $1 = 'nt' ]; then
   $PY net_test.py
 elif [ $1 = 'c' ]; then
   [ -z "$2" ] && { echo "Which client [0, *] ?"; exit 1; }
-  $PY -u client.py --i=$2 --num_reqs_to_finish=100 --mid_ip_m='{"m0": "10.0.1.0"}' --dashboard_server_ip='10.0.3.0'
+  $PY -u client.py --i=$2 --mean_inter_gen_time=0.1 --num_reqs_to_finish=1000000 --mid_ip_m='{"m0": "10.0.1.0"}' --dashboard_server_ip='10.0.3.0'
 elif [ $1 = 'cm' ]; then
   # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "192.168.49.2"}' --mport=30000
   # $PY -u client.py --i=$2 --mid_ip_m='{"m0": "10.106.162.193"}' --mport=30000
-  $PY -u client.py --i=$2 --num_reqs_to_finish=1000000000 --mid_ip_m='{"m0": "127.0.0.1"}' --mport=57621
+  $PY -u client.py --i=$2 --mean_inter_gen_time=1 --num_reqs_to_finish=1000000000 --mid_ip_m='{"m0": "127.0.0.1"}' --mport=$3 # --dashboard_server_ip='dashboard-service'
 elif [ $1 = 'm' ]; then
   # $PY -u master.py --i=$2 --wip_l='["10.0.2.0"]'
   $PY -u master.py --i=$2 --wip_l='["10.0.2.0","10.0.2.1"]' --dashboard_server_ip='10.0.3.0'

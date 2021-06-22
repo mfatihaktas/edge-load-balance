@@ -191,7 +191,7 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport=', 'num_reqs_to_finish=', 'dashboard_server_ip='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'mid_ip_m=', 'mport=', 'num_reqs_to_finish=', 'dashboard_server_ip=', 'mean_inter_gen_time='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
@@ -206,6 +206,8 @@ def parse_argv(argv):
 			m['num_reqs_to_finish'] = float(arg)
 		elif opt == '--dashboard_server_ip':
 			m['dashboard_server_ip'] = arg
+		elif opt == '--mean_inter_gen_time':
+			m['mean_inter_gen_time'] = float(arg)
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
@@ -213,7 +215,7 @@ def parse_argv(argv):
 		m['mport'] = LISTEN_PORT
 
 	if 'dashboard_server_ip' not in m:
-		m['dashboard_server_ip'] = 'dashboard-service'
+		m['dashboard_server_ip'] = None
 
 	log(DEBUG, "", m=m)
 	return m
@@ -228,7 +230,7 @@ def run(argv):
 	c = Client(_id, d = 1, inter_probe_num_reqs = float('Inf'),
 						 mid_ip_m = m['mid_ip_m'], mport = m['mport'],
 						 num_reqs_to_finish = m['num_reqs_to_finish'],
-						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
+						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[m['mean_inter_gen_time']*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
 						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]),
 						 dashboard_server_ip=m['dashboard_server_ip'])
