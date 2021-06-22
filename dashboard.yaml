@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3"]
+        args: ["/home/app/dashboard/dashboard.py"]

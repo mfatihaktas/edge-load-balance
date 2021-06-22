@@ -210,6 +210,9 @@ def parse_argv(argv):
 	if 'wip_l' not in m:
 		m['wip_l'] = get_wip_l('edge-service')
 
+	if 'dashboard_server_ip' not in m:
+		m['dashboard_server_ip'] = 'dashboard-service'
+
 	log(DEBUG, "", m=m)
 	return m
 
@@ -220,7 +223,7 @@ def run(argv):
 	log(DEBUG, "", m=m)
 
 	mr = Master(_id, m['wip_l'],
-							dashboard_server_ip=m['dashboard_server_ip'] if 'dashboard_server_ip' in m else None)
+							dashboard_server_ip=m['dashboard_server_ip'])
 	# input("Enter to finish...\n")
 	# sys.exit()
 

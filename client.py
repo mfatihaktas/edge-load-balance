@@ -212,6 +212,9 @@ def parse_argv(argv):
 	if 'mport' not in m:
 		m['mport'] = LISTEN_PORT
 
+	if 'dashboard_server_ip' not in m:
+		m['dashboard_server_ip'] = 'dashboard-service'
+
 	log(DEBUG, "", m=m)
 	return m
 
@@ -228,7 +231,7 @@ def run(argv):
 						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[0.1*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
 						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]),
-						 dashboard_server_ip=m['dashboard_server_ip'] if 'dashboard_server_ip' in m else None)
+						 dashboard_server_ip=m['dashboard_server_ip'])
 
 	log(DEBUG, "", client=c)
 	plot_client(c)

@@ -77,3 +77,43 @@ spec:
     targetPort: 5000
     nodePort: 30000
     protocol: TCP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3"]
+        args: ["/home/app/dashboard/dashboard.py"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-service
+spec:
+  selector:
+    app: dashboard
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
