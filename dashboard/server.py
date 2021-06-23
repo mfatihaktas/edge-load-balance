@@ -62,7 +62,7 @@ class ClientInfo():
 		cid = req_info_m['cid']
 		log(DEBUG, "started", cid=cid)
 		self.client_info_q.put(cid, req_info_m)
-		self.plot(cid)
+		# self.plot(cid)
 		log(DEBUG, "done")
 
 	def color_for_mid(self, mid):
@@ -119,7 +119,7 @@ class MasterInfo():
 		mid = info_m['mid']
 		log(DEBUG, "started", mid=mid)
 		self.master_info_q.put(mid, info_m)
-		self.plot(mid)
+		# self.plot(mid)
 		log(DEBUG, "done")
 
 	def color_for_mid(self, mid):
@@ -173,14 +173,33 @@ class DashboardServer():
 	def handle_msg(self, msg):
 		self.msg_q.put(msg)
 
-	def run(self):
-		while True:
-			msg = self.msg_q.get(block=True)
-
-			update = msg.payload
+	def put(self, update_l):
+		cid_plot_s, mid_plot_s = set(), set()
+		for update in update_l:
 			if update.typ == UpdateType.from_client:
 				self.client_info.put(update.m)
+				cid_plot_s.add(update.m['cid'])
 			elif update.typ == UpdateType.from_master:
 				self.master_info.put(update.m)
+				mid_plot_s.add(update.m['mid'])
 			else:
 				assert_("Unexpected update type", update=update)
+
+		for cid in cid_plot_s:
+			self.client_info.plot(cid)
+		for mid in mid_plot_s:
+			self.master_info.plot(mid)
+
+	def run(self):
+		while True:
+			update_l = []
+			n = self.msg_q.qsize()
+			if n == 0:
+				msg = self.msg_q.get(block=True)
+				update_l.append(msg.payload)
+			else:
+				for _ in range(n):
+					msg = self.msg_q.get(block=True)
+					update_l.append(msg.payload)
+
+			self.put(update_l)

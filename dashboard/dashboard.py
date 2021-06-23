@@ -14,6 +14,7 @@ app = Flask(__name__, static_url_path='', static_folder='static', template_folde
 @app.route('/', methods=['GET'])
 def index():
 	img_filename_l = os.listdir('dashboard/static/image')
+	img_filename_l.sort()
 	log(DEBUG, "", img_filename_l=img_filename_l)
 	img_path_l = ['image/' + name for name in img_filename_l if '.png' in name]
 	# log(DEBUG, "", img_path_l=img_path_l)

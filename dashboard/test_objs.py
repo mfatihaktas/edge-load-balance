@@ -70,11 +70,11 @@ class TestMaster():
 			self.send_update(m)
 
 if __name__ == '__main__':
-	tc = TestClient(_id='c0', inter_update_time=1, dashboard_server_ip='192.168.2.148')
-	tc = TestClient(_id='c1', inter_update_time=1, dashboard_server_ip='192.168.2.148')
-	tc = TestClient(_id='c2', inter_update_time=1, dashboard_server_ip='192.168.2.148')
+	tc = TestClient(_id='c0', inter_update_time=0.1, dashboard_server_ip='192.168.2.148')
+	tc = TestClient(_id='c1', inter_update_time=0.1, dashboard_server_ip='192.168.2.148')
+	tc = TestClient(_id='c2', inter_update_time=0.1, dashboard_server_ip='192.168.2.148')
 
-	tc = TestMaster(_id='cl-0', num_worker=10, inter_update_time=2, dashboard_server_ip='192.168.2.148')
-	tc = TestMaster(_id='cl-1', num_worker=10, inter_update_time=2.5, dashboard_server_ip='192.168.2.148')
+	tc = TestMaster(_id='cl-0', num_worker=10, inter_update_time=0.2, dashboard_server_ip='192.168.2.148')
+	tc = TestMaster(_id='cl-1', num_worker=10, inter_update_time=0.25, dashboard_server_ip='192.168.2.148')
 
 	input("Enter...")
