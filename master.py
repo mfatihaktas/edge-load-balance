@@ -135,7 +135,7 @@ class Master():
 		if self.dashboard_server_ip is None:
 			return
 
-		log(DEBUG, "started")
+		# log(DEBUG, "started")
 		self.num_updates_sent += 1
 
 		m = {'mid': self._id,
@@ -224,7 +224,11 @@ def parse_argv(argv):
 		m['i'] = LISTEN_IP
 	if 'wip_l' not in m:
 		check('worker_service' in m, 'wip_l not set, worker_service should have been set')
-		m['wip_l'] = get_wip_l(m['worker_service'])
+		wip_l = get_wip_l(m['worker_service'])
+		while len(wip_l) == 0:
+			log(DEBUG, "get_wip_l returned empty...retrying", worker_service=m['worker_service'])
+			wip_l = get_wip_l(m['worker_service'])
+		m['wip_l'] = wip_l
 	if 'dashboard_server_ip' not in m:
 		m['dashboard_server_ip'] = 'dashboard-service'
 
