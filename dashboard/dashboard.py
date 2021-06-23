@@ -3,7 +3,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-import pprint
+import pprint, getopt
 
 from flask import Flask, request, render_template
 from server import DashboardServer
@@ -23,8 +23,29 @@ def index():
 	return render_template("index.html",
 												 img_path_l=img_path_l)
 
+def parse_argv(argv):
+	m = {}
+	try:
+		opts, args = getopt.getopt(argv, '', ['log_to_std='])
+	except getopt.GetoptError:
+		assert_("Wrong args;", opts=opts, args=args)
+
+	for opt, arg in opts:
+		if opt == '--log_to_std':
+			m['log_to_std'] = bool(int(arg))
+		else:
+			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
+
+	if 'log_to_std' not in m:
+		m['log_to_std'] = True
+
+	return m
+
 if __name__ == '__main__':
+	m = parse_argv(sys.argv[1:])
 	log_to_file('d.log')
+	if m['log_to_std']:
+		log_to_std()
 
 	server = DashboardServer()
 

@@ -20,7 +20,7 @@ spec:
         ports:
         - containerPort: 5000
         command: ["python3", "-u"]
-        args: ["/home/app/worker.py"]
+        args: ["/home/app/worker.py", "--log_to_std='True'"]
 
 ---
 

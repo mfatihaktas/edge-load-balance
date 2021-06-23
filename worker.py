@@ -63,16 +63,20 @@ class Worker():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i='])
+		opts, args = getopt.getopt(argv, '', ['i=', 'log_to_std='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
 	for opt, arg in opts:
-		if opt == '--i':
+		if opt == '--log_to_std':
+			m['log_to_std'] = bool(int(arg))
+		elif opt == '--i':
 			m['i'] = arg
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
+	if 'log_to_std' not in m:
+		m['log_to_std'] = True
 	if 'i' not in m:
 		m['i'] = LISTEN_IP
 
@@ -82,6 +86,8 @@ if __name__ == '__main__':
 	m = parse_argv(sys.argv[1:])
 	_id = 'w_' + m['i']
 	log_to_file('{}.log'.format(_id))
+	if m['log_to_std']:
+		log_to_std()
 
 	w = Worker(_id)
 

@@ -42,7 +42,11 @@ def create_sock(ip, port):
 	try:
 		if TRANS == 'TCP':
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			sock.connect((ip, port))
+			try:
+				sock.connect((ip, port))
+			except:
+				log(ERROR, "sock.connect failed", ip=ip, port=port, err=sys.exc_info()[0])
+				return None
 		elif TRANS == 'UDP':
 			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		return sock
@@ -117,12 +121,33 @@ def send_msg(msg, port=None, trans=TRANS):
 		port = LISTEN_PORT
 
 	sock = create_sock(msg.dst_ip, port)
+	if sock is None:
+		log(ERROR, "create_sock failed", msg=msg)
+		return None
+
+	def sendall_tcp(ba):
+		try:
+			sock.sendall(ba)
+		except:
+			log(ERROR, "sock.sendall failed", err=sys.exc_info()[0])
+	def send_tcp(ba):
+		try:
+			sock.send(ba)
+		except:
+			log(ERROR, "sock.sendall failed", err=sys.exc_info()[0])
+
+	def send_udp(ba, to_addr):
+		try:
+			sock.sendto(ba, to_addr)
+		except:
+			log(ERROR, "sock.sendto failed", err=sys.exc_info()[0])
+
 	if msg is None:
 		header_ba = bytearray(msg_len_header(0))
 		if trans == 'TCP':
-			sock.sendall(header_ba)
+			sendall_tcp(header_ba)
 		elif trans == 'UDP':
-			sock.sendto(header_ba, to_addr)
+			send_udp(header_ba, to_addr)
 		return
 
 	msg.src_ip = LISTEN_IP
@@ -141,17 +166,17 @@ def send_msg(msg, port=None, trans=TRANS):
 
 		total_size = len(data)
 		for i in range(0, total_size, PACKET_SIZE):
-			sock.send(data[i:min(i + PACKET_SIZE, total_size)])
+			send_tcp(data[i:min(i + PACKET_SIZE, total_size)])
 		log(DEBUG, "sent", total_size=total_size)
 
 	elif trans == 'UDP':
-		sock.sendto(header_ba, to_addr)
-		sock.sendto(msg_ba, to_addr)
+		send_udp(header_ba, to_addr)
+		send_udp(msg_ba, to_addr)
 
 		if msg.payload.size_inBs > 0:
 			total_size = len(payload_ba)
 			for i in range(0, total_size, PACKET_SIZE):
-				sock.sendto(payload_ba[i:min(i + PACKET_SIZE, total_size)], to_addr)
+				send_udp(payload_ba[i:min(i + PACKET_SIZE, total_size)], to_addr)
 
 # ******************************  TCPServer  ***************************** #
 class MsgHandler(socketserver.BaseRequestHandler):

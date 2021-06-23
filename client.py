@@ -194,17 +194,18 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'd=', 'mid_addr_m=', 'num_reqs_to_finish=', 'dashboard_server_ip=', 'mean_inter_gen_time=', 'inter_probe_num_reqs='])
+		opts, args = getopt.getopt(argv, '', ['log_to_std=', 'i=', 'd=', 'mid_addr_m=', 'num_reqs_to_finish=', 'dashboard_server_ip=', 'mean_inter_gen_time=', 'inter_probe_num_reqs='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
 	for opt, arg in opts:
-		if opt == '--i':
+		if opt == '--log_to_std':
+			m['log_to_std'] = bool(int(arg))
+		elif opt == '--i':
 			m['i'] = arg
 		elif opt == '--d':
 			m['d'] = int(arg)
 		elif opt == '--mid_addr_m':
-			print("mid_addr_m= {}".format(arg))
 			m['mid_addr_m'] = json.loads(arg)
 		elif opt == '--num_reqs_to_finish':
 			m['num_reqs_to_finish'] = int(arg)
@@ -217,6 +218,8 @@ def parse_argv(argv):
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
+	if 'log_to_std' not in m:
+		m['log_to_std'] = True
 	if 'd' not in m:
 		m['d'] = 1
 	if 'dashboard_server_ip' not in m:
@@ -231,6 +234,9 @@ def run(argv):
 	m = parse_argv(argv)
 	_id = 'c_' + m['i']
 	log_to_file('{}.log'.format(_id))
+	if m['log_to_std']:
+		log_to_std()
+	log(DEBUG, "", m=m)
 
 	ES = 0.1 # 0.01
 	mu = float(1/ES)

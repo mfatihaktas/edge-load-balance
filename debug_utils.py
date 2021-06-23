@@ -20,7 +20,8 @@ FORMAT = '%(levelname)s] %(func_name)s: %(msg)s'
 # logger.basicConfig(format=FORMAT, level=logging.DEBUG) # filename='c.log'
 formatter = logging.Formatter(FORMAT)
 
-if not LOG_ONLY_TO_FILE:
+def log_to_std():
+	logger = logging.getLogger('edge_cloud')
 	sh = logging.StreamHandler()
 	sh.setFormatter(formatter)
 	logger.addHandler(sh)

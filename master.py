@@ -115,6 +115,9 @@ class Master():
 
 		self.num_updates_sent = 0
 
+		t_update = threading.Thread(target=self.run_dashboard_updates, daemon=True)
+		t_update.start()
+
 		self.on = True
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
@@ -149,6 +152,12 @@ class Master():
 
 		log(DEBUG, "done", m=m)
 
+	def run_dashboard_updates(self):
+		while True:
+			time.sleep(1)
+
+			self.send_update_to_dashboard()
+
 	def handle_msg(self, msg):
 		log(DEBUG, "handling", msg=msg)
 
@@ -163,7 +172,6 @@ class Master():
 				pass
 			elif p.typ == InfoType.worker_req_completion:
 				self.w_q.dec_qlen(msg.src_ip)
-				self.send_update_to_dashboard()
 			elif p.typ == InfoType.close:
 				for wip in self.wip_l:
 					self.commer.send_to_worker(wip, msg)
@@ -189,17 +197,17 @@ class Master():
 			log(DEBUG, "Will inc_qlen", wip=wip)
 			self.w_q.inc_qlen(wip)
 
-			self.send_update_to_dashboard()
-
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['i=', 'wip_l=', 'worker_service=', 'dashboard_server_ip='])
+		opts, args = getopt.getopt(argv, '', ['log_to_std=', 'i=', 'wip_l=', 'worker_service=', 'dashboard_server_ip='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
 	for opt, arg in opts:
-		if opt == '--i':
+		if opt == '--log_to_std':
+			m['log_to_std'] = bool(int(arg))
+		elif opt == '--i':
 			m['i'] = arg
 		elif opt == '--wip_l':
 			m['wip_l'] = json.loads(arg)
@@ -210,13 +218,13 @@ def parse_argv(argv):
 		else:
 			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
 
+	if 'log_to_std' not in m:
+		m['log_to_std'] = True
 	if 'i' not in m:
 		m['i'] = LISTEN_IP
-
 	if 'wip_l' not in m:
 		check('worker_service' in m, 'wip_l not set, worker_service should have been set')
 		m['wip_l'] = get_wip_l(m['worker_service'])
-
 	if 'dashboard_server_ip' not in m:
 		m['dashboard_server_ip'] = 'dashboard-service'
 
@@ -227,6 +235,8 @@ def run(argv):
 	m = parse_argv(argv)
 	_id = 'm_' + m['i']
 	log_to_file('{}.log'.format(_id))
+	if m['log_to_std']:
+		log_to_std()
 	log(DEBUG, "", m=m)
 
 	mr = Master(_id, m['wip_l'],
