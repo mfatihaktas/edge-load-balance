@@ -194,7 +194,7 @@ class Master():
 
 			log(DEBUG, "Will send_to_worker", wip=wip)
 			self.commer.send_to_worker(wip, msg)
-			if msg.payload.is_req() and msg.payload.probe == False:
+			if msg.payload.is_req():
 				log(DEBUG, "Will inc_qlen", wip=wip)
 				self.w_q.inc_qlen(wip)
 

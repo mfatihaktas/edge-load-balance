@@ -49,8 +49,8 @@ class Worker():
 				log(DEBUG, "finished serving")
 				self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
 
-				msg.payload = Info(req._id, InfoType.worker_req_completion)
-				self.commer.send_info_to_master(msg)
+			msg.payload = Info(req._id, InfoType.worker_req_completion)
+			self.commer.send_info_to_master(msg)
 
 			result = result_from_req(req)
 			result.epoch_departed_cluster = time.time()
