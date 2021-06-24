@@ -19,7 +19,7 @@ elif [ $1 = 'cm' ]; then
   # $PY -u client.py --i=$2 --mid_addr_m='{"m0": ["10.106.162.193", "null"]}' --mport=30000
   $PY -u client.py --i=$2 --mean_inter_gen_time=1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3']}'
 elif [ $1 = 'cm2' ]; then
-  $PY -u client.py --i=$2 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3'], "m1": ["127.0.0.1", '$4']}' --dashboard_server_addr='["127.0.0.1", '$5']'
+  $PY -u client.py --log_to_std=0 --i=$2 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3'], "m1": ["127.0.0.1", '$4']}' --dashboard_server_addr='["127.0.0.1", '$5']'
 elif [ $1 = 'm' ]; then
   # $PY -u master.py --i=$2 --wip_l='["10.0.1.0"]'
   $PY -u master.py --log_to_std=0 --i=$2 --wip_l='["10.0.1.0","10.0.1.1"]' --dashboard_server_ip='10.0.3.0'
