@@ -11,15 +11,15 @@ elif [ $1 = 'n2' ]; then
   $PY net_two_masters.py
 elif [ $1 = 'c' ]; then
   [ -z "$2" ] && { echo "Which client [0, *] ?"; exit 1; }
-  $PY -u client.py --i=$2 --mean_inter_gen_time=0.1 --num_reqs_to_finish=10000 --mid_addr_m='{"m0": ["10.0.0.0", "null"]}' --dashboard_server_ip='10.0.3.0'
+  $PY -u client.py --i=$2 --mean_inter_gen_time=0.1 --num_reqs_to_finish=10000 --mid_addr_m='{"m0": ["10.0.0.0", "null"]}' --dashboard_server_addr='["10.0.3.0", "null"]'
 elif [ $1 = 'c2' ]; then
-  $PY -u client.py --log_to_std=0 --i=0 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --num_reqs_to_finish=10000 --mid_addr_m='{"m0": ["10.0.0.0", "null"], "m1": ["10.0.0.1", "null"]}' --dashboard_server_ip='10.0.3.0'
+  $PY -u client.py --log_to_std=0 --i=0 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --num_reqs_to_finish=10000 --mid_addr_m='{"m0": ["10.0.0.0", "null"], "m1": ["10.0.0.1", "null"]}' --dashboard_server_addr='["10.0.3.0", "null"]'
 elif [ $1 = 'cm' ]; then
   # $PY -u client.py --i=$2 --mid_addr_m='{"m0": ["192.168.49.2", "null"]}' --mport=30000
   # $PY -u client.py --i=$2 --mid_addr_m='{"m0": ["10.106.162.193", "null"]}' --mport=30000
   $PY -u client.py --i=$2 --mean_inter_gen_time=1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3']}'
 elif [ $1 = 'cm2' ]; then
-  $PY -u client.py --i=$2 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3'], "m1": ["127.0.0.1", '$4']}'
+  $PY -u client.py --i=$2 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --num_reqs_to_finish=100000 --mid_addr_m='{"m0": ["127.0.0.1", '$3'], "m1": ["127.0.0.1", '$4']}' --dashboard_server_addr='["127.0.0.1", '$5']'
 elif [ $1 = 'm' ]; then
   # $PY -u master.py --i=$2 --wip_l='["10.0.1.0"]'
   $PY -u master.py --log_to_std=0 --i=$2 --wip_l='["10.0.1.0","10.0.1.1"]' --dashboard_server_ip='10.0.3.0'

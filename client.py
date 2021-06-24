@@ -13,7 +13,7 @@ class State(enum.Enum):
 class Client():
 	def __init__(self, _id, d, inter_probe_num_reqs,
 							 mid_addr_m, num_reqs_to_finish, inter_gen_time_rv, serv_time_rv, size_inBs_rv,
-							 dashboard_server_ip):
+							 dashboard_server_addr):
 		self._id = _id
 		self.d = d
 		self.inter_probe_num_reqs = inter_probe_num_reqs
@@ -22,7 +22,7 @@ class Client():
 		self.inter_gen_time_rv = inter_gen_time_rv
 		self.serv_time_rv = serv_time_rv
 		self.size_inBs_rv = size_inBs_rv
-		self.dashboard_server_ip = dashboard_server_ip
+		self.dashboard_server_addr = dashboard_server_addr
 
 		self.mid_l = []
 		self.commer = CommerOnClient(self._id, self.handle_msg)
@@ -63,7 +63,7 @@ class Client():
 			'num_reqs_to_finish= {}'.format(self.num_reqs_to_finish) + '\n\t' + \
 			'serv_time_rv= {}'.format(self.serv_time_rv) + '\n\t' + \
 			'size_inBs_rv= {}'.format(self.size_inBs_rv) + '\n\t' + \
-			'dashboard_server_ip= {}'.format(self.dashboard_server_ip) + ')'
+			'dashboard_server_addr= {}'.format(self.dashboard_server_addr) + ')'
 
 	def close(self):
 		if self.state == State.off:
@@ -129,7 +129,7 @@ class Client():
 				self.close()
 
 	def send_update_to_dashboard(self, T):
-		if self.dashboard_server_ip is None:
+		if self.dashboard_server_addr is None:
 			return
 
 		log(DEBUG, "started", T=T)
@@ -143,8 +143,8 @@ class Client():
 							src_id = self._id,
 							src_ip = LISTEN_IP,
 							dst_id = 'd',
-							dst_ip = self.dashboard_server_ip)
-		send_msg(msg)
+							dst_ip = self.dashboard_server_addr[0])
+		send_msg(msg, port=self.dashboard_server_addr[1])
 
 		log(DEBUG, "done", m=m)
 
@@ -194,7 +194,7 @@ class Client():
 def parse_argv(argv):
 	m = {}
 	try:
-		opts, args = getopt.getopt(argv, '', ['log_to_std=', 'i=', 'd=', 'mid_addr_m=', 'num_reqs_to_finish=', 'dashboard_server_ip=', 'mean_inter_gen_time=', 'inter_probe_num_reqs='])
+		opts, args = getopt.getopt(argv, '', ['log_to_std=', 'i=', 'd=', 'mid_addr_m=', 'num_reqs_to_finish=', 'dashboard_server_addr=', 'mean_inter_gen_time=', 'inter_probe_num_reqs='])
 	except getopt.GetoptError:
 		assert_("Wrong args;", opts=opts, args=args)
 
@@ -209,8 +209,8 @@ def parse_argv(argv):
 			m['mid_addr_m'] = json.loads(arg)
 		elif opt == '--num_reqs_to_finish':
 			m['num_reqs_to_finish'] = int(arg)
-		elif opt == '--dashboard_server_ip':
-			m['dashboard_server_ip'] = arg
+		elif opt == '--dashboard_server_addr':
+			m['dashboard_server_addr'] = json.loads(arg)
 		elif opt == '--mean_inter_gen_time':
 			m['mean_inter_gen_time'] = float(arg)
 		elif opt == '--inter_probe_num_reqs':
@@ -222,10 +222,13 @@ def parse_argv(argv):
 		m['log_to_std'] = True
 	if 'd' not in m:
 		m['d'] = 1
-	if 'dashboard_server_ip' not in m:
-		m['dashboard_server_ip'] = None
 	if 'inter_probe_num_reqs' not in m:
 		m['inter_probe_num_reqs'] = float('Inf')
+
+	if 'dashboard_server_addr' not in m:
+		m['dashboard_server_addr'] = None
+	elif m['dashboard_server_addr'][1] == 'null':
+		m['dashboard_server_addr'][1] = LISTEN_PORT
 
 	log(DEBUG, "", m=m)
 	return m
@@ -246,7 +249,7 @@ def run(argv):
 						 inter_gen_time_rv = DiscreteRV(p_l=[1], v_l=[m['mean_inter_gen_time']*1000], norm_factor=1000),
 						 serv_time_rv=DiscreteRV(p_l=[1], v_l=[ES*1000], norm_factor=1000), # Exp(mu), # TPareto_forAGivenMean(l=ES/2, a=1, mean=ES)
 						 size_inBs_rv=DiscreteRV(p_l=[1], v_l=[PACKET_SIZE*1]),
-						 dashboard_server_ip=m['dashboard_server_ip'])
+						 dashboard_server_addr=m['dashboard_server_addr'])
 
 	log(DEBUG, "", client=c)
 	plot_client(c)

@@ -100,7 +100,7 @@ class WQueue(): # Worker
 		return wip
 
 class Master():
-	def __init__(self, _id, wip_l, dashboard_server_ip=None):
+	def __init__(self, _id, wip_l, dashboard_server_ip):
 		self._id = _id
 		self.wip_l = wip_l
 		self.dashboard_server_ip = dashboard_server_ip

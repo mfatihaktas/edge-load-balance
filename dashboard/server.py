@@ -106,14 +106,16 @@ class ClientInfo():
 		log(DEBUG, "done", cid=cid)
 
 class MasterInfo():
-	def __init__(self):
-		self.master_info_q = InfoQ(max_qlen=20)
+	def __init__(self, max_qlen):
+		self.max_qlen = max_qlen
+
+		self.master_info_q = InfoQ(max_qlen)
 
 		self.mid_color_m = {}
 
 	def __repr__(self):
-		return 'MasterInfo:\n' + \
-			     '\t master_info_q=\n {}'.format(self.master_info_q)
+		return 'MasterInfo(max_qlen= {})'.format(self.max_qlen) + '\n' \
+			     ' : master_info_q=\n {}'.format(self.master_info_q)
 
 	def put(self, info_m):
 		mid = info_m['mid']
@@ -157,8 +159,8 @@ class DashboardServer():
 	def __init__(self):
 		self.commer = CommerOnDashboardServer(self.handle_msg)
 
-		self.client_info = ClientInfo()
-		self.master_info = MasterInfo()
+		self.client_info = ClientInfo(max_qlen=50)
+		self.master_info = MasterInfo(max_qlen=50)
 
 		self.msg_q = queue.Queue()
 

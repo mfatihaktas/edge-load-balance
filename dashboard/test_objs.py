@@ -3,7 +3,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-import threading, time, random
+import threading, time, random, getopt
 
 from debug_utils import *
 from commer import LISTEN_IP, send_msg
@@ -69,12 +69,31 @@ class TestMaster():
 			epoch += random.randint(1, 5)
 			self.send_update(m)
 
-if __name__ == '__main__':
-	tc = TestClient(_id='c0', inter_update_time=0.1, dashboard_server_ip='192.168.2.148')
-	tc = TestClient(_id='c1', inter_update_time=0.1, dashboard_server_ip='192.168.2.148')
-	tc = TestClient(_id='c2', inter_update_time=0.1, dashboard_server_ip='192.168.2.148')
+def parse_argv(argv):
+	m = {}
+	try:
+		opts, args = getopt.getopt(argv, '', ['dashboard_server_ip='])
+	except getopt.GetoptError:
+		assert_("Wrong args;", opts=opts, args=args)
 
-	tc = TestMaster(_id='cl-0', num_worker=10, inter_update_time=0.2, dashboard_server_ip='192.168.2.148')
-	tc = TestMaster(_id='cl-1', num_worker=10, inter_update_time=0.25, dashboard_server_ip='192.168.2.148')
+	for opt, arg in opts:
+		if opt == '--dashboard_server_ip':
+			m['dashboard_server_ip'] = arg
+		else:
+			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
+
+	log(DEBUG, "", m=m)
+	return m
+
+if __name__ == '__main__':
+	log_to_std()
+
+	m = parse_argv(sys.argv[1:])
+	tc = TestClient(_id='c0', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestClient(_id='c1', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestClient(_id='c2', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
+
+	tc = TestMaster(_id='cl-0', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='cl-1', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
 
 	input("Enter...")
