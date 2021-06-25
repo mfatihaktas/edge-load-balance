@@ -32,6 +32,8 @@ def get_listen_ip(net_intf='eth0'):
 LISTEN_IP = get_listen_ip(net_intf='eth0')
 if LISTEN_IP is None:
 	LISTEN_IP = get_listen_ip(net_intf='en0')
+if LISTEN_IP is None:
+  LISTEN_IP = get_listen_ip(net_intf='eno1')
 
 def msg_len_header(msg_size):
 	msg_size_str = str(msg_size)

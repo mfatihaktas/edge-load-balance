@@ -67,11 +67,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: edge-master-nodeport-0
+  name: edge-master-service-0
 spec:
+  type: LoadBalancer
   selector:
     app: edge-master-0
-  type: NodePort
   ports:
   - name: tcp
     port: 5000
@@ -150,11 +150,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: edge-master-nodeport-1
+  name: edge-master-service-1
 spec:
+  type: LoadBalancer
   selector:
     app: edge-master-1
-  type: NodePort
   ports:
   - name: tcp
     port: 5000

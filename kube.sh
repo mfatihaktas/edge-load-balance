@@ -3,7 +3,12 @@ echo $1 $2 $3
 
 KUBECTL=kubectl
 
-if [ $1 = 'bash' ]; then
+if [ $1 = 'm' ]; then
+  # Works on orbit nodes with root login
+  minikube start --force --driver=docker
+elif [ $1 = 'mt' ]; then
+  minikube tunnel
+elif [ $1 = 'bash' ]; then
   POD_NAME=$2
   [ -z "$POD_NAME" ] && { echo "Pod name?"; exit 1; }
   $KUBECTL exec --stdin --tty $POD_NAME -- /bin/bash

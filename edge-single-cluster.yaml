@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-worker
+  labels:
+    app: edge-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: edge-worker
+  template:
+    metadata:
+      labels:
+        app: edge-worker
+    spec:
+      containers:
+      - name: edge-worker
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/worker.py"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-worker-service
+  labels:
+    app: edge-worker-service
+spec:
+  clusterIP: None
+  selector:
+    app: edge-worker
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-master
+  labels:
+    app: edge-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-master
+  template:
+    metadata:
+      labels:
+        app: edge-master
+    spec:
+      containers:
+      - name: edge-master
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/master.py", "--worker_service=edge-worker-service"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-master-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: edge-master
+  ports:
+  - name: tcp
+    port: 5000
+    targetPort: 5000
+    nodePort: 30000
+    protocol: TCP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3"]
+        args: ["/home/app/dashboard/dashboard.py"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: dashboard
+  ports:
+  - name: flask
+    protocol: TCP
+    port: 5001
+    targetPort: 5001
+    nodePort: 30001
+  - name: dashboard-server
+    protocol: TCP
+    port: 5000
+    nodePort: 30002
