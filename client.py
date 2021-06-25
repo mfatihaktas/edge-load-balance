@@ -220,6 +220,8 @@ def parse_argv(argv):
 
 	if 'log_to_std' not in m:
 		m['log_to_std'] = True
+	if 'i' not in m:
+		m['i'] = LISTEN_IP
 	if 'd' not in m:
 		m['d'] = 1
 	if 'inter_probe_num_reqs' not in m:
