@@ -231,6 +231,8 @@ def parse_argv(argv):
 		m['d'] = 1
 	if 'inter_probe_num_reqs' not in m:
 		m['inter_probe_num_reqs'] = float('Inf')
+	if 'num_reqs_to_finish' not in m:
+		m['num_reqs_to_finish'] = float('inf')
 
 	if 'dashboard_server_addr' not in m:
 		m['dashboard_server_addr'] = None
