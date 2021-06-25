@@ -20,4 +20,4 @@ spec:
         ports:
         - containerPort: 5000
         command: ["python3", "-u"]
-        args: ["/home/app/client.py", "--d=2", "--inter_probe_num_reqs=20", "--mean_inter_gen_time=0.1", "--mid_addr_m='{\"m0\": [\"edge-master-service-0\", \"null\"], \"m1\": [\"edge-master-service-1\", \"null\"]}'", "--dashboard_server_addr='[\"dashboard-service\", \"null\"]'"]
+        args: ["/home/app/client.py", "--d=2", "--inter_probe_num_reqs=20", "--mean_inter_gen_time=0.1", "--mid_addr_m={\"m0\": [\"edge-master-service-0\", \"null\"], \"m1\": [\"edge-master-service-1\", \"null\"]}", "--dashboard_server_addr=[\"dashboard-service\", \"null\"]"]
