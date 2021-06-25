@@ -209,7 +209,7 @@ def parse_argv(argv):
 		elif opt == '--mid_addr_m':
 			try:
 				m['mid_addr_m'] = json.loads(arg)
-			except JSONDecodeError:
+			except json.decoder.JSONDecodeError:
 				print("JSONDecodeError:: arg= {}".format(arg))
 				break
 		elif opt == '--num_reqs_to_finish':
