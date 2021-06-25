@@ -207,7 +207,11 @@ def parse_argv(argv):
 		elif opt == '--d':
 			m['d'] = int(arg)
 		elif opt == '--mid_addr_m':
-			m['mid_addr_m'] = json.loads(arg)
+			try:
+				m['mid_addr_m'] = json.loads(arg)
+			except JSONDecodeError:
+				print("JSONDecodeError:: arg= {}".format(arg))
+				break
 		elif opt == '--num_reqs_to_finish':
 			m['num_reqs_to_finish'] = int(arg)
 		elif opt == '--dashboard_server_addr':
