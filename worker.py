@@ -9,12 +9,15 @@ class Worker():
 	def __init__(self, _id):
 		self._id = _id
 
-		# TODO: Limit queue length
 		self.msg_q = queue.Queue()
-		self.epoch__num_req_l = []
+		# self.epoch__num_req_l = []
 		self.commer = CommerOnWorker(self._id, self.handle_msg)
-
 		self.on = True
+
+		self.msg_to_send_q = queue.Queue()
+		t = threading.Thread(target=self.run_send, daemon=True)
+		t.start()
+
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
 		t.join()
@@ -23,6 +26,7 @@ class Worker():
 		log(DEBUG, "started")
 		self.commer.close()
 		self.msg_q.put(None)
+		self.msg_to_send_q.put(None)
 		self.on = False
 		log(DEBUG, "done")
 
@@ -31,7 +35,7 @@ class Worker():
 			self.close()
 		elif msg.payload.is_req():
 			self.msg_q.put(msg)
-			self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
+			# self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
 
 	def run(self):
 		while self.on:
@@ -47,7 +51,7 @@ class Worker():
 				log(DEBUG, "serving/sleeping", serv_time=req.serv_time)
 				time.sleep(req.serv_time)
 				log(DEBUG, "finished serving")
-				self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
+				# self.epoch__num_req_l.append((time.time(), self.msg_q.qsize()))
 
 			msg.payload = Info(req._id, InfoType.worker_req_completion)
 			self.commer.send_info_to_master(msg)
@@ -56,9 +60,18 @@ class Worker():
 			result.epoch_departed_cluster = time.time()
 			# result.size_inBs = ?
 			msg.payload = result
-			self.commer.send_result_to_user(msg)
+			self.msg_to_send_q.put(msg)
 
 		plot_worker(self)
+
+	def run_send(self):
+		while self.on:
+			msg = self.msg_to_send_q.get(block=True)
+			if msg is None:
+				log(DEBUG, "got close signal")
+				return
+
+			self.commer.send_result_to_user(msg)
 
 def parse_argv(argv):
 	m = {}

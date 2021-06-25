@@ -11,7 +11,7 @@ elif [ $1 = 'n2' ]; then
   $PY net_two_masters.py
 elif [ $1 = 'c' ]; then
   [ -z "$2" ] && { echo "Which client [0, *] ?"; exit 1; }
-  $PY -u client.py --i=$2 --mean_inter_gen_time=0.1 --mid_addr_m='{"m0": ["10.0.0.0", "null"]}' --dashboard_server_addr='["10.0.3.0", "null"]'
+  $PY -u client.py --i=$2 --mean_inter_gen_time=0.2 --mid_addr_m='{"m0": ["10.0.0.0", "null"]}' --dashboard_server_addr='["10.0.3.0", "null"]'
 elif [ $1 = 'c2' ]; then
   $PY -u client.py --log_to_std=0 --i=0 --d=2 --inter_probe_num_reqs=20 --mean_inter_gen_time=0.1 --mid_addr_m='{"m0": ["10.0.0.0", "null"], "m1": ["10.0.0.1", "null"]}' --dashboard_server_addr='["10.0.3.0", "null"]'
 elif [ $1 = 'cm' ]; then
