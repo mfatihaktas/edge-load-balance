@@ -7,7 +7,7 @@ if [ $1 = 'd' ]; then
   rm static/image/*.png
   $PY dashboard.py
 elif [ $1 = 't' ]; then
-  $PY test_objs.py --dashboard_server_ip='192.168.43.49'
+  $PY test_objs.py --dashboard_server_ip='192.168.2.148'
 else
   echo "Arg did not match!"
 fi

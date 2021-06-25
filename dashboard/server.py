@@ -179,11 +179,14 @@ class DashboardServer():
 		cid_plot_s, mid_plot_s = set(), set()
 		for update in update_l:
 			if update.typ == UpdateType.from_client:
+				cid = update.m['cid']
+				cid_plot_s.add(cid)
 				self.client_info.put(update.m)
-				cid_plot_s.add(update.m['cid'])
 			elif update.typ == UpdateType.from_master:
-				self.master_info.put(update.m)
-				mid_plot_s.add(update.m['mid'])
+				mid = update.m['mid']
+				if mid not in mid_plot_s:
+					mid_plot_s.add(mid)
+					self.master_info.put(update.m)
 			else:
 				assert_("Unexpected update type", update=update)
 
