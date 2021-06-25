@@ -199,6 +199,7 @@ def parse_argv(argv):
 		assert_("Wrong args;", opts=opts, args=args)
 
 	for opt, arg in opts:
+		print("opt= {},\n  arg= {}".format(opt, arg))
 		if opt == '--log_to_std':
 			m['log_to_std'] = bool(int(arg))
 		elif opt == '--i':
