@@ -285,7 +285,8 @@ def run(argv):
 	log(DEBUG, "", m=m)
 
 	mr = Master(_id, m['wip_s'],
-							dashboard_server_ip=m['dashboard_server_ip'])
+							dashboard_server_ip=m['dashboard_server_ip'],
+							worker_service=m['worker_service'])
 	# input("Enter to finish...\n")
 	# sys.exit()
 

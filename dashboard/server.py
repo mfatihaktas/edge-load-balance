@@ -3,7 +3,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-import threading, queue
+import threading, queue, time
 from collections import deque
 
 import matplotlib.patches as mpatches
@@ -43,6 +43,11 @@ class InfoQ():
 
 		log(DEBUG, "done", id=_id)
 
+	def rm(self, _id):
+		log(DEBUG, "started", _id=_id)
+		self.id__info_m_q.pop(_id)
+		log(DEBUG, "done", _id=_id)
+
 	def get_info_m_q(self, _id):
 		return self.id__info_m_q[_id]
 
@@ -54,21 +59,48 @@ class ClientInfo():
 
 		self.mid_color_m = {}
 
+		self.cid_exp_dur = 5
+		self.cid__last_time_recved_m = {}
+		t = threading.Thread(target=self.run_check_if_any_client_expired, daemon=True)
+		t.start()
+
 	def __repr__(self):
 		return 'ClientInfo:\n' + \
 			     '\t client_info_q=\n {}'.format(self.client_info_q)
+
+	def run_check_if_any_client_expired(self):
+		while True:
+			time.sleep(7)
+
+			# [(cid, last_time) for cid, last_time self.cid__last_time_recved_m.items()]
+			for cid, last_time in list(self.cid__last_time_recved_m.items()):
+				if time.time() - last_time > self.cid_exp_dur:
+					log(DEBUG, "expired", cid=cid)
+					self.cid__last_time_recved_m.pop(cid)
+					self.client_info_q.rm(cid)
+
+					fn = self.plot_filename(cid)
+					log(DEBUG, "removing", filename=fn)
+					try:
+						os.remove(fn)
+						log(DEBUG, "removed", cid=cid)
+					except FileNotFoundError:
+						log(WARNING, "file could not be found", filename=fn)
 
 	def put(self, req_info_m):
 		cid = req_info_m['cid']
 		log(DEBUG, "started", cid=cid)
 		self.client_info_q.put(cid, req_info_m)
-		# self.plot(cid)
+		self.cid__last_time_recved_m[cid] = time.time()
 		log(DEBUG, "done")
 
 	def color_for_mid(self, mid):
 		if mid not in self.mid_color_m:
 			self.mid_color_m[mid] = next(nice_color)
 		return self.mid_color_m[mid]
+
+	def plot_filename(self, cid):
+		return "dashboard/static/image/plot_{}.png".format(cid)
 
 	def plot(self, cid):
 		log(DEBUG, "started", cid=cid)
@@ -101,7 +133,7 @@ class ClientInfo():
 		plot.xlabel('The last {} requests (at most)'.format(self.max_qlen), fontsize=fontsize)
 		plot.title('Client id= {}'.format(cid))
 		plot.gcf().set_size_inches(6, 4)
-		plot.savefig("dashboard/static/image/plot_{}.png".format(cid), bbox_inches='tight')
+		plot.savefig(self.plot_filename(cid), bbox_inches='tight')
 		plot.gcf().clear()
 		log(DEBUG, "done", cid=cid)
 

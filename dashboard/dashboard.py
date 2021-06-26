@@ -22,7 +22,7 @@ def index():
 	# log(DEBUG, "", img_path_l=img_path_l)
 
 	app.logger.info("Returning index.html")
-	return render_template("index.html", c_img_path_l=c_img_path_l, m_img_path_l=m_img_path_l)
+	return render_template("index.html", m_img_path_l=m_img_path_l, c_img_path_l=c_img_path_l)
 
 def parse_argv(argv):
 	m = {}
