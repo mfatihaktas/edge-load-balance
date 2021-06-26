@@ -167,10 +167,6 @@ class Client():
 			req.epoch_departed_client = time.time()
 			msg = Msg(_id=self.num_reqs_gened, payload=req)
 
-			## Send message to currently assigned master
-			self.commer.send_msg(self.assigned_mid, msg)
-			log(DEBUG, "sent", req=req)
-
 			## Send also its probe version if need to
 			if self.waiting_for_probe == False and \
 				 (self.num_reqs_gened == 1 or \
@@ -178,6 +174,10 @@ class Client():
 				msg.payload.probe = True
 				self.waiting_for_probe = True
 				self.replicate(random.sample(self.mid_l, self.d), msg)
+
+			## Send message to currently assigned master
+			self.commer.send_msg(self.assigned_mid, msg)
+			log(DEBUG, "sent", req=req)
 
 			inter_gen_time = self.inter_gen_time_rv.sample()
 			log(DEBUG, "sleeping", inter_gen_time=inter_gen_time)
