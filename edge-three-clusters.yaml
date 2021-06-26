@@ -1,0 +1,293 @@
+## Cluster-0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-worker-0
+  labels:
+    app: edge-worker-0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-worker-0
+  template:
+    metadata:
+      labels:
+        app: edge-worker-0
+    spec:
+      containers:
+      - name: edge-worker-0
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/worker.py", "--log_to_std=0"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-worker-service-0
+  labels:
+    app: edge-worker-service-0
+spec:
+  clusterIP: None
+  selector:
+    app: edge-worker-0
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-master-0
+  labels:
+    app: edge-master-0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-master-0
+  template:
+    metadata:
+      labels:
+        app: edge-master-0
+    spec:
+      containers:
+      - name: edge-master-0
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/master.py", "--log_to_std=0", "--worker_service=edge-worker-service-0"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-master-service-0
+spec:
+  type: LoadBalancer
+  selector:
+    app: edge-master-0
+  ports:
+  - name: tcp
+    port: 5000
+    targetPort: 5000
+    nodePort: 30000
+    protocol: TCP
+
+---
+
+## Cluster-1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-worker-1
+  labels:
+    app: edge-worker-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-worker-1
+  template:
+    metadata:
+      labels:
+        app: edge-worker-1
+    spec:
+      containers:
+      - name: edge-worker-1
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/worker.py", "--log_to_std=0"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-worker-service-1
+  labels:
+    app: edge-worker-service-1
+spec:
+  clusterIP: None
+  selector:
+    app: edge-worker-1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-master-1
+  labels:
+    app: edge-master-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-master-1
+  template:
+    metadata:
+      labels:
+        app: edge-master-1
+    spec:
+      containers:
+      - name: edge-master-1
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/master.py", "--log_to_std=0", "--worker_service=edge-worker-service-1"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-master-service-1
+spec:
+  type: LoadBalancer
+  selector:
+    app: edge-master-1
+  ports:
+  - name: tcp
+    port: 5000
+    targetPort: 5000
+    nodePort: 30001
+    protocol: TCP
+
+## Cluster-2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-worker-2
+  labels:
+    app: edge-worker-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-worker-2
+  template:
+    metadata:
+      labels:
+        app: edge-worker-2
+    spec:
+      containers:
+      - name: edge-worker-2
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/worker.py", "--log_to_std=0"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-worker-service-2
+  labels:
+    app: edge-worker-service-2
+spec:
+  clusterIP: None
+  selector:
+    app: edge-worker-2
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-master-2
+  labels:
+    app: edge-master-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-master-2
+  template:
+    metadata:
+      labels:
+        app: edge-master-2
+    spec:
+      containers:
+      - name: edge-master-2
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3", "-u"]
+        args: ["/home/app/master.py", "--log_to_std=0", "--worker_service=edge-worker-service-2"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-master-service-2
+spec:
+  type: LoadBalancer
+  selector:
+    app: edge-master-2
+  ports:
+  - name: tcp
+    port: 5000
+    targetPort: 5000
+    nodePort: 30000
+    protocol: TCP
+
+---
+
+## Dashboard
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: mfatihaktas/edge-load-balance
+        ports:
+        - containerPort: 5000
+        command: ["python3"]
+        args: ["/home/app/dashboard/dashboard.py", "--log_to_std=0"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: dashboard
+  ports:
+  - name: dashboard-server
+    protocol: TCP
+    port: 5000
+    nodePort: 30010
+  - name: flask
+    protocol: TCP
+    port: 5001
+    targetPort: 5001
+    nodePort: 30011
