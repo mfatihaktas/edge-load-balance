@@ -43,14 +43,12 @@ class RRQueue(): # Round Robin
 		r = True
 		q = self.cid_q_m[msg.payload.cid]
 		if len(q) == self.max_qlen:
-			# msg_popped = q.popleft()
-			# log(DEBUG, "Was full, popped the oldest req", msg_popped=msg_popped)
-			log(DEBUG, "Was full, dropped", msg=msg)
+			msg_popped = q.popleft()
+			log(DEBUG, "Was full, popped the oldest req", msg_popped=msg_popped)
 			self.num_dropped += 1
 			r = False
-		else:
-			q.append(msg)
-			log(DEBUG, "pushed", msg=msg)
+		q.append(msg)
+		log(DEBUG, "pushed", msg=msg)
 		return r
 
 	def pop(self):

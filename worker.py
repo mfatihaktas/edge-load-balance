@@ -15,8 +15,8 @@ class Worker():
 		self.on = True
 
 		self.msg_to_send_q = queue.Queue()
-		t = threading.Thread(target=self.run_send, daemon=True)
-		t.start()
+		t_send = threading.Thread(target=self.run_send, daemon=True)
+		t_send.start()
 
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
