@@ -5,9 +5,20 @@
     <title>Edge service dashboard</title>
 </head>
 <body>
-    <h1>Edge service dashboard</h1>
-    {% for img_path in img_path_l %}
-    <img src="{{url_for('static', filename=img_path)}}" alt="{{img_path}}">
+  <h1>Edge service dashboard</h1>
+  {% if c_img_path_l %}
+  <div class="column">
+    <div class="row">
+    {% for img_path in c_img_path_l %}
+      <img src="{{url_for('static', filename=img_path)}}" alt="{{img_path}}">
     {% endfor %}
+    </div>
+    <div class="row">
+    {% for img_path in m_img_path_l %}
+      <img src="{{url_for('static', filename=img_path)}}" alt="{{img_path}}">
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </body>
 </html>

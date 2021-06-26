@@ -16,12 +16,13 @@ def index():
 	img_filename_l = os.listdir('dashboard/static/image')
 	img_filename_l.sort()
 	log(DEBUG, "", img_filename_l=img_filename_l)
-	img_path_l = ['image/' + name for name in img_filename_l if '.png' in name]
+
+	c_img_path_l = ['image/' + filename for filename in img_filename_l if '_c_' in filename]
+	m_img_path_l = ['image/' + filename for filename in img_filename_l if '_m_' in filename]
 	# log(DEBUG, "", img_path_l=img_path_l)
 
 	app.logger.info("Returning index.html")
-	return render_template("index.html",
-												 img_path_l=img_path_l)
+	return render_template("index.html", c_img_path_l=c_img_path_l, m_img_path_l=m_img_path_l)
 
 def parse_argv(argv):
 	m = {}

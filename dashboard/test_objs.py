@@ -89,11 +89,11 @@ if __name__ == '__main__':
 	log_to_std()
 
 	m = parse_argv(sys.argv[1:])
-	tc = TestClient(_id='c0', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
-	tc = TestClient(_id='c1', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
-	tc = TestClient(_id='c2', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestClient(_id='c_0', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestClient(_id='c_1', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestClient(_id='c_2', inter_update_time=0.1, dashboard_server_ip=m['dashboard_server_ip'])
 
-	tc = TestMaster(_id='cl-0', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
-	tc = TestMaster(_id='cl-1', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_0', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_1', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
 
 	input("Enter...")
