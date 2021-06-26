@@ -176,6 +176,7 @@ class Client():
 				self.replicate(random.sample(self.mid_l, self.d), msg)
 
 			## Send message to currently assigned master
+			msg.payload.probe = False
 			self.commer.send_msg(self.assigned_mid, msg)
 			log(DEBUG, "sent", req=req)
 
