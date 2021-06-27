@@ -158,6 +158,22 @@ class Client():
 			log(DEBUG, "sent", mid=mid)
 		log(DEBUG, "done")
 
+	def probe(self, msg):
+		if self.d > 1 and self.waiting_for_probe == False and \
+				 (self.num_reqs_gened == 1 or \
+					self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs_):
+			log(DEBUG, "started", msg_id=msg._id)
+
+			msg.payload.probe = True
+			self.waiting_for_probe = True
+			mid_l = [self.assigned_mid, *random.sample(self.mid_l, self.d - 1)]
+			log(DEBUG, "will probe", mid_l=mid_l)
+			self.replicate(mid_l, msg)
+			step = int(self.inter_probe_num_reqs * 0.4)
+			self.inter_probe_num_reqs_ = self.inter_probe_num_reqs + random.randrange(-step, step + 1)
+
+			log(DEBUG, "done", msg_id=msg._id)
+
 	def run_send(self):
 		while self.state == State.on:
 			self.num_reqs_gened += 1
@@ -170,14 +186,7 @@ class Client():
 			msg = Msg(_id=self.num_reqs_gened, payload=req)
 
 			## Send also its probe version if need to
-			if self.waiting_for_probe == False and \
-				 (self.num_reqs_gened == 1 or \
-					self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs_):
-				msg.payload.probe = True
-				self.waiting_for_probe = True
-				self.replicate(random.sample(self.mid_l, self.d), msg)
-				step = int(self.inter_probe_num_reqs * 0.3)
-				self.inter_probe_num_reqs_ = self.inter_probe_num_reqs + random.randrange(-step, step + 1)
+			self.probe(msg)
 
 			## Send message to currently assigned master
 			msg.payload.probe = False
