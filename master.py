@@ -106,7 +106,11 @@ class WQueue(): # Worker
 	def dec_qlen(self, wip):
 		log(DEBUG, "started", wip=wip)
 		with self.lock:
-			self.wip_qlen_heap_m[wip] -= 1
+			try:
+				self.wip_qlen_heap_m[wip] -= 1
+			except KeyError:
+				log(DEBUG, "tried on non-existent key", wip=wip)
+				return
 			check(self.wip_qlen_heap_m[wip] >= 0, "Q-len cannot be negative")
 
 			self.w_token_q.put(1)

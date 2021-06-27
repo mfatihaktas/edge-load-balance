@@ -181,7 +181,7 @@ class MasterInfo():
 		# plot.legend(fontsize=fontsize)
 		plot.xlabel('Time (sec)', fontsize=fontsize)
 		plot.ylabel('Avg worker queue length', fontsize=fontsize)
-		plot.title('Cluster id= {}'.format(mid) + '\n' + '(Error bars show stdev)')
+		plot.title('Cluster id= {}, # workers= {}'.format(mid, len(info_m_q[-1]['w_qlen_l'])) + '\n' + '(Error bars show stdev)')
 		plot.gcf().set_size_inches(6, 4)
 		plot.savefig("dashboard/static/image/plot_{}.png".format(mid), bbox_inches='tight')
 		plot.gcf().clear()
