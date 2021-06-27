@@ -4,6 +4,7 @@ WORKDIR /home/app
 
 RUN apt-get update
 RUN apt-get install net-tools
+RUN apt-get install less
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt

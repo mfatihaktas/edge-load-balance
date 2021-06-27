@@ -80,7 +80,7 @@ class WQueue(): # Worker
 		log(DEBUG, "started", new_wip_s=new_wip_s)
 		with self.lock:
 			## Drop wip's that got removed
-			for wip in self.wip_qlen_heap_m:
+			for wip in [wip for wip in self.wip_qlen_heap_m]:
 				if wip not in new_wip_s:
 					qlen = self.wip_qlen_heap_m[wip]
 					log(DEBUG, "dropping", wip=wip, qlen=qlen)
