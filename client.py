@@ -24,6 +24,8 @@ class Client():
 		self.size_inBs_rv = size_inBs_rv
 		self.dashboard_server_addr = dashboard_server_addr
 
+		self.inter_probe_num_reqs_ = self.inter_probe_num_reqs
+
 		self.mid_l = []
 		self.commer = CommerOnClient(self._id, self.handle_msg)
 		for mid, (mip, mport) in mid_addr_m.items():
@@ -170,10 +172,12 @@ class Client():
 			## Send also its probe version if need to
 			if self.waiting_for_probe == False and \
 				 (self.num_reqs_gened == 1 or \
-					self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs):
+					self.num_reqs_gened - self.num_reqs_last_probed >= self.inter_probe_num_reqs_):
 				msg.payload.probe = True
 				self.waiting_for_probe = True
 				self.replicate(random.sample(self.mid_l, self.d), msg)
+				step = int(self.inter_probe_num_reqs * 0.3)
+				self.inter_probe_num_reqs_ = self.inter_probe_num_reqs + random.randrange(-step, step + 1)
 
 			## Send message to currently assigned master
 			msg.payload.probe = False
