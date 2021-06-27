@@ -6,7 +6,7 @@ metadata:
   labels:
     app: edge-worker-0
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: edge-worker-0
@@ -89,7 +89,7 @@ metadata:
   labels:
     app: edge-worker-1
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: edge-worker-1
@@ -170,7 +170,7 @@ metadata:
   labels:
     app: edge-worker-2
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: edge-worker-2
