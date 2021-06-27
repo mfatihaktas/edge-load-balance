@@ -140,6 +140,7 @@ class Master():
 		self.w_token_q = queue.Queue()
 		self.w_q = WQueue(self.wip_s, self.w_token_q, max_qlen=30)
 
+		self.on = True
 		if worker_service is not None:
 			t_wip_update = threading.Thread(target=self.run_wip_updates, daemon=True)
 			t_wip_update.start()
@@ -149,7 +150,6 @@ class Master():
 			t_dashboard_update = threading.Thread(target=self.run_dashboard_updates, daemon=True)
 			t_dashboard_update.start()
 
-		self.on = True
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
 		t.join()
@@ -270,6 +270,8 @@ def parse_argv(argv):
 		m['i'] = LISTEN_IP
 	if 'wip_s' not in m:
 		m['wip_s'] = None
+	if 'worker_service' not in m:
+		m['worker_service'] = None
 	if 'dashboard_server_ip' not in m:
 		m['dashboard_server_ip'] = 'dashboard-service'
 
