@@ -162,6 +162,8 @@ spec:
     nodePort: 30001
     protocol: TCP
 
+---
+
 ## Cluster-2
 apiVersion: apps/v1
 kind: Deployment
