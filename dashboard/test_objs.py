@@ -95,5 +95,11 @@ if __name__ == '__main__':
 
 	tc = TestMaster(_id='m_0', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
 	tc = TestMaster(_id='m_1', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_2', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_3', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_4', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_5', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_6', num_worker=10, inter_update_time=0.2, dashboard_server_ip=m['dashboard_server_ip'])
+	tc = TestMaster(_id='m_7', num_worker=10, inter_update_time=0.25, dashboard_server_ip=m['dashboard_server_ip'])
 
 	input("Enter...")

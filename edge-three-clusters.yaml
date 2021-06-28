@@ -280,7 +280,7 @@ kind: Service
 metadata:
   name: dashboard-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: dashboard
   ports:

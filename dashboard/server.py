@@ -70,9 +70,8 @@ class ClientInfo():
 
 	def run_check_if_any_client_expired(self):
 		while True:
-			time.sleep(7)
+			time.sleep(5)
 
-			# [(cid, last_time) for cid, last_time self.cid__last_time_recved_m.items()]
 			for cid, last_time in list(self.cid__last_time_recved_m.items()):
 				if time.time() - last_time > self.cid_exp_dur:
 					log(DEBUG, "expired", cid=cid)
@@ -128,7 +127,7 @@ class ClientInfo():
 		label_patch_l = []
 		for mid, color in self.mid_color_m.items():
 			label_patch_l.append(mpatches.Patch(color=color, label='Cluster id= {}'.format(mid)))
-		plot.legend(handles=label_patch_l, fontsize=fontsize, bbox_to_anchor=(1.025, 1))
+		plot.legend(handles=label_patch_l, fontsize=fontsize, bbox_to_anchor=(1.05, 1))
 		plot.ylabel('T (msec)', fontsize=fontsize)
 		plot.xlabel('The last {} requests (at most)'.format(self.max_qlen), fontsize=fontsize)
 		plot.title('Client id= {}'.format(cid))

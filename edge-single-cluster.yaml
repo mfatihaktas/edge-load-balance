@@ -119,8 +119,8 @@ spec:
     protocol: TCP
     port: 5001
     targetPort: 5001
-    nodePort: 30001
+    nodePort: 30010
   - name: dashboard-server
     protocol: TCP
     port: 5000
-    nodePort: 30002
+    nodePort: 30011
