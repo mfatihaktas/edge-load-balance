@@ -41,10 +41,10 @@ class InfoQ():
 
 			if _id not in self.id__info_m_q:
 				self.id__info_m_q[_id] = deque(maxlen=self.max_qlen)
-				q = self.id__info_m_q[_id]
-				q.append(info_m)
+			q = self.id__info_m_q[_id]
+			q.append(info_m)
 
-				log(DEBUG, "done", id=_id)
+			log(DEBUG, "done", id=_id)
 
 	def rm(self, _id):
 		with self.lock:
