@@ -30,26 +30,31 @@ class InfoQ():
 
 		self.id__info_m_q = {}
 
+		self.lock = threading.Lock()
+
 	def __repr__(self):
 		return pprint.pformat(self.id__info_m_q)
 
 	def put(self, _id, info_m):
-		log(DEBUG, "started", id=_id, info_m=info_m)
+		with self.lock:
+			log(DEBUG, "started", id=_id, info_m=info_m)
 
-		if _id not in self.id__info_m_q:
-			self.id__info_m_q[_id] = deque(maxlen=self.max_qlen)
-		q = self.id__info_m_q[_id]
-		q.append(info_m)
+			if _id not in self.id__info_m_q:
+				self.id__info_m_q[_id] = deque(maxlen=self.max_qlen)
+				q = self.id__info_m_q[_id]
+				q.append(info_m)
 
-		log(DEBUG, "done", id=_id)
+				log(DEBUG, "done", id=_id)
 
 	def rm(self, _id):
-		log(DEBUG, "started", _id=_id)
-		self.id__info_m_q.pop(_id)
-		log(DEBUG, "done", _id=_id)
+		with self.lock:
+			log(DEBUG, "started", _id=_id)
+			self.id__info_m_q.pop(_id)
+			log(DEBUG, "done", _id=_id)
 
 	def get_info_m_q(self, _id):
-		return self.id__info_m_q[_id]
+		with self.lock:
+			return self.id__info_m_q[_id]
 
 class ClientInfo():
 	def __init__(self, max_qlen=20):
