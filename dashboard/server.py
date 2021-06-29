@@ -64,7 +64,9 @@ class ClientInfo():
 
 		self.mid_color_m = {}
 
-		self.cid_exp_dur = 5
+		self.lock = threading.Lock()
+
+		self.cid_exp_dur = 10
 		self.cid__last_time_recved_m = {}
 		t = threading.Thread(target=self.run_check_if_any_client_expired, daemon=True)
 		t.start()
@@ -77,26 +79,28 @@ class ClientInfo():
 		while True:
 			time.sleep(5)
 
-			for cid, last_time in list(self.cid__last_time_recved_m.items()):
-				if time.time() - last_time > self.cid_exp_dur:
-					log(DEBUG, "expired", cid=cid)
-					self.cid__last_time_recved_m.pop(cid)
-					self.client_info_q.rm(cid)
+			with self.lock:
+				for cid, last_time in list(self.cid__last_time_recved_m.items()):
+					if time.time() - last_time > self.cid_exp_dur:
+						log(DEBUG, "expired", cid=cid)
+						self.cid__last_time_recved_m.pop(cid)
+						self.client_info_q.rm(cid)
 
-					fn = self.plot_filename(cid)
-					log(DEBUG, "removing", filename=fn)
-					try:
-						os.remove(fn)
-						log(DEBUG, "removed", cid=cid)
-					except FileNotFoundError:
-						log(WARNING, "file could not be found", filename=fn)
+						fn = self.plot_filename(cid)
+						log(DEBUG, "removing", filename=fn)
+						try:
+							os.remove(fn)
+							log(DEBUG, "removed", cid=cid)
+						except FileNotFoundError:
+							log(WARNING, "file could not be found", filename=fn)
 
 	def put(self, req_info_m):
-		cid = req_info_m['cid']
-		log(DEBUG, "started", cid=cid)
-		self.client_info_q.put(cid, req_info_m)
-		self.cid__last_time_recved_m[cid] = time.time()
-		log(DEBUG, "done")
+		with self.lock:
+			cid = req_info_m['cid']
+			log(DEBUG, "started", cid=cid)
+			self.client_info_q.put(cid, req_info_m)
+			self.cid__last_time_recved_m[cid] = time.time()
+			log(DEBUG, "done")
 
 	def color_for_mid(self, mid):
 		if mid not in self.mid_color_m:
@@ -108,7 +112,11 @@ class ClientInfo():
 
 	def plot(self, cid):
 		log(DEBUG, "started", cid=cid)
-		info_m_q = self.client_info_q.get_info_m_q(cid)
+		try:
+			info_m_q = self.client_info_q.get_info_m_q(cid)
+		except KeyError:
+			log(WARNING, "Could not find info_m_q for cid= {}".format(cid))
+			return
 
 		fontsize = 14
 		## T over requests
