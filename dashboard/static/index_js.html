@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<!-- <meta http-equiv="refresh" content="4"> -->
+<head>
+  <title>Edge service dashboard</title>
+  <script language="JavaScript">
+    function refresh(element) {
+        setTimeout(function() {
+            element.src = element.src.split('?')[0] + '?' + new Date().getTime();
+            refresh(element);
+        }, 1000);
+    }
+  </script>
+</head>
+
+<body>
+  <h1>Edge service dashboard</h1>
+
+  {% if m_img_path_l %}
+  <div class="container">
+    {% for row in m_img_path_l|batch(4) %}
+    <div class="row">
+      <div class="column">
+        {% for img_path in row %}
+        <img src="{{url_for('static', filename=img_path)}}" alt="{{img_path}}" onload="refresh(this)">
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if c_img_path_l %}
+  <div class="container">
+    {% for row in c_img_path_l|batch(3) %}
+    <div class="row">
+      <div class="column">
+        {% for img_path in row %}
+        <img src="{{url_for('static', filename=img_path)}}" alt="{{img_path}}" onload="refresh(this)">
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</body>
+</html>

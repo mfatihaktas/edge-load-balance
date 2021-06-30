@@ -44,6 +44,9 @@ elif [ $1 = 'w' ]; then
 elif [ $1 = 'd' ]; then
   rm dashboard/static/image/*.png
   $PY dashboard/dashboard.py --log_to_std=0
+elif [ $1 = 'djs' ]; then
+  rm dashboard/static/image/*.png
+  $PY dashboard/dashboard_js.py --log_to_std=0
 elif [ $1 = 'k' ]; then
   pkill -f client.py
   pkill -f master.py

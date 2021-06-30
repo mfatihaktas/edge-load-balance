@@ -4,8 +4,9 @@ echo $1 $2 $3
 KUBECTL=kubectl
 
 if [ $1 = 'm' ]; then
-  # Works on orbit nodes with root login
+  minikube delete
   minikube config set memory 12384
+  # Works on orbit nodes with root login
   minikube start --force --driver=docker
 elif [ $1 = 'mt' ]; then
   minikube tunnel

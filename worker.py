@@ -18,6 +18,10 @@ class Worker():
 		t_send = threading.Thread(target=self.run_send, daemon=True)
 		t_send.start()
 
+		self.probe_to_send_q = queue.Queue()
+		t_send_probe = threading.Thread(target=self.run_send_probe, daemon=True)
+		t_send_probe.start()
+
 		t = threading.Thread(target=self.run, daemon=True)
 		t.start()
 		t.join()
@@ -26,6 +30,7 @@ class Worker():
 		log(DEBUG, "started")
 		self.commer.close()
 		self.msg_q.put(None)
+		self.probe_to_send_q.put(None)
 		self.msg_to_send_q.put(None)
 		self.on = False
 		log(DEBUG, "done")
@@ -60,9 +65,26 @@ class Worker():
 			result.epoch_departed_cluster = time.time()
 			# result.size_inBs = ?
 			msg.payload = result
-			self.msg_to_send_q.put(msg)
+
+			if not req.probe:
+				self.msg_to_send_q.put(msg)
+			else:
+				self.probe_to_send_q.put(msg)
 
 		plot_worker(self)
+
+	def run_send_probe(self):
+		while self.on:
+			msg = self.probe_to_send_q.get(block=True)
+			if msg is None:
+				log(DEBUG, "got close signal")
+				return
+
+			serv_time = msg.payload.serv_time
+			log(DEBUG, "sleeping for probe", serv_time=serv_time)
+			time.sleep(serv_time)
+			log(DEBUG, "done sleeping for probe")
+			self.msg_to_send_q.put(msg)
 
 	def run_send(self):
 		while self.on:
