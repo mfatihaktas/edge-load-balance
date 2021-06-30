@@ -5,6 +5,7 @@ KUBECTL=kubectl
 
 if [ $1 = 'm' ]; then
   # Works on orbit nodes with root login
+  minikube config set memory 12384
   minikube start --force --driver=docker
 elif [ $1 = 'mt' ]; then
   minikube tunnel
