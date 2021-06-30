@@ -6,9 +6,9 @@
   <script language="JavaScript">
     function refresh(element) {
         setTimeout(function() {
-            element.src = element.src.split('?')[0] + '?' + new Date().getTime();
+            element.src = element.src.split('?')[0] + '?' + Math.random()*1000;  // new Date().now();
             refresh(element);
-        }, 1000);
+        }, 2000);
     }
   </script>
 </head>
