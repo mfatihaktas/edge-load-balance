@@ -271,7 +271,7 @@ spec:
         ports:
         - containerPort: 5000
         command: ["python3"]
-        args: ["/home/app/dashboard/dashboard_js.py", "--log_to_std=0"]
+        args: ["/home/app/dashboard/dashboard.py", "--log_to_std=0"]
 
 ---
 
