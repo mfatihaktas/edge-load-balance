@@ -56,13 +56,21 @@ class InfoQ():
 		with self.lock:
 			return self.id__info_m_q[_id]
 
+class ColorMap():
+	def __init__(self):
+		self.mip_color_m = {}
+
+	def get_color(self, mip):
+		if mip not in self.mip_color_m:
+			self.mip_color_m[mip] = next(nice_color)
+		return self.mip_color_m[mip]
+
 class ClientInfo():
-	def __init__(self, max_qlen=20):
+	def __init__(self, color_map, max_qlen=20):
+		self.color_map = color_map
 		self.max_qlen = max_qlen
 
 		self.client_info_q = InfoQ(max_qlen)
-
-		self.mid_color_m = {}
 
 		self.lock = threading.Lock()
 
@@ -102,11 +110,6 @@ class ClientInfo():
 			self.cid__last_time_recved_m[cid] = time.time()
 			log(DEBUG, "done")
 
-	def color_for_mid(self, mid):
-		if mid not in self.mid_color_m:
-			self.mid_color_m[mid] = next(nice_color)
-		return self.mid_color_m[mid]
-
 	def plot_filename(self, cid):
 		return "dashboard/static/image/plot_{}.png".format(cid)
 
@@ -130,16 +133,15 @@ class ClientInfo():
 
 			x_l = list(range(_i, i+1))
 			# plot.plot(x_l, T_l, label='Cluster id= {}'.format(info_m_q[i-1]['mid']), color=next(nice_color), marker='x', linestyle='None', mew=3, ms=5)
-			mid = info_m_q[_i]['mid']
-			plot.bar(x_l, height=T_l, color=self.color_for_mid(mid)) # label='Cluster id= {}'.format(mid)
+			plot.bar(x_l, height=T_l, color=self.color_map.get_color(info_m_q[_i]['mip']))
 			plot.xticks([])
 
 			if i == _i:
 				i += 1
 
 		label_patch_l = []
-		for mid, color in self.mid_color_m.items():
-			label_patch_l.append(mpatches.Patch(color=color, label='Cluster id= {}'.format(mid)))
+		for mip, color in self.color_map.mip_color_m.items():
+			label_patch_l.append(mpatches.Patch(color=color, label='mip= {}'.format(mip)))
 		plot.legend(handles=label_patch_l, fontsize=fontsize, bbox_to_anchor=(1.05, 1))
 		plot.ylabel('T (msec)', fontsize=fontsize)
 		plot.xlabel('The last {} requests (at most)'.format(self.max_qlen), fontsize=fontsize)
@@ -150,7 +152,8 @@ class ClientInfo():
 		log(DEBUG, "done", cid=cid)
 
 class MasterInfo():
-	def __init__(self, max_qlen):
+	def __init__(self, color_map, max_qlen):
+		self.color_map = color_map
 		self.max_qlen = max_qlen
 
 		self.master_info_q = InfoQ(max_qlen)
@@ -168,11 +171,6 @@ class MasterInfo():
 		# self.plot(mid)
 		log(DEBUG, "done")
 
-	def color_for_mid(self, mid):
-		if mid not in self.mid_color_m:
-			self.mid_color_m[mid] = next(nice_color)
-		return self.mid_color_m[mid]
-
 	def plot(self, mid):
 		log(DEBUG, "started", mid=mid)
 		info_m_q = self.master_info_q.get_info_m_q(mid)
@@ -189,7 +187,7 @@ class MasterInfo():
 			y_l.append(w_qlen_mean)
 			yerr_l.append(w_qlen_std)
 
-		plot.errorbar(x_l, y_l, yerr=yerr_l, color=self.color_for_mid(mid), marker='o', linestyle='None', mew=3, ms=5)
+		plot.errorbar(x_l, y_l, yerr=yerr_l, color=self.color_map.get_color(info_m_q[-1]['mip']), marker='o', linestyle='None', mew=3, ms=5)
 		# plot.legend(fontsize=fontsize)
 		plot.xlabel('Time (sec)', fontsize=fontsize)
 		plot.ylabel('Avg worker queue length', fontsize=fontsize)
@@ -203,8 +201,9 @@ class DashboardServer():
 	def __init__(self):
 		self.commer = CommerOnDashboardServer(self.handle_msg)
 
-		self.client_info = ClientInfo(max_qlen=50)
-		self.master_info = MasterInfo(max_qlen=50)
+		color_map = ColorMap()
+		self.client_info = ClientInfo(color_map, max_qlen=50)
+		self.master_info = MasterInfo(color_map, max_qlen=50)
 
 		self.msg_q = queue.Queue()
 

@@ -124,22 +124,23 @@ class Client():
 			self.num_reqs_finished += 1
 			log(DEBUG, "", num_reqs_gened=self.num_reqs_gened, num_reqs_finished=self.num_reqs_finished)
 
-			self.send_update_to_dashboard(T=1000*(result.epoch_arrived_client - result.epoch_departed_client))
+			self.send_update_to_dashboard(result)
 
 			log(DEBUG, "done", msg_id=msg._id)
 			if self.num_reqs_finished >= self.num_reqs_to_finish:
 				self.close()
 
-	def send_update_to_dashboard(self, T):
+	def send_update_to_dashboard(self, result):
 		if self.dashboard_server_addr is None:
 			return
 
-		log(DEBUG, "started", T=T)
+		log(DEBUG, "started", result=result)
 		self.num_updates_sent += 1
 
 		m = {'cid': self._id,
 				 'mid': self.assigned_mid,
-				 'T': T}
+				 'mip': result.mip,
+				 'T': 1000*(result.epoch_arrived_client - result.epoch_departed_client) }
 		msg = Msg(_id = self.num_updates_sent,
 							payload = Update(_id=self.num_updates_sent, typ=UpdateType.from_client, m=m),
 							src_id = self._id,

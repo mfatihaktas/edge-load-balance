@@ -73,6 +73,7 @@ class ReqRes(Payload):
 		self.probe = probe
 
 		self.mid = None
+		self.mip = None
 		self.epoch_departed_client = None
 		self.epoch_arrived_cluster = None
 		self.epoch_departed_cluster = None
@@ -104,6 +105,7 @@ def result_from_req(req):
 	r.serv_time = req.serv_time
 	r.probe = req.probe
 	r.mid = req.mid
+	r.mip = req.mip
 	r.epoch_departed_client = req.epoch_departed_client
 	r.epoch_arrived_cluster = req.epoch_arrived_cluster
 	r.epoch_departed_cluster = req.epoch_departed_cluster

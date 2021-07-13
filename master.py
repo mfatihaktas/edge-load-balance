@@ -188,6 +188,7 @@ class Master():
 		self.num_updates_sent += 1
 
 		m = {'mid': self._id,
+				 'mip': LISTEN_IP,
 				 'epoch': time.time(),
 				 'w_qlen_l': [qlen for wip, qlen in self.w_q.wip_qlen_heap_m.items()]}
 
@@ -213,6 +214,7 @@ class Master():
 		p = msg.payload
 		if p.is_req():
 			p.epoch_arrived_cluster = time.time()
+			p.mip = LISTEN_IP
 			if self.msg_q.push(msg):
 				self.msg_token_q.put(1)
 		elif p.is_info():
