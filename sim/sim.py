@@ -1,14 +1,16 @@
+import numpy as np
+
 from objs import *
 
-num_cluster = 5
+num_cluster = 20
 forward_rate, backward_rate = 0.6, 1
 state_state_rate_m = {
 	1 : {1 : backward_rate, 2 : forward_rate},
 	2 : {1 : backward_rate, 3 : forward_rate},
 	3 : {2 : backward_rate, 3 : forward_rate}
 }
-state_cost_m = {1 : 1, 2 : 2, 3 : 3}
-inter_probe_time_rv = Exp(mu = 0.2)
+state_cost_m = {s : s for s in state_state_rate_m}
+inter_probe_time_rv = DiscreteRV(p_l=[1], v_l=[1]) # Exp(mu = 0.2)
 
 def log_global_vars():
 	log(DEBUG, "", num_cluster=num_cluster, state_state_rate_m=state_state_rate_m, state_cost_m=state_cost_m, inter_probe_time_rv=inter_probe_time_rv)
@@ -36,17 +38,22 @@ def sim_probe_iidClusters_wPodC(d, num_probe=None, num_sim=100, sim_time=1000):
 	return cum_cost_per_unit_time / num_sim
 
 def sim_cost_wrt_d():
+	num_sim = 10
+	sim_time = 1000
+
 	d_l, cost_l = [], []
-	for d in range(1, num_cluster):
+	# for d in range(1, num_cluster + 1):
+	for d in np.linspace(1, num_cluster, 5):
+		d = int(d)
 		log(INFO, ">> d= {}".format(d))
 		d_l.append(d)
 
-		cost = sim_probe_iidClusters_wPodC(d, num_sim=10, sim_time=1000)
+		cost = sim_probe_iidClusters_wPodC(d, num_sim, sim_time)
 		log(INFO, "cost= {}".format(cost))
 		cost_l.append(cost)
 
 	fontsize = 14
-	plot.plot(cost_l, d_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=2, ms=2)
+	plot.plot(d_l, cost_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=2, ms=2)
 	plot.ylabel('Avg cost per unit time', fontsize=fontsize)
 	plot.xlabel('d', fontsize=fontsize)
 	plot.title('Number of clusters= {}'.format(num_cluster))
