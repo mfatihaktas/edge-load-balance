@@ -16,17 +16,29 @@ class Cluster_wMarkovState():
 		self.state_state_rate_m = state_state_rate_m
 
 		self.cur_state = random.choice([s for s in state_state_rate_m])
+		self.state__next_state_rv_m = {}
 		self.act = None
 
 	# def __repr__(self):
-	# 	return "Cluster_wMarkovState(" + "\n" \
-	# 		     "id= {}".format(self._id) + "\n" + \
-	# 				 "state_state_rate_m= \n{}".format(pprint.pformat(self.state_state_rate_m)) + ")"
+	#		return "Cluster_wMarkovState(" + "\n" \
+	#					 "id= {}".format(self._id) + "\n" + \
+	#					 "state_state_rate_m= \n{}".format(pprint.pformat(self.state_state_rate_m)) + ")"
 	def __repr__(self):
 		return "Cluster_wMarkovState(id= {})".format(self._id)
 
 	def get_cur_state(self):
 		return self.cur_state
+
+	def update_cur_state(self):
+		if self.cur_state not in self.state__next_state_rv_m:
+			state_rate_m = self.state_state_rate_m[self.cur_state]
+			total_rate = sum(rate for _, rate in state_rate_m.items())
+			p_l, v_l = [], []
+			for state, rate in state_rate_m.items():
+				v_l.append(state)
+				p_l.append(rate / total_rate)
+			self.state__next_state_rv_m[self.cur_state] = DiscreteRV(p_l, v_l)
+		self.cur_state = self.state__next_state_rv_m[self.cur_state].sample()
 
 	def start(self):
 		self.act = self.env.process(self.run())
@@ -43,6 +55,8 @@ class Cluster_wMarkovState():
 			slog(DEBUG, self.env, self, "waiting", time=time, cur_state=self.cur_state)
 			yield self.env.timeout(time)
 			slog(DEBUG, self.env, self, "done waiting")
+
+			self.update_cur_state()
 
 class Probe_iidClusters_wPodC():
 	def __init__(self, env, num_cluster, state_state_rate_m, state_cost_m, d, inter_probe_time_rv, num_probe):
@@ -83,13 +97,14 @@ class Probe_iidClusters_wPodC():
 			i += 1
 			slog(DEBUG, self.env, self, "{}the probe started".format(i))
 
+			epoch = self.env.now
 			if self.epoch_last_probed is not None:
-				self.cost_l.append((self.env.now - self.epoch_last_probed) * cur_cost)
+				self.cost_l.append((epoch - self.epoch_last_probed) * cur_cost)
 
 			cl_to_probe_l = random.sample(self.cl_l, self.d)
 			probed_state_l = [cl.get_cur_state() for cl in cl_to_probe_l]
 			cur_cost = min(self.state_cost_m[state] for state in probed_state_l)
-			self.epoch_last_probed = self.env.now
+			self.epoch_last_probed = epoch
 			slog(DEBUG, self.env, self, "probed", probed_state_l=probed_state_l, cur_cost=cur_cost)
 
 			time = self.inter_probe_time_rv.sample()
