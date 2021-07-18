@@ -70,25 +70,25 @@ class Probe_iidClusters_wPodC():
 
 		self.cl_l = [Cluster_wMarkovState(env, 'cl_{}'.format(i), state_state_rate_m) for i in range(num_cluster)]
 
-		self.epoch_started = None
-		self.epoch_last_probed = None
-		self.cost_l = []
+		self.epoch_cost_l = []
 		self.wait = env.process(self.run())
 
 	def __repr__(self):
 		return "Probe_iidClusters_wPodC(d= {})".format(self.d)
 
 	def get_cost_per_unit_time(self):
-		if self.epoch_last_probed == self.epoch_started:
-			return None
-		return sum(self.cost_l) / (self.epoch_last_probed - self.epoch_started)
+		cum_time_weighted_cost = 0
+		for i in range(len(self.epoch_cost_l) - 1):
+			time = self.epoch_cost_l[i+1][0] - self.epoch_cost_l[i][0]
+			cost = self.epoch_cost_l[i][1]
+			cum_time_weighted_cost += time * cost
+		return cum_time_weighted_cost / self.epoch_cost_l[-1][0]
 
 	def run(self):
 		for cl in self.cl_l:
 			cl.start()
 		slog(DEBUG, self.env, self, "all clusters started")
 
-		self.epoch_started = self.env.now
 		cur_cost = None
 
 		# for i in range(self.num_probe):
@@ -97,14 +97,10 @@ class Probe_iidClusters_wPodC():
 			i += 1
 			slog(DEBUG, self.env, self, "{}the probe started".format(i))
 
-			epoch = self.env.now
-			if self.epoch_last_probed is not None:
-				self.cost_l.append((epoch - self.epoch_last_probed) * cur_cost)
-
 			cl_to_probe_l = random.sample(self.cl_l, self.d)
 			probed_state_l = [cl.get_cur_state() for cl in cl_to_probe_l]
 			cur_cost = min(self.state_cost_m[state] for state in probed_state_l)
-			self.epoch_last_probed = epoch
+			self.epoch_cost_l.append((self.env.now, cur_cost))
 			slog(DEBUG, self.env, self, "probed", probed_state_l=probed_state_l, cur_cost=cur_cost)
 
 			time = self.inter_probe_time_rv.sample()
