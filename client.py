@@ -167,6 +167,7 @@ class Client():
 
 			msg.payload.probe = True
 			self.waiting_for_probe = True
+			# TODO: Same mid should not be inserted in mid_l multiple times
 			mid_l = [self.assigned_mid, *random.sample(self.mid_l, self.d - 1)]
 			log(DEBUG, "will probe", mid_l=mid_l)
 			self.replicate(mid_l, msg)
