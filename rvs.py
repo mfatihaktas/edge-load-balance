@@ -148,7 +148,7 @@ class DiscreteRV():
 			self.v_l = [norm_factor * v for v in v_l]
 		self.norm_factor = norm_factor
 
-		self.dist = scipy.stats.rv_discrete(name='discrete', values=(v_l, p_l))
+		self.dist = scipy.stats.rv_discrete(name='discrete', values=(self.v_l, self.p_l))
 
 	def __repr__(self):
 		return 'DiscreteRV(' + '\n\t' + \
