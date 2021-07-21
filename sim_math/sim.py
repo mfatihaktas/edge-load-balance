@@ -88,7 +88,8 @@ def sim_cost_wrt_interProbeTime_d():
 	num_sim = 1 # 3 # 10
 	sim_time = 50 # 0 # 1000 # 2000
 
-	for x in [1, 2, 5, 10, 20, 50]:
+	# for x in [1, 2, 5, 10, 20, 50]:
+	for x in [20, 50]:
 		log(INFO, ">> x= {}".format(x))
 		d_l, cost_l = [], []
 		for d in [1, 2, 3, *np.linspace(5, num_cluster, 4)]:

@@ -1,113 +1,81 @@
+import os, sys
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+import simpy
 import numpy as np
 
-from objs import *
-from sim_utils import *
+from rvs import *
+from client import *
+from cluster import *
 
-num_cluster = 20
-forward_rate, backward_rate = 0.9, 1 # 1, 1 # 0.6, 1
-# state_state_rate_m = {
-#		1 : {1 : backward_rate, 2 : forward_rate},
-#		2 : {1 : backward_rate, 3 : forward_rate},
-#		3 : {2 : backward_rate, 3 : forward_rate}
-# }
-# state_state_rate_m = {s : {s - 1 : backward_rate, s + 1 : forward_rate} for s in range(20)}
-state_state_rate_m = {}
-num_state = 20
-for s in range(num_state):
-	if s == 0:
-		m = {s : backward_rate, s + 1 : forward_rate}
-	elif s == num_state - 1:
-		m = {s - 1 : backward_rate, s : forward_rate}
-	else:
-		m = {s - 1 : backward_rate, s + 1 : forward_rate}
-	state_state_rate_m[s] = m
+# N: # clusters
+# n: # workers in each cluster
+N, n = 3, 1
 
-state_cost_m = {s : s for s in state_state_rate_m}
-inter_probe_time_rv = DiscreteRV(p_l=[1], v_l=[1]) # Exp(mu = 0.2)
+# m: # clients
+m = 1
+
+d = 1
+inter_gen_time_rv = Exp(0.6) # DiscreteRV(p_l=[1], v_l=[1])
+serv_time_rv = Exp(1) # DiscreteRV(p_l=[1], v_l=[1])
 
 def log_global_vars():
-	log(DEBUG, "", num_cluster=num_cluster, state_state_rate_m=state_state_rate_m, state_cost_m=state_cost_m, inter_probe_time_rv=inter_probe_time_rv)
+	log(DEBUG, "", N=N, n=n, m=m, d=d, inter_gen_time_rv=inter_gen_time_rv, serv_time_rv=serv_time_rv)
 
-def sim_probe_iidClusters_wPodC(d, x, num_probe=None, num_sim=100, sim_time=1000):
-	# log(INFO, "started", d=d, inter_probe_time_rv=inter_probe_time_rv, num_probe=num_probe, num_sim=num_sim, sim_time=sim_time)
-	inter_probe_time_rv = DiscreteRV(p_l=[1], v_l=[x], norm_factor=1000)
+def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
+	log(DEBUG, "started", d=d, inter_probe_num_req=inter_probe_num_req, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 
 	cum_cost_per_unit_time = 0
 	for i in range(num_sim):
-		# log(DEBUG, "*** {}th sim run started".format(i))
+		log(DEBUG, "*** {}th sim run started".format(i))
 
 		env = simpy.Environment()
-		p = Probe_iidClusters_wPodC(env, num_cluster, state_state_rate_m, state_cost_m, d, inter_probe_time_rv, num_probe)
-		# env.run(until=p.wait)
-		env.run(until=sim_time)
+		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
+		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
+		net = Net_wConstantDelay('n', env, [*cl_l, *c_l], delay=0)
+		env.run(until=c_l[0].act_recv)
 
-		# if i == 0:
-		# 	plot_cost_over_time(p, d, x, forward_rate, backward_rate)
+		cum_ET = 0
+		t_l = []
+		for c in c_l:
+			for req in c.req_finished_l:
+				t_l.append(req.epoch_arrived_client - req.epoch_departed_client)
+		ET = np.mean(t_l)
+		log(INFO, "ET= {}".format(ET))
+		cum_ET += ET
 
-		cost_per_unit_time = p.get_cost_per_unit_time()
-		# log(INFO, '', cost_per_unit_time=cost_per_unit_time)
-		if cost_per_unit_time is None:
-			log(WARNING, "cost_per_unit_time is None")
-			continue
+	log(INFO, 'done')
+	return cum_ET / num_sim
 
-		# log(DEBUG, "cost_per_unit_time= {}".format(cost_per_unit_time))
-		cum_cost_per_unit_time += cost_per_unit_time
-
-	# log(INFO, 'done')
-	return cum_cost_per_unit_time / num_sim
-
-def sim_cost_wrt_d():
+def sim_ET_wrt_interProbeNumReqs_d():
 	num_probe = None
-	num_sim = 10
-	sim_time = 1000
-
-	d_l, cost_l = [], []
-	# for d in range(1, num_cluster + 1):
-	for d in [1, 2, 3, *np.linspace(5, num_cluster, 4)]:
-		d = int(d)
-		log(INFO, ">> d= {}".format(d))
-		d_l.append(d)
-
-		cost = sim_probe_iidClusters_wPodC(d, 1, num_probe, num_sim, sim_time)
-		log(INFO, "cost= {}".format(cost))
-		cost_l.append(cost)
-
-	fontsize = 14
-	plot.plot(d_l, cost_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
-	plot.ylabel(r'$E[C]$' + ' per unit time', fontsize=fontsize)
-	plot.xlabel(r'$d$', fontsize=fontsize)
-	plot.title(r'$N= {}$'.format(num_cluster))
-	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_cost_wrt_d.png", bbox_inches='tight')
-	plot.gcf().clear()
-
-	log(DEBUG, "done")
-
-def sim_cost_wrt_interProbeTime_d():
-	num_probe = None
+	num_req_to_finish = 1000
 	num_sim = 1 # 3 # 10
-	sim_time = 50 # 0 # 1000 # 2000
 
-	for x in [1, 2, 5, 10, 20, 50]:
-		log(INFO, ">> x= {}".format(x))
-		d_l, cost_l = [], []
-		for d in [1, 2, 3, *np.linspace(5, num_cluster, 4)]:
+	for inter_probe_num_req in [5, 10, 15, 20, 50]:
+		log(INFO, ">> inter_probe_num_req= {}".format(inter_probe_num_req))
+		d_l, ET_l = [], []
+		# for d in [1, 2, 3, *np.linspace(5, N, 4)]:
+		for d in range(1, N + 1):
 			d = int(d)
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			cost = sim_probe_iidClusters_wPodC(d, x, num_probe, num_sim, sim_time)
-			log(INFO, "cost= {}".format(cost))
-			cost_l.append(cost)
-		plot.plot(d_l, cost_l, color=next(nice_color), label='x= {}'.format(x), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+			ET = sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim)
+			log(INFO, "ET= {}".format(ET))
+			ET_l.append(ET)
+		plot.plot(d_l, ET_l, color=next(light_color), label='p= {}'.format(inter_probe_num_req), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
-	plot.ylabel(r'$E[C]$' + ' per unit time', fontsize=fontsize)
+	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$d$', fontsize=fontsize)
-	plot.title(r'$N= {}, \lambda= {}, \mu= {}$'.format(num_cluster, forward_rate, backward_rate))
+	plot.title(r'$N= {}, n= {}, m= {}$'.format(N, n, m) + '\n' \
+						 r'$X \sim$ {}, $S \sim {}$'.format(inter_gen_time_rv, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_cost_wrt_interProbeTime_d_lambda_{}_mu_{}.png".format(forward_rate, backward_rate), bbox_inches='tight')
+	plot.savefig("plot_ET_wrt_interProbeNumReqs_N_{}_m_{}.png".format(N, m), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -116,5 +84,6 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	# sim_cost_wrt_d()
-	sim_cost_wrt_interProbeTime_d()
+	log_global_vars()
+
+	sim_ET_wrt_interProbeNumReqs_d()
