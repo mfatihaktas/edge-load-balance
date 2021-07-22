@@ -20,15 +20,15 @@ class Net():
 			n.set_out(self)
 			self.id_out_m[n._id] = n
 
-		self.req_s = simpy.Store(env)
+		self.msg_s = simpy.Store(env)
 
 	def __repr__(self):
 		return "Net(id= {})".format(self._id)
 
-	def put(self, req):
-		slog(DEBUG, self.env, self, "recved", req=req)
-		req.epoch_arrived_net = self.env.now
-		self.req_s.put(req)
+	def put(self, msg):
+		slog(DEBUG, self.env, self, "recved", msg=msg)
+		msg.epoch_arrived_net = self.env.now
+		self.msg_s.put(msg)
 
 class Net_wConstantDelay(Net):
 	def __init__(self, _id, env, node_l, delay):
@@ -39,14 +39,15 @@ class Net_wConstantDelay(Net):
 
 	def run(self):
 		while True:
-			req = yield self.req_s.get()
+			msg = yield self.msg_s.get()
+			slog(DEBUG, self.env, self, "forwarding", msg=msg)
 
-			t = self.delay - (self.env.now - req.epoch_arrived_net)
+			t = self.delay - (self.env.now - msg.epoch_arrived_net)
 			if t > 0:
-				slog(DEBUG, self.env, self, "delaying", req=req, t=t)
+				slog(DEBUG, self.env, self, "delaying", msg=msg, t=t)
 				yield self.env.timeout(t)
 
-			self.id_out_m[req.dst_id].put(req)
+			self.id_out_m[msg.dst_id].put(msg)
 
 class Cluster():
 	def __init__(self, _id, env, num_worker, out=None):
@@ -65,5 +66,5 @@ class Cluster():
 		self.master.set_out(out)
 
 	def put(self, msg):
-		log(DEBUG, "recved", msg=msg)
+		slog(DEBUG, self.env, self, "recved", msg=msg)
 		self.master.put(msg)

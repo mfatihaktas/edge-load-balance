@@ -1,4 +1,5 @@
 import enum
+from copy import deepcopy
 
 class Request():
 	def __init__(self, _id, src_id, dst_id, serv_time):
@@ -28,6 +29,9 @@ class Msg():
 
 	def __repr__(self):
 		return "Msg(id= {} \n\t payload= {} \n\t src_id= {} \n\t dst_id= {})".format(self._id, self.payload, self.src_id, self.dst_id)
+
+	def copy(self):
+		return deepcopy(self)
 
 class Payload():
 	def __init__(self, _id, p_typ):

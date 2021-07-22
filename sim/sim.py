@@ -18,11 +18,13 @@ N, n = 3, 1
 m = 1
 
 d = 1
-inter_gen_time_rv = Exp(0.6) # DiscreteRV(p_l=[1], v_l=[1])
-serv_time_rv = Exp(1) # DiscreteRV(p_l=[1], v_l=[1])
+req_gen_rate = 0.6
+inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen_rate])
+serv_rate = 1
+serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 
 def log_global_vars():
-	log(DEBUG, "", N=N, n=n, m=m, d=d, inter_gen_time_rv=inter_gen_time_rv, serv_time_rv=serv_time_rv)
+	log(DEBUG, "", N=N, n=n, m=m, d=d, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv)
 
 def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 	log(DEBUG, "started", d=d, inter_probe_num_req=inter_probe_num_req, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
@@ -33,7 +35,7 @@ def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 
 		env = simpy.Environment()
 		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
-		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
+		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
 		net = Net_wConstantDelay('n', env, [*cl_l, *c_l], delay=0)
 		env.run(until=c_l[0].act_recv)
 
@@ -55,10 +57,12 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	num_sim = 1 # 3 # 10
 
 	for inter_probe_num_req in [5, 10, 15, 20, 50]:
+	# for inter_probe_num_req in [2]:
 		log(INFO, ">> inter_probe_num_req= {}".format(inter_probe_num_req))
 		d_l, ET_l = [], []
 		# for d in [1, 2, 3, *np.linspace(5, N, 4)]:
 		for d in range(1, N + 1):
+		# for d in [2]:
 			d = int(d)
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
@@ -66,6 +70,7 @@ def sim_ET_wrt_interProbeNumReqs_d():
 			ET = sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim)
 			log(INFO, "ET= {}".format(ET))
 			ET_l.append(ET)
+			# return
 		plot.plot(d_l, ET_l, color=next(light_color), label='p= {}'.format(inter_probe_num_req), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	fontsize = 14
@@ -73,9 +78,9 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$d$', fontsize=fontsize)
 	plot.title(r'$N= {}, n= {}, m= {}$'.format(N, n, m) + '\n' \
-						 r'$X \sim$ {}, $S \sim {}$'.format(inter_gen_time_rv, serv_time_rv))
+						 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_ET_wrt_interProbeNumReqs_N_{}_m_{}.png".format(N, m), bbox_inches='tight')
+	plot.savefig("plot_ET_wrt_interProbeNumReqs_d_lambda_{}_mu_{}_N_{}_m_{}.png".format(req_gen_rate, serv_rate, N, m), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")

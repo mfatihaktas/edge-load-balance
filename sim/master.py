@@ -137,14 +137,14 @@ class Master():
 		self.act = env.process(self.run())
 
 	def __repr__(self):
-		return "Master(\n\t id= {})".format(self._id)
+		return "Master(id= {})".format(self._id)
 
 	def set_out(self, out):
 		for _, w in self.id_w_m.items():
 			w.out = out
 
 	def put(self, msg):
-		log(DEBUG, "handling", msg=msg)
+		slog(DEBUG, self.env, self, "recved", msg=msg)
 
 		p = msg.payload
 		if p.is_req():
@@ -159,18 +159,18 @@ class Master():
 			elif p.typ == InfoType.worker_req_completion:
 				self.w_q.dec_qlen(msg.src_id)
 		else:
-			log(ERROR, "Unexpected payload type", payload=p)
+			slog(ERROR, self.env, self, "Unexpected payload type", payload=p)
 
 	def run(self):
 		while True:
-			log(DEBUG, "Waiting for msg")
+			slog(DEBUG, self.env, self, "Waiting for msg")
 			yield self.msg_token_s.get()
 			msg = self.msg_q.pop()
 			check(msg is not None, "Msg must have arrived")
 
-			log(DEBUG, "Waiting for worker")
+			slog(DEBUG, self.env, self, "Waiting for worker")
 			yield self.w_token_s.get()
-			log(DEBUG, "", w_token_s_len=len(self.w_token_s.items))
+			slog(DEBUG, self.env, self, "", w_token_s_len=len(self.w_token_s.items))
 			wid = self.w_q.pop()
 			check(wid is not None, "There should have been an available worker")
 
@@ -179,5 +179,5 @@ class Master():
 			msg.dst_id = wid
 			self.id_w_m[wid].put(msg)
 			if msg.payload.is_req():
-				log(DEBUG, "Will inc_qlen", wid=wid)
+				slog(DEBUG, self.env, self, "Will inc_qlen", wid=wid)
 				self.w_q.inc_qlen(wid)

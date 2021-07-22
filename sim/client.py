@@ -46,7 +46,7 @@ class Client():
 	# 		'serv_time_rv= {}'.format(self.serv_time_rv) + ')'
 
 	def __repr__(self):
-		return 'Client(id= {}'.format(self._id)
+		return 'Client(id= {})'.format(self._id)
 
 	def set_out(self, out):
 		self.out = out
@@ -60,16 +60,16 @@ class Client():
 			msg = yield self.msg_s.get()
 			slog(DEBUG, self.env, self, "handling", msg=msg)
 			check(msg.payload.is_result(), "Msg should contain a result")
-			result = msg.payload
-			check(result.cid == self._id, "result.cid should equal to cid", result=result, cid=self._id)
+			res = msg.payload
+			check(res.cid == self._id, "result.cid should equal to cid", result=res, cid=self._id)
 
-			if result.probe:
+			if res.probe:
 				if self.waiting_for_probe:
-					if self.assigned_cl_id != result.src_id:
-						msg_ = Msg(0, payload=Info(0, InfoType.client_disconn), src_id=self._id, dst_id=msg.src_id)
+					if self.assigned_cl_id != res.cl_id:
+						msg_ = Msg(0, payload=Info(0, InfoType.client_disconn), src_id=self._id, dst_id=res.cl_id)
 						self.out.put(msg_)
 
-					self.assigned_cl_id = msg.src_id
+					self.assigned_cl_id = res.cl_id
 					self.num_req_last_probed = self.num_req_gened
 					self.waiting_for_probe = False
 					slog(DEBUG, self.env, self, "Set assigned_cl_id", assigned_cl_id=self.assigned_cl_id)
@@ -80,15 +80,15 @@ class Client():
 			## Book keeping
 			slog(DEBUG, self.env, self, "started book keeping", msg=msg)
 			t = self.env.now
-			result.epoch_arrived_client = t
-			self.req_finished_l.append(result)
+			res.epoch_arrived_client = t
+			self.req_finished_l.append(res)
 
 			slog(DEBUG, self.env, self, "",
-					response_time = (result.epoch_arrived_client - result.epoch_departed_client),
-					time_from_c_to_s = (result.epoch_arrived_cluster - result.epoch_departed_client),
-					time_from_s_to_c = (result.epoch_arrived_client - result.epoch_departed_cluster),
-					time_from_s_to_w_to_s = result.serv_time,
-					result=result)
+					response_time = (res.epoch_arrived_client - res.epoch_departed_client),
+					time_from_c_to_s = (res.epoch_arrived_cluster - res.epoch_departed_client),
+					time_from_s_to_c = (res.epoch_arrived_client - res.epoch_departed_cluster),
+					time_from_s_to_w_to_s = res.serv_time,
+					result=res)
 
 			self.num_req_finished += 1
 			slog(DEBUG, self.env, self, "", num_req_gened=self.num_req_gened, num_req_finished=self.num_req_finished)
@@ -101,8 +101,10 @@ class Client():
 	def replicate(self, cl_id_l, msg):
 		slog(DEBUG, self.env, self, "started", cl_id_l=cl_id_l, msg=msg)
 		for cl_id in cl_id_l:
-			msg.dst_id = cl_id
-			self.out.put(msg)
+			msg_ = msg.copy()
+			msg_.dst_id = cl_id
+			msg_.payload.cl_id = cl_id
+			self.out.put(msg_)
 			slog(DEBUG, self.env, self, "sent", cl_id=cl_id)
 		slog(DEBUG, self.env, self, "done")
 
@@ -118,7 +120,6 @@ class Client():
 				cl_id_l = [self.assigned_cl_id]
 			else:
 				cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
-				log(WARNING, "len(cl_id_l)= {}".format(len(cl_id_l)))
 				cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
 			slog(DEBUG, self.env, self, "will probe", cl_id_l=cl_id_l)
 
@@ -140,6 +141,7 @@ class Client():
 
 			## Send message to currently assigned cluster
 			msg.payload.probe = False
+			msg.payload.cl_id = self.assigned_cl_id
 			msg.src_id = self._id
 			msg.dst_id = self.assigned_cl_id
 			self.out.put(msg)

@@ -26,16 +26,21 @@ class Worker():
 
 		self.act = env.process(self.run())
 
+	def __repr__(self):
+		return "Worker(id= {})".format(self._id)
+
 	def reg_master(self, master):
 		self.master = master
 
 	def put(self, msg):
+		slog(DEBUG, self.env, self, "recved", msg=msg)
 		check(msg.payload.is_req(), "Msg should contain a request")
 		self.msg_s.put(msg)
 
 	def run(self):
 		while True:
 			msg = yield self.msg_s.get()
+			slog(DEBUG, self.env, self, "working on", msg=msg)
 
 			req = msg.payload
 			if not req.probe:
@@ -65,9 +70,9 @@ class Worker():
 			msg = yield self.probe_to_send_s.get()
 
 			serv_time = msg.payload.serv_time
-			log(DEBUG, "sleeping for probe", serv_time=serv_time)
+			slog(DEBUG, self.env, self, "sleeping for probe", serv_time=serv_time)
 			yield self.env.timeout(serv_time)
-			log(DEBUG, "done sleeping for probe")
+			slog(DEBUG, self.env, self, "done sleeping for probe")
 
 			self.msg_to_send_s.put(msg)
 
