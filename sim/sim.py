@@ -34,7 +34,7 @@ def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 
 		env = simpy.Environment()
 		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
-		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
+		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l, initial_cl_id=cl_l[m % N]._id) for i in range(m)]
 		net = Net_wConstantDelay('n', env, [*cl_l, *c_l], delay=0)
 		env.run(until=c_l[0].act_recv)
 
@@ -53,12 +53,12 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	num_req_to_finish = 10000
 	num_sim = 3 # 10
 
-	for inter_probe_num_req in [5, 10, 15, 20, 50]:
+	for inter_probe_num_req in [5, 10, 15, 20, 50, 200]:
 	# for inter_probe_num_req in [2]:
 		log(INFO, ">> inter_probe_num_req= {}".format(inter_probe_num_req))
 		d_l, ET_l = [], []
-		# for d in [1, 2, 3, *np.linspace(5, N, 4)]:
-		for d in range(1, N + 1):
+		for d in [1, 2, 3, *numpy.arange(5, N + 1, 4)]:
+		# for d in range(1, N + 1):
 		# for d in [2]:
 			d = int(d)
 			log(INFO, "> d= {}".format(d))

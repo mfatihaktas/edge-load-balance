@@ -10,7 +10,8 @@ from debug_utils import *
 
 class Client():
 	def __init__(self, _id, env, d, inter_probe_num_req,
-							 num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
+							 num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l,
+							 initial_cl_id=None, out=None):
 		self._id = _id
 		self.env = env
 		self.d = d
@@ -29,7 +30,7 @@ class Client():
 
 		self.req_finished_l = []
 
-		self.assigned_cl_id = random.sample(self.cl_l, 1)[0]._id
+		self.assigned_cl_id = initial_cl_id if initial_cl_id is not None else random.sample(self.cl_l, 1)[0]._id
 		self.waiting_for_probe = False
 
 		self.msg_s = simpy.Store(env)
@@ -116,11 +117,8 @@ class Client():
 
 			msg.payload.probe = True
 			self.waiting_for_probe = True
-			if self.d == 1:
-				cl_id_l = [self.assigned_cl_id]
-			else:
-				cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
-				cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
+			cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
+			cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
 			slog(DEBUG, self.env, self, "will probe", cl_id_l=cl_id_l)
 
 			self.replicate(cl_id_l, msg)
