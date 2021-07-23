@@ -12,24 +12,23 @@ from cluster import *
 
 # N: # clusters
 # n: # workers in each cluster
-N, n = 3, 1
+N, n = 5, 1
 
 # m: # clients
-m = 1
+m = 5
 
-d = 1
-req_gen_rate = 0.6
+req_gen_rate = 0.8 * N * n / m
 inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen_rate])
 serv_rate = 1
 serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 
 def log_global_vars():
-	log(DEBUG, "", N=N, n=n, m=m, d=d, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv)
+	log(DEBUG, "", N=N, n=n, m=m, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv)
 
 def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 	log(DEBUG, "started", d=d, inter_probe_num_req=inter_probe_num_req, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 
-	cum_cost_per_unit_time = 0
+	cum_ET = 0
 	for i in range(num_sim):
 		log(DEBUG, "*** {}th sim run started".format(i))
 
@@ -39,7 +38,6 @@ def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 		net = Net_wConstantDelay('n', env, [*cl_l, *c_l], delay=0)
 		env.run(until=c_l[0].act_recv)
 
-		cum_ET = 0
 		t_l = []
 		for c in c_l:
 			for req in c.req_finished_l:
@@ -52,9 +50,8 @@ def sim_PodC(d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 	return cum_ET / num_sim
 
 def sim_ET_wrt_interProbeNumReqs_d():
-	num_probe = None
-	num_req_to_finish = 1000
-	num_sim = 1 # 3 # 10
+	num_req_to_finish = 10000
+	num_sim = 3 # 10
 
 	for inter_probe_num_req in [5, 10, 15, 20, 50]:
 	# for inter_probe_num_req in [2]:
