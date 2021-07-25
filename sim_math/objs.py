@@ -91,10 +91,10 @@ class Probe_iidClusters_wPodC():
 
 		cur_cost = None
 
-		# for i in range(self.num_probe):
-		i = 0
-		while True:
-			i += 1
+		# i = 0
+		# while True:
+		#		i += 1
+		for i in range(self.num_probe):
 			slog(DEBUG, self.env, self, "{}the probe started".format(i))
 
 			cl_to_probe_l = random.sample(self.cl_l, self.d)

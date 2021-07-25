@@ -4,7 +4,7 @@ from objs import *
 from sim_utils import *
 
 num_cluster = 20
-forward_rate, backward_rate = 0.9, 1 # 1, 1 # 0.6, 1
+forward_rate, backward_rate = 0.8, 1 # 1, 1 # 0.6, 1
 # state_state_rate_m = {
 #		1 : {1 : backward_rate, 2 : forward_rate},
 #		2 : {1 : backward_rate, 3 : forward_rate},
@@ -38,11 +38,11 @@ def sim_probe_iidClusters_wPodC(d, x, num_probe=None, num_sim=100, sim_time=1000
 
 		env = simpy.Environment()
 		p = Probe_iidClusters_wPodC(env, num_cluster, state_state_rate_m, state_cost_m, d, inter_probe_time_rv, num_probe)
-		# env.run(until=p.wait)
-		env.run(until=sim_time)
+		env.run(until=p.wait)
+		# env.run(until=sim_time)
 
 		# if i == 0:
-		# 	plot_cost_over_time(p, d, x, forward_rate, backward_rate)
+		#		plot_cost_over_time(p, d, x, forward_rate, backward_rate)
 
 		cost_per_unit_time = p.get_cost_per_unit_time()
 		# log(INFO, '', cost_per_unit_time=cost_per_unit_time)
@@ -57,9 +57,9 @@ def sim_probe_iidClusters_wPodC(d, x, num_probe=None, num_sim=100, sim_time=1000
 	return cum_cost_per_unit_time / num_sim
 
 def sim_cost_wrt_d():
-	num_probe = None
-	num_sim = 10
-	sim_time = 1000
+	num_probe = 1000 # None
+	num_sim = 3
+	# sim_time = 1000
 
 	d_l, cost_l = [], []
 	# for d in range(1, num_cluster + 1):
@@ -84,15 +84,16 @@ def sim_cost_wrt_d():
 	log(DEBUG, "done")
 
 def sim_cost_wrt_interProbeTime_d():
-	num_probe = None
-	num_sim = 1 # 3 # 10
-	sim_time = 50 # 0 # 1000 # 2000
+	num_probe = 1000
+	num_sim = 3 # 10
+	sim_time = 2000
 
-	# for x in [1, 2, 5, 10, 20, 50]:
-	for x in [20, 50]:
+	for x in [1, 2, 5, 10, 50, 100, 500]:
+	# for x in [5]:
 		log(INFO, ">> x= {}".format(x))
 		d_l, cost_l = [], []
 		for d in [1, 2, 3, *np.linspace(5, num_cluster, 4)]:
+		# for d in [1]:
 			d = int(d)
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)

@@ -12,10 +12,10 @@ from cluster import *
 
 # N: # clusters
 # n: # workers in each cluster
-N, n = 5, 1
+N, n = 10, 1
 
 # m: # clients
-m = 5
+m = 2 * N
 
 req_gen_rate = 0.8 * N * n / m
 inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen_rate])
@@ -53,11 +53,12 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	num_req_to_finish = 10000
 	num_sim = 3 # 10
 
-	for inter_probe_num_req in [5, 10, 15, 20, 50, 200]:
+	for inter_probe_num_req in [5, 10, 20, 50, 200, 1000, 2000]:
 	# for inter_probe_num_req in [2]:
 		log(INFO, ">> inter_probe_num_req= {}".format(inter_probe_num_req))
 		d_l, ET_l = [], []
-		for d in [1, 2, 3, *numpy.arange(5, N + 1, 4)]:
+		for d in [1, 2, 3, 5, N]:
+		# for d in [1, 2, 3, *numpy.arange(5, N + 1, 4)]:
 		# for d in range(1, N + 1):
 		# for d in [2]:
 			d = int(d)

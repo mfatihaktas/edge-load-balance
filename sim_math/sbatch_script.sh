@@ -9,5 +9,5 @@
 #SBATCH --export=ALL                 # Export your current env to the job env
 #SBATCH --output=log/slurm.%N.%j.out
 export MV2_ENABLE_AFFINITY=0
-srun --mpi=pmi2 python3 /home/mfa51/edge-load-balance/sim/sim.py
+srun --mpi=pmi2 python3 /home/mfa51/edge-load-balance/sim_math/sim.py
   
