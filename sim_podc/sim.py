@@ -1,6 +1,7 @@
 import os, sys
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir + '/sim_common')
 sys.path.append(parent_dir)
 
 import simpy
@@ -24,7 +25,11 @@ def sim_PodC(m, d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 		env = simpy.Environment()
 		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
 		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l, initial_cl_id=cl_l[m % N]._id) for i in range(m)]
-		net = Net_wConstantDelay('n', env, [*cl_l, *c_l], delay=0)
+		if fluctuating_net_state is False:
+			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
+		else:
+			net = Net_wFluctuatingDelay('n', env, [*cl_l, *c_l], net_delay, net_delay_additional, normal_dur_rv, slow_dur_rv)
+			net.reg_as_fluctuating(random.sample(cl_l, num_fluctuating_cl))
 		env.run(until=c_l[0].act_recv)
 
 		t_l = []
@@ -73,7 +78,7 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	log(DEBUG, "done")
 
 def sim_ET_vs_m():
-	num_req_to_finish = 10000 # 100
+	num_req_to_finish = 10 # 10000 # 100
 	num_sim = 2 # 10
 
 	d = 2
@@ -97,7 +102,7 @@ def sim_ET_vs_m():
 	plot.title(r'$N= {}, n= {}$'.format(N, n) + ', ' \
 						 r'$\rho= {}$, $S \sim {}$'.format(ro, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_podc_ET_vs_m_ro_{}_N_{}.png".format(ro, N), bbox_inches='tight')
+	plot.savefig("plot_podc_ET_vs_m_ro_{}_N_{}_fluctuatingNet_{}.png".format(ro, N, fluctuating_net_state), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
