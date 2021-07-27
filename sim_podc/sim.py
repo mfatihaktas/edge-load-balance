@@ -73,11 +73,11 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	log(DEBUG, "done")
 
 def sim_ET_vs_m():
-	num_req_to_finish = 5000 # 100
+	num_req_to_finish = 10000 # 100
 	num_sim = 2 # 10
 
 	d = 2
-	inter_probe_num_req = 25
+	inter_probe_num_req = 50
 
 	m_l, ET_l = [], []
 	for m in [1, 2, N, 2*N, 3*N]:
@@ -97,7 +97,7 @@ def sim_ET_vs_m():
 	plot.title(r'$N= {}, n= {}$'.format(N, n) + ', ' \
 						 r'$\rho= {}$, $S \sim {}$'.format(ro, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_ET_vs_m_ro_{}_N_{}.png".format(ro, N), bbox_inches='tight')
+	plot.savefig("plot_podc_ET_vs_m_ro_{}_N_{}.png".format(ro, N), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
