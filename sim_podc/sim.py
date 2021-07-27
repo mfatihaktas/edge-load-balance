@@ -73,7 +73,7 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	log(DEBUG, "done")
 
 def sim_ET_vs_m():
-	num_req_to_finish = 5000 # 100
+	num_req_to_finish = 10 # 5000 # 100
 	num_sim = 2 # 10
 
 	d = 2
@@ -88,7 +88,7 @@ def sim_ET_vs_m():
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 
-	plot.plot(m_l, ET_l, color=next(light_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+	plot.plot(m_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
