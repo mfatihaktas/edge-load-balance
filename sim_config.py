@@ -22,7 +22,7 @@ fluctuating_net = True # False
 net_delay = 0
 net_delay_additional = 5
 num_fluctuating_cl = 2
-normal_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
+normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
 
 def log_global_vars():

@@ -35,7 +35,7 @@ class Net_wConstantDelay(Net):
 		super().__init__(_id, env, node_l)
 		self.delay = delay
 
-		self.action = env.process(self.run())
+		self.act = env.process(self.run())
 
 	def run(self):
 		while True:

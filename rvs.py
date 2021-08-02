@@ -191,6 +191,66 @@ class Dolly(RV):
 		# u = random.uniform(0, 1)
 		return self.dist.rvs() # + u/100
 
+class DUniform(RV):
+  def __init__(self, l, u):
+    super().__init__(l, u)
+
+    self.v_l = np.arange(self.l, self.u + 1)
+    w_l = [1 for v in self.v_l]
+    self.p_l = [w / sum(w_l) for w in w_l]
+    self.dist = scipy.stats.rv_discrete(name='duniform', values=(self.v_l, self.p_l) )
+
+  def __repr__(self):
+    return 'DUniform[{}, {}]'.format(self.l, self.u)
+
+  def mean(self):
+    return (self.l + self.u) / 2
+
+  def pdf(self, x):
+    return self.dist.pmf(x)
+
+  def cdf(self, x):
+    if x < self.l:
+      return 0
+    elif x > self.u:
+      return 1
+    return self.dist.cdf(math.floor(x) )
+
+  def tail(self, x):
+    return 1 - self.cdf(x)
+
+  def moment(self, i):
+    # p = 1 / (self.u - self.l + 1)
+    # return sum([p*v**i for v in range(self.l, self.u + 1)])
+    return self.dist.moment(i)
+
+  def sample(self):
+    # return random.randint(self.l, self.u)
+    return self.dist.rvs() # [0]
+
+class Normal(RV):
+  def __init__(self, mu, sigma):
+    super().__init__(l=-np.inf, u=np.inf)
+    self.mu = mu
+    self.sigma = sigma
+
+    self.dist = scipy.stats.norm(mu, sigma)
+
+  def __repr__(self):
+    return 'Normal[mu= {}, sigma= {}]'.format(self.mu, self.sigma)
+
+  def cdf(self, x):
+    return self.dist.cdf(x)
+
+  def tail(self, x):
+    return 1 - self.cdf(x)
+
+  def mean(self):
+    return self.mu
+
+  def sample(self):
+    return self.dist.rvs(size=1)[0]
+
 class SumOfRVs(RV):
 	def __init__(self, rv_l):
 		super().__init__(l=sum(rv.l for rv in rv_l), u=sum(rv.u for rv in rv_l))
