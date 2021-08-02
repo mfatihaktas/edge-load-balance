@@ -102,9 +102,11 @@ def plot_EI_vs_d(n):
 	# plot_wAdditiveNoise(max_noise_factor = 2)
 	# plot_wAdditiveNoise(max_noise_factor = 3)
 
+	plot_wGaussianNoise(coeff_var = 0.2)
 	plot_wGaussianNoise(coeff_var = 0.5)
 	plot_wGaussianNoise(coeff_var = 1)
 	plot_wGaussianNoise(coeff_var = 2)
+	plot_wGaussianNoise(coeff_var = 3)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
