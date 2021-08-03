@@ -111,7 +111,7 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	log_sim_config()
+	log_global_vars()
 
 	sim_ET_wrt_interProbeNumReqs_d()
 	# sim_ET_vs_m()

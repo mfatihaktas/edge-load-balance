@@ -20,10 +20,6 @@ class GaussianThompsonSampling_slidingWin():
 		for arm_id in self.arm_id_l:
 			self.arm_id_cost_q.append((arm_id, 0))
 
-		self.precision_0 = 1
-		self.precision = 1
-		self.mean = 1
-
 	def __repr__(self):
 		return 'GaussianThompsonSampling_slidingWin(arm_id_l= {}, win_len)'.format(self.arm_id_l, self.win_len)
 
