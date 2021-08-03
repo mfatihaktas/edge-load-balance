@@ -78,7 +78,7 @@ def sim_EmaxHeight_wAdditiveNoise(m, n, d, noise_rv, num_exp, bin_selector):
 def plot_EI_vs_d(n):
 	log(INFO, "started", n=n)
 	m = 10 * n
-	num_exp = 1 # 3 # 1000
+	num_exp = 3 # 1000
 
 	def plot_wAdditiveNoise(max_noise_factor, k=0):
 		log(INFO, "started", max_noise_factor=max_noise_factor, k=k)
@@ -101,7 +101,8 @@ def plot_EI_vs_d(n):
 		bin_selector = PodC(k)
 
 		d_l, EI_l = [], []
-		for d in [1, 2, 3, 10]:
+		# for d in [1, 2, 3, 10]:
+		for d in [1, 2, 3, 4, 5, 6, 10]:
 			d_l.append(d)
 
 			E_max_height = sim_EmaxHeight_wGaussianNoise(m, n, d, coeff_var, num_exp, bin_selector)
@@ -141,4 +142,4 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	plot_EI_vs_d(n=10)
+	plot_EI_vs_d(n=500)
