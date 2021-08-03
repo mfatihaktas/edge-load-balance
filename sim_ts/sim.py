@@ -25,11 +25,11 @@ def sim_thompsonSampling(m, num_req_to_finish, num_sim=1):
 		env = simpy.Environment()
 		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
 		c_l = [Client('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
-		if fluctuating_net is False:
-			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
-		else:
+		if N_fluctuating_frac:
 			net = Net_wFluctuatingDelay('n', env, [*cl_l, *c_l], net_delay, net_delay_additional, normal_dur_rv, slow_dur_rv)
-			net.reg_as_fluctuating(random.sample(cl_l, num_fluctuating_cl))
+			net.reg_as_fluctuating(random.sample(cl_l, int(N * N_fluctuating_frac)))
+		else:
+			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
 		env.run(until=c_l[0].act_recv)
 
 		t_l = []
@@ -65,7 +65,7 @@ def sim_ET_vs_m():
 	plot.title(r'$N= {}, n= {}$'.format(N, n) + ', ' \
 						 r'$\rho= {}$, $S \sim {}$'.format(ro, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_exp_ET_wrt_m_ro_{}_N_{}_fluctuatingNet_{}.png".format(ro, N, fluctuating_net), bbox_inches='tight')
+	plot.savefig("plot_ts_ET_wrt_m_ro_{}_N_{}_Nff_{}.png".format(ro, N, N_fluctuating_frac), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -74,6 +74,6 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	log_global_vars()
+	log_sim_config()
 
 	sim_ET_vs_m()
