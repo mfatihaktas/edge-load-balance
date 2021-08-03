@@ -141,4 +141,4 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	plot_EI_vs_d(n=10)
+	plot_EI_vs_d(n=500)
