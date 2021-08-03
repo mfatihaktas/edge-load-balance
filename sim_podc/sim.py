@@ -72,7 +72,7 @@ def sim_ET_wrt_interProbeNumReqs_d():
 	plot.title(r'$N= {}, n= {}, m= {}$'.format(N, n, m) + '\n' \
 						 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_ET_wrt_interProbeNumReqs_d_lambda_{}_mu_{}_N_{}_m_{}.png".format(req_gen_rate, serv_rate, N, m), bbox_inches='tight')
+	plot.savefig("plot_ET_wrt_interProbeNumReqs_d_lambda_{}_mu_{}_N_{}_m_{}_fluctuatingNet_{}.png".format(req_gen_rate, serv_rate, N, m, fluctuating_net), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -113,5 +113,5 @@ if __name__ == '__main__':
 
 	log_global_vars()
 
-	# sim_ET_wrt_interProbeNumReqs_d()
-	sim_ET_vs_m()
+	sim_ET_wrt_interProbeNumReqs_d()
+	# sim_ET_vs_m()
