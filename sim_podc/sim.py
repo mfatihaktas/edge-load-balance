@@ -44,7 +44,7 @@ def sim_PodC(m, d, inter_probe_num_req, num_req_to_finish, num_sim=1):
 	return cum_ET / num_sim
 
 def sim_ET_wrt_interProbeNumReqs_d():
-	num_req_to_finish = 10000
+	num_req_to_finish = 100000
 	num_sim = 3 # 10
 
 	for inter_probe_num_req in [5, 10, 20, 50, 200, 1000, 2000]:
