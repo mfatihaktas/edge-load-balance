@@ -13,10 +13,13 @@ class PodC():
 	def __repr__(self):
 		return "PodC(k= {})".format(self.k)
 
-	## Select kth min
+	## Select kth min. If k >= d, select d-1'th min.
 	def select(self, b_i_l):
+		if len(b_i_l) == 1:
+			return b_i_l[0][1]
+
 		b_i_l.sort()
-		return b_i_l[self.k][1] if self.k < len(b_i_l) else b_i_l[-1][1]
+		return b_i_l[self.k][1] if self.k < len(b_i_l) else b_i_l[-2][1]
 
 ## m: # balls
 ## n: # bins

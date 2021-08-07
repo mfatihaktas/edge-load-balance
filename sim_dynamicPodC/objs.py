@@ -9,11 +9,69 @@ from debug_utils import *
 from priority_dict import *
 
 class Ball():
-	def __init__(self, _id):
+	def __init__(self, _id, rest_time):
 		self._id = _id
+		self.rest_time = rest_time
 
 	def __repr__(self):
-		return 'Ball(id= {})'.format(self._id)
+		return "Ball(id= {})".format(self._id)
+
+class BallGen():
+	def __init__(self, env, m, rest_time_rv, num_balls_to_gen, out):
+		self.m = m
+		self.rest_time_rv = rest_time_rv
+		self.num_balls_to_gen = num_balls_to_gen
+		self.out = out
+
+		self.ball_id_to_gen_s = simpy.Store(env)
+
+		for i in range(self.m):
+			self.ball_id_to_gen_s.put(i)
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "BallGen(m= {})".format(self.m)
+
+	def put(self, bid):
+		slog(DEBUG, self.env, self, "recved back", bid=bid)
+		self.ball_id_to_gen_s.put(bid)
+
+	def run(self):
+		slog(DEBUG, self.env, self, "started", num_balls_to_gen=self.num_balls_to_gen)
+
+		for _ in range(self.num_balls_to_gen):
+			bid = yield self.ball_id_to_gen_s.get()
+
+			b = Ball(bid, self.rest_time_rv.sample())
+			self.out.put(b)
+
+		slog(DEBUG, self.env, self, "done")
+
+class PodCScher():
+	def __init__(self, env, d, bin_l):
+		self.d = d
+		self.bin_l = bin_l
+
+		self.ball_s = simpy.Store(env)
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "PodCScher(d= {})".format(self.d)
+
+	def put(self, ball):
+		slog(DEBUG, self.env, self, "recved", ball=ball)
+		self.ball_s.put(ball)
+
+	def run(self):
+		while True:
+			ball = yield self.ball_s.get()
+
+			bin_l = random.sample(self.bin_l, self.d)
+			h_i_l = [(b.height(), i) for i, b in enumerate(bin_l)]
+			bin_ = bin_l[min(h_i_l)[1]]
+			slog(DEBUG, self.env, self, "assigning", ball=ball, bin_=bin_)
+			bin_.put(ball)
 
 class Bin():
 	def __init__(self, _id, env, out):
@@ -23,69 +81,43 @@ class Bin():
 
 		self.ball_id__exp_epoch_heap_m = priority_dict()
 
-		self.msg_to_send_s = simpy.Store(env)
-		self.act_send = env.process(self.run_send())
-
-		self.probe_to_send_s = simpy.Store(env)
-		self.act_probe = env.process(self.run_send_probe())
+		self.ball_token_s = simpy.Store(env)
+		self.interrupt = None
+		self.got_interrupted = False
 
 		self.act = env.process(self.run())
 
 	def __repr__(self):
 		return "Bin(id= {})".format(self._id)
 
-	def reg_master(self, master):
-		self.master = master
+	def put(self, ball):
+		slog(DEBUG, self.env, self, "recved", ball=ball)
+		check(ball._id not in self.ball_id__exp_epoch_heap_m, "Only one copy should exist for each ball at all times")
 
-	def put(self, msg):
-		slog(DEBUG, self.env, self, "recved", msg=msg)
-		check(msg.payload.is_req(), "Msg should contain a request")
-		self.msg_s.put(msg)
+		self.ball_id__exp_epoch_heap_m[ball._id] = self.env.now + ball.rest_time
+		self.ball_token_s.put(1)
+
+		if self.interrupt is not None:
+			self.got_interrupted = True
+			self.interrupt.succeed()
 
 	def run(self):
 		while True:
-			msg = yield self.msg_s.get()
-			slog(DEBUG, self.env, self, "working on", msg=msg)
+			yield self.ball_token_s.get()
 
-			req = msg.payload
-			if not req.probe:
-				slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
-				yield self.env.timeout(req.serv_time)
-				slog(DEBUG, self.env, self, "finished serving")
+			bid = self.ball_id__exp_epoch_heap_m.smallest()
+			self.interrupt = self.env.event()
+			t = self.ball_id__exp_epoch_heap_m[bid] - self.env.now
+			slog(DEBUG, self.env, self, "waiting", bid=bid, t=t)
+			yield (self.interrupt | self.env.timeout(t))
 
-			## Send to master
-			msg.payload = Info(req._id, InfoType.worker_req_completion)
-			msg.dst_id = msg.src_id
-			msg.src_id = self._id
-			self.master.put(msg)
-
-			res = result_from_req(req)
-			res.epoch_departed_cluster = self.env.now
-			msg.payload = res
-
-			if req.probe:
-				self.probe_to_send_s.put(msg)
+			if self.got_interrupted:
+				slog(DEBUG, self.env, self, "got interrupted", bid=bid)
+				self.got_interrupted = False
+				self.interrupt = None
+				self.ball_token_s.put(1)
 			else:
-				self.msg_to_send_s.put(msg)
+				self.ball_id__exp_epoch_heap_m.pop(bid)
+				self.out.put(bid)
 
 		slog(DEBUG, self.env, self, "done")
-
-	def run_send_probe(self):
-		while True:
-			msg = yield self.probe_to_send_s.get()
-
-			serv_time = msg.payload.serv_time
-			slog(DEBUG, self.env, self, "sleeping for probe", serv_time=serv_time)
-			yield self.env.timeout(serv_time)
-			slog(DEBUG, self.env, self, "done sleeping for probe")
-
-			self.msg_to_send_s.put(msg)
-
-	def run_send(self):
-		while True:
-			msg = yield self.msg_to_send_s.get()
-
-			## Send to client
-			msg.src_id = self._id
-			msg.dst_id = msg.payload.cid
-			self.out.put(msg)

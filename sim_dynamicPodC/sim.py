@@ -1,35 +1,22 @@
 import os, sys
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir + '/sim_common')
 sys.path.append(parent_dir)
 
 import simpy
 import numpy as np
 
-from rvs import *
-from client import *
-from cluster import *
-
-from sim_config import *
-
-def sim_PodC(m, d, inter_probe_num_req, num_req_to_finish, num_sim=1):
-	log(DEBUG, "started", d=d, inter_probe_num_req=inter_probe_num_req, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
-
-	inter_req_gen_time_rv = get_inter_req_gen_time_rv(m)
+def sim(m, n, d, rest_time_rv, num_balls_to_gen, num_sim=1):
+	log(DEBUG, "started", m=m, n=n, d=d, rest_time_rv=rest_time_rv, num_balls_to_gen=num_balls_to_gen, num_sim=num_sim)
 
 	cum_ET = 0
 	for i in range(num_sim):
 		log(DEBUG, "*** {}th sim run started".format(i))
 
 		env = simpy.Environment()
-		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
-		c_l = [Client('c{}'.format(i), env, d, inter_probe_num_req, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l, initial_cl_id=cl_l[m % N]._id) for i in range(m)]
-		if N_fluctuating_frac:
-			net = Net_wFluctuatingDelay('n', env, [*cl_l, *c_l], net_delay, net_delay_additional, normal_dur_rv, slow_dur_rv)
-			net.reg_as_fluctuating(random.sample(cl_l, int(N * N_fluctuating_frac)))
-		else:
-			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
+		bin_l = [Bin('bin-{}'.format(i), env, out) for i in range(n)]
+		scher = PodCScher(env, d, bin_l)
+		bg = BallGen(env, m, rest_time_rv, out=scher)
 		env.run(until=c_l[0].act_recv)
 
 		t_l = []
