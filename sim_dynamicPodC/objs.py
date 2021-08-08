@@ -112,12 +112,11 @@ class Bin_fluctuating(Bin):
 		self.normal_dur_rv = normal_dur_rv
 
 		self.state = 'n' # 's'
-		self.mult_height_factor = 10
+		self.mult_height_factor = 1
 
 		self.act = env.process(self.run_fluctuating_state())
 
 	def height(self):
-		# return len(self.ball_id__exp_epoch_heap_m) * self.mult_height_factor
 		return super().height() * self.mult_height_factor
 
 	def run_fluctuating_state(self):
@@ -125,10 +124,12 @@ class Bin_fluctuating(Bin):
 
 		while True:
 			if self.state == 'n':
+				self.mult_height_factor = 1
 				dur = self.normal_dur_rv.sample()
 				slog(DEBUG, self.env, self, "normal state started", dur=dur)
 				self.state = 's'
 			elif self.state == 's':
+				self.mult_height_factor = 10
 				dur = self.slow_dur_rv.sample()
 				slog(DEBUG, self.env, self, "slow state started", dur=dur)
 				self.state = 'n'

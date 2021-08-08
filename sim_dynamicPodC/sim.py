@@ -66,7 +66,7 @@ def plot_EI_vs_d_restime(n):
 	plot.xlabel(r'$d$', fontsize=fontsize)
 	plot.title(r'$m= {}, n= {}$'.format(m, n))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_EI_vs_d_restime_n_{}_.png".format(n), bbox_inches='tight')
+	plot.savefig("plot_EI_vs_d_restime_n_{}.png".format(n), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
