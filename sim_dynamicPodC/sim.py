@@ -41,7 +41,8 @@ def plot_EI_vs_d_restime(n):
 	num_sim = 1 # 3
 
 	# for t in [1, 2, 3, 4]:
-	for t in [1, 2, 3, 10]:
+	# for t in [1, 2, 3, 10]:
+	for t in [1, 10, 50]:
 		log(INFO, ">> t= {}".format(t))
 		ball_restime_rv = DiscreteRV(p_l=[1], v_l=[t])
 
@@ -65,7 +66,7 @@ def plot_EI_vs_d_restime(n):
 	plot.xlabel(r'$d$', fontsize=fontsize)
 	plot.title(r'$m= {}, n= {}$'.format(m, n))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_EI_vs_d_restime_n_{}.png".format(n), bbox_inches='tight')
+	plot.savefig("plot_EI_vs_d_restime_n_{}_.png".format(n), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -74,4 +75,4 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	plot_EI_vs_d_restime(n=10)
+	plot_EI_vs_d_restime(n=100)
