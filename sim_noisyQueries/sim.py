@@ -19,7 +19,7 @@ class PodC():
 			return b_i_l[0][1]
 
 		b_i_l.sort()
-		return b_i_l[self.k][1] if self.k < len(b_i_l) else b_i_l[-2][1]
+		return b_i_l[self.k][1] if self.k <= len(b_i_l) else b_i_l[-2][1]
 
 ## m: # balls
 ## n: # bins
@@ -81,7 +81,7 @@ def sim_EmaxHeight_wAdditiveNoise(m, n, d, noise_rv, num_exp, bin_selector):
 def plot_EI_vs_d(n):
 	log(INFO, "started", n=n)
 	m = 10 * n
-	num_exp = 1 # 3 # 1000
+	num_exp = 3 # 1000
 
 	def plot_wAdditiveNoise(max_noise_factor, k=0):
 		log(INFO, "started", max_noise_factor=max_noise_factor, k=k)
