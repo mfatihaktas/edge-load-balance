@@ -19,7 +19,7 @@ class PodC():
 			return b_i_l[0][1]
 
 		b_i_l.sort()
-		return b_i_l[self.k][1] if self.k < len(b_i_l) else b_i_l[-2][1]
+		return b_i_l[self.k][1] if self.k <= len(b_i_l) else b_i_l[-2][1]
 
 ## m: # balls
 ## n: # bins
