@@ -13,6 +13,8 @@ class Ball():
 		self._id = _id
 		self.rest_time = rest_time
 
+		self.epoch_cost_l = []
+
 	def __repr__(self):
 		return "Ball(id= {})".format(self._id)
 
@@ -81,6 +83,8 @@ class Bin():
 			self.interrupt.succeed()
 
 	def run(self):
+		slog(DEBUG, self.env, self, "started")
+
 		while True:
 			yield self.ball_token_s.get()
 
@@ -101,15 +105,49 @@ class Bin():
 
 		slog(DEBUG, self.env, self, "done")
 
+class Bin_fluctuating(Bin):
+	def __init__(self, _id, env, slow_dur_rv, normal_dur_rv, out=None):
+		super().__init__(_id, env, out)
+		self.slow_dur_rv = slow_dur_rv
+		self.normal_dur_rv = normal_dur_rv
+
+		self.state = 'n' # 's'
+		self.mult_height_factor = 10
+
+		self.act = env.process(self.run_fluctuating_state())
+
+	def height(self):
+		# return len(self.ball_id__exp_epoch_heap_m) * self.mult_height_factor
+		return super().height() * self.mult_height_factor
+
+	def run_fluctuating_state(self):
+		slog(DEBUG, self.env, self, "started")
+
+		while True:
+			if self.state == 'n':
+				dur = self.normal_dur_rv.sample()
+				slog(DEBUG, self.env, self, "normal state started", dur=dur)
+				self.state = 's'
+			elif self.state == 's':
+				dur = self.slow_dur_rv.sample()
+				slog(DEBUG, self.env, self, "slow state started", dur=dur)
+				self.state = 'n'
+
 class BinCluster():
-	def __init__(self, env, n, d, ball_restime_rv, ball_gen):
+	def __init__(self, env, n, d, ball_restime_rv, ball_gen, slow_dur_rv=None, normal_dur_rv=None):
 		self.env = env
 		self.n = n
 		self.d = d
 		self.ball_restime_rv = ball_restime_rv
 
 		ball_gen.out = self
-		self.bin_l = [Bin('bin-{}'.format(i), env) for i in range(n)]
+
+		if slow_dur_rv is None:
+			self.bin_l = [Bin('bin-{}'.format(i), env) for i in range(n)]
+		else:
+			check(normal_dur_rv is not None, "normal_dur_rv cannot be None when slow_dur_rv is not None.")
+			self.bin_l = [Bin_fluctuating('bin-{}'.format(i), env, slow_dur_rv, normal_dur_rv) for i in range(n)]
+
 		for b in self.bin_l:
 			b.out = ball_gen
 

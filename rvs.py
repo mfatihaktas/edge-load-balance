@@ -150,11 +150,14 @@ class DiscreteRV():
 
 		self.dist = scipy.stats.rv_discrete(name='discrete', values=(self.v_l, self.p_l))
 
+	# def __repr__(self):
+	# 	return 'DiscreteRV(' + '\n\t' + \
+	# 		'p_l= {}'.format(self.p_l) + '\n\t' + \
+	# 		'v_l= {}'.format(self.v_l) + '\n\t' + \
+	# 		'norm_factor= {}'.format(self.norm_factor) + ')'
+
 	def __repr__(self):
-		return 'DiscreteRV(' + '\n\t' + \
-			'p_l= {}'.format(self.p_l) + '\n\t' + \
-			'v_l= {}'.format(self.v_l) + '\n\t' + \
-			'norm_factor= {}'.format(self.norm_factor) + ')'
+		return 'Disc(p={}, v={})'.format(self.p_l, self.v_l)
 
 	def mean(self):
 		return self.dist.mean() / self.norm_factor
