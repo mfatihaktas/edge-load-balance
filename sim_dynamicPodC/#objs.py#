@@ -76,7 +76,7 @@ class Bin():
 		self.ball_id__exp_epoch_heap_m[ball._id] = self.env.now + ball.rest_time
 		self.ball_token_s.put(1)
 
-		if self.got_interrupted is False and self.interrupt is not None:
+		if self.interrupt is not None:
 			self.got_interrupted = True
 			self.interrupt.succeed()
 
@@ -145,5 +145,3 @@ class BinCluster():
 			bin_ = bin_l[min(h_i_l)[1]]
 			slog(DEBUG, self.env, self, "assigning", ball=ball, bin_=bin_)
 			bin_.put(ball)
-
-			self.record_state()
