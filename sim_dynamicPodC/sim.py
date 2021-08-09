@@ -8,8 +8,8 @@ import simpy
 from objs import *
 from rvs import *
 
-def sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, slow_dur_rv=None, normal_dur_rv=None, num_sim=1):
-	log(DEBUG, "started", m=m, n=n, d=d, ball_restime_rv=ball_restime_rv, num_balls_to_gen=num_balls_to_gen, slow_dur_rv=slow_dur_rv, normal_dur_rv=normal_dur_rv, num_sim=num_sim)
+def sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, frac_fluctuating=0, slow_dur_rv=None, normal_dur_rv=None, num_sim=1):
+	log(DEBUG, "started", m=m, n=n, d=d, ball_restime_rv=ball_restime_rv, num_balls_to_gen=num_balls_to_gen, frac_fluctuating=frac_fluctuating, slow_dur_rv=slow_dur_rv, normal_dur_rv=normal_dur_rv, num_sim=num_sim)
 
 	cum_EI = 0
 	for i in range(num_sim):
@@ -17,7 +17,7 @@ def sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, slow_dur_rv=None, normal_
 
 		env = simpy.Environment()
 		bg = BallGen(env, m, ball_restime_rv, num_balls_to_gen)
-		bc = BinCluster(env, n, d, ball_restime_rv, bg, slow_dur_rv, normal_dur_rv)
+		bc = BinCluster(env, n, d, ball_restime_rv, bg, frac_fluctuating, slow_dur_rv, normal_dur_rv)
 		env.run(until=bg.act)
 
 		check(len(bc.epoch_I_l) > 1, "BinCluster.epoch_I_l should have at least two elements")
@@ -40,6 +40,7 @@ def plot_EI_vs_d_restime(n):
 	num_balls_to_gen = 100 * m
 	num_sim = 2
 
+	frac_fluctuating = 0.2
 	slow_dur_rv = DiscreteRV(p_l=[1], v_l=[10])
 	normal_dur_rv = DiscreteRV(p_l=[1], v_l=[30])
 
@@ -54,7 +55,7 @@ def plot_EI_vs_d_restime(n):
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			EI = sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, slow_dur_rv, normal_dur_rv, num_sim)
+			EI = sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, frac_fluctuating, slow_dur_rv, normal_dur_rv, num_sim)
 			log(INFO, "EI= {}".format(EI))
 			EI_l.append(EI)
 			# return
@@ -64,10 +65,10 @@ def plot_EI_vs_d_restime(n):
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[I]$', fontsize=fontsize)
 	plot.xlabel(r'$d$', fontsize=fontsize)
-	plot.title(r'$m= {}, n= {}$'.format(m, n) + '\n' \
+	plot.title(r'$m= {}$, $n= {}$, $f= {}$'.format(m, n, frac_fluctuating) + '\n' \
 						 r'$T_s \sim${}, $T_n \sim${}'.format(slow_dur_rv, normal_dur_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_EI_vs_d_restime_n_{}.png".format(n), bbox_inches='tight')
+	plot.savefig("plot_EI_vs_d_restime_n_{}_f_{}.png".format(n, frac_fluctuating), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")

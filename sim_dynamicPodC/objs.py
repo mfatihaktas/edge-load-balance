@@ -139,7 +139,7 @@ class Bin_fluctuating(Bin):
 				self.state = 'n'
 
 class BinCluster():
-	def __init__(self, env, n, d, ball_restime_rv, ball_gen, slow_dur_rv=None, normal_dur_rv=None):
+	def __init__(self, env, n, d, ball_restime_rv, ball_gen, frac_fluctuating=0, slow_dur_rv=None, normal_dur_rv=None):
 		self.env = env
 		self.n = n
 		self.d = d
@@ -147,11 +147,10 @@ class BinCluster():
 
 		ball_gen.out = self
 
-		if slow_dur_rv is None:
-			self.bin_l = [Bin('bin-{}'.format(i), env) for i in range(n)]
-		else:
-			check(normal_dur_rv is not None, "normal_dur_rv cannot be None when slow_dur_rv is not None.")
-			self.bin_l = [Bin_fluctuating('bin-{}'.format(i), env, slow_dur_rv, normal_dur_rv) for i in range(n)]
+		nf = int(frac_fluctuating * n)
+		self.bin_l = [Bin('bin-{}'.format(i), env) for i in range(nf)]
+		for i in range(nf, n):
+			self.bin_l.append(Bin_fluctuating('bin-{}'.format(i), env, slow_dur_rv, normal_dur_rv))
 
 		for b in self.bin_l:
 			b.out = ball_gen
