@@ -127,11 +127,15 @@ class Bin_fluctuating(Bin):
 				self.mult_height_factor = 1
 				dur = self.normal_dur_rv.sample()
 				slog(DEBUG, self.env, self, "normal state started", dur=dur)
+				yield self.env.timeout(dur)
+
 				self.state = 's'
 			elif self.state == 's':
 				self.mult_height_factor = 10
 				dur = self.slow_dur_rv.sample()
 				slog(DEBUG, self.env, self, "slow state started", dur=dur)
+				yield self.env.timeout(dur)
+
 				self.state = 'n'
 
 class BinCluster():

@@ -10,8 +10,8 @@ ERROR = 3
 CRITICAL = 4
 
 logger = logging.getLogger('edge_cloud')
-logger.setLevel(logging.INFO)
-# logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # FORMAT = '[%(asctime)s - %(funcName)10s()] %(msg)s'
 # FORMAT = '[%(asctime)s - %(func_name)6s()] %(msg)s'
