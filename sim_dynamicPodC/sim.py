@@ -36,18 +36,18 @@ def sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, slow_dur_rv=None, normal_
 def plot_EI_vs_d_restime(n):
 	log(INFO, "started", n=n)
 
-	m = 10 * n
-	num_balls_to_gen = 100 * m
+	m = n # 10 * n
+	num_balls_to_gen = m # 100 * m
 	num_sim = 1 # 3
+
+	slow_dur_rv = DiscreteRV(p_l=[1], v_l=[10])
+	normal_dur_rv = DiscreteRV(p_l=[1], v_l=[30])
 
 	# for t in [1, 2, 3, 4]:
 	# for t in [1, 2, 3, 10]:
-	for t in [1, 10, 50]:
+	for t in [1, 10, 30]:
 		log(INFO, ">> t= {}".format(t))
 		ball_restime_rv = DiscreteRV(p_l=[1], v_l=[t])
-
-		slow_dur_rv = DiscreteRV(p_l=[1], v_l=[4*t])
-		normal_dur_rv = DiscreteRV(p_l=[1], v_l=[10*t])
 
 		d_l, EI_l = [], []
 		for d in [1, 2, n]:
@@ -64,7 +64,8 @@ def plot_EI_vs_d_restime(n):
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[I]$', fontsize=fontsize)
 	plot.xlabel(r'$d$', fontsize=fontsize)
-	plot.title(r'$m= {}, n= {}$'.format(m, n))
+	plot.title(r'$m= {}, n= {}$'.format(m, n) + '\n' \
+						 r'$T_s \sim${}, $T_n \sim${}'.format(slow_dur_rv, normal_dur_rv))
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig("plot_EI_vs_d_restime_n_{}.png".format(n), bbox_inches='tight')
 	plot.gcf().clear()
