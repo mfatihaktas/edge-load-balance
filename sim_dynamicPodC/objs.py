@@ -151,9 +151,9 @@ class BinCluster():
 		ball_gen.out = self
 
 		nf = int(frac_fluctuating * n)
-		self.bin_l = [Bin('bin-{}'.format(i), env) for i in range(nf)]
+		self.bin_l = [Bin_fluctuating('bin-{}'.format(i), env, slow_dur_rv, normal_dur_rv) for i in range(nf)]
 		for i in range(nf, n):
-			self.bin_l.append(Bin_fluctuating('bin-{}'.format(i), env, slow_dur_rv, normal_dur_rv))
+			self.bin_l.append(Bin('bin-{}'.format(i), env))
 
 		for b in self.bin_l:
 			b.out = ball_gen
