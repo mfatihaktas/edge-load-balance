@@ -36,9 +36,9 @@ def sim_EI(m, n, d, ball_restime_rv, num_balls_to_gen, slow_dur_rv=None, normal_
 def plot_EI_vs_d_restime(n):
 	log(INFO, "started", n=n)
 
-	m = n # 10 * n
-	num_balls_to_gen = 2*m # 100 * m
-	num_sim = 1 # 3
+	m = 10 * n
+	num_balls_to_gen = 100 * m
+	num_sim = 3
 
 	slow_dur_rv = DiscreteRV(p_l=[1], v_l=[10])
 	normal_dur_rv = DiscreteRV(p_l=[1], v_l=[30])
