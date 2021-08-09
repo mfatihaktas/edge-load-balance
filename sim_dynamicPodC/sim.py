@@ -38,19 +38,19 @@ def plot_EI_vs_d_restime(n):
 
 	m = 10 * n
 	num_balls_to_gen = 100 * m
-	num_sim = 3
+	num_sim = 2
 
 	slow_dur_rv = DiscreteRV(p_l=[1], v_l=[10])
 	normal_dur_rv = DiscreteRV(p_l=[1], v_l=[30])
 
 	# for t in [1, 2, 3, 4]:
 	# for t in [1, 2, 3, 10]:
-	for t in [1, 10, 30]:
+	for t in [1, 10, 50, 100]:
 		log(INFO, ">> t= {}".format(t))
 		ball_restime_rv = DiscreteRV(p_l=[1], v_l=[t])
 
 		d_l, EI_l = [], []
-		for d in [1, 2, n]:
+		for d in [1, 2, 3, n]:
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
