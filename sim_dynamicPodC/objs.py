@@ -119,6 +119,9 @@ class Bin_fluctuating(Bin):
 	def height(self):
 		return super().height() * self.mult_height_factor
 
+	def __repr__(self):
+		return "Bin_fluctuating(id= {})".format(self._id)
+
 	def run_fluctuating_state(self):
 		slog(DEBUG, self.env, self, "started")
 
