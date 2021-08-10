@@ -84,3 +84,54 @@ class Worker():
 			msg.src_id = self._id
 			msg.dst_id = msg.payload.cid
 			self.out.put(msg)
+
+
+class Worker_probesTreatedAsActualReq():
+	def __init__(self, _id, env, out=None):
+		self._id = _id
+		self.env = env
+		self.out = out
+
+		self.master = None
+
+		self.msg_s = simpy.Store(env)
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Worker(id= {})".format(self._id)
+
+	def reg_master(self, master):
+		self.master = master
+
+	def put(self, msg):
+		slog(DEBUG, self.env, self, "recved", msg=msg)
+		check(msg.payload.is_req(), "Msg should contain a request")
+		self.msg_s.put(msg)
+
+	def run(self):
+		while True:
+			msg = yield self.msg_s.get()
+			slog(DEBUG, self.env, self, "working on", msg=msg)
+
+			req = msg.payload
+			slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
+			yield self.env.timeout(req.serv_time)
+			slog(DEBUG, self.env, self, "finished serving")
+
+			## Send to master
+			msg.payload = Info(req._id, InfoType.worker_req_completion)
+			msg.dst_id = msg.src_id
+			msg.src_id = self._id
+			self.master.put(msg)
+
+			res = result_from_req(req)
+			res.epoch_departed_cluster = self.env.now
+			msg.payload = res
+
+			## Send to client
+			msg.src_id = self._id
+			msg.dst_id = msg.payload.cid
+			self.out.put(msg)
+
+		slog(DEBUG, self.env, self, "done")

@@ -129,7 +129,9 @@ class Cluster():
 		self.num_worker = num_worker
 		self.out = out
 
-		w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+		# w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+		w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+
 		self.master = Master(_id, env, w_l)
 
 	def __repr__(self):

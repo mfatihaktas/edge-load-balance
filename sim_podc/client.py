@@ -3,26 +3,75 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
+import numpy as np
 import simpy, random
+from collections import deque
 
 from msg import *
 from debug_utils import *
 
+class InterProbeNumReq_controller_constant():
+	def __init__(self, num):
+		self.num = num
+
+	def __repr__(self):
+		return "InterProbeNumReq_controller_constant(num= {})".format(self.num)
+
+	def update(self, T):
+		pass
+
+	def get_num(self):
+		return self.num
+
+class InterProbeNumReq_controller_learningWConstInc():
+	def __init__(self, num, inc):
+		self.num = num
+		self.inc = inc
+
+		self.ET_prev = None
+		self.T_cur_l = []
+		self.num_l = []
+
+	def __repr__(self):
+		return "InterProbeNumReq_controller_learningWConstInc(num= {}, inc= {})".format(self.num, self.inc)
+
+	def update(self, T):
+		log(DEBUG, "started", T=T)
+		self.T_cur_l.append(T)
+
+	def get_num(self):
+		if self.ET_prev is None and len(self.T_cur_l) != 0:
+			self.ET_prev = np.mean(self.T_cur_l)
+		elif self.ET_prev is not None:
+			ET_cur = np.mean(self.T_cur_l)
+
+			log(DEBUG, "", ET_prev=self.ET_prev, ET_cur=ET_cur)
+			if ET_cur < self.ET_prev * 0.9:
+				self.num += 1
+			else:
+				self.num -= 1
+				if self.num < 1:
+					self.num = 2
+
+			self.ET_prev = ET_cur
+			self.T_cur_l.clear()
+
+		self.num_l.append(self.num)
+		return self.num
+
 class Client():
-	def __init__(self, _id, env, d, inter_probe_num_req,
+	def __init__(self, _id, env, d, interProbeNumReq_controller,
 							 num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l,
 							 initial_cl_id=None, out=None):
 		self._id = _id
 		self.env = env
 		self.d = d
-		self.inter_probe_num_req = inter_probe_num_req
+		self.interProbeNumReq_controller = interProbeNumReq_controller
 		self.num_req_to_finish = num_req_to_finish
 		self.inter_gen_time_rv = inter_gen_time_rv
 		self.serv_time_rv = serv_time_rv
 		self.cl_l = cl_l
 		self.out = out
-
-		self.inter_probe_num_req_ = self.inter_probe_num_req
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0
@@ -40,7 +89,7 @@ class Client():
 	# def __repr__(self):
 	# 	return 'Client(' + '\n\t' + \
 	# 		'id= {}'.format(self._id) + '\n\t' + \
-	# 		'inter_probe_num_req= {}'.format(self.inter_probe_num_req) + '\n\t' + \
+	# 		'interProbeNumReq_controller= {}'.format(self.interProbeNumReq_controller) + '\n\t' + \
 	# 		'cl_l= {}'.format(self.cl_l) + '\n\t' + \
 	# 		'num_req_to_finish= {}'.format(self.num_req_to_finish) + '\n\t' + \
 	# 		'inter_gen_time_rv= {}'.format(self.inter_gen_time_rv) + '\n\t' + \
@@ -84,8 +133,11 @@ class Client():
 			res.epoch_arrived_client = t
 			self.req_finished_l.append(res)
 
+			T = res.epoch_arrived_client - res.epoch_departed_client
+			self.interProbeNumReq_controller.update(T)
+
 			slog(DEBUG, self.env, self, "",
-					response_time = (res.epoch_arrived_client - res.epoch_departed_client),
+					response_time = T,
 					time_from_c_to_s = (res.epoch_arrived_cluster - res.epoch_departed_client),
 					time_from_s_to_c = (res.epoch_arrived_client - res.epoch_departed_cluster),
 					time_from_s_to_w_to_s = res.serv_time,
@@ -110,9 +162,10 @@ class Client():
 		slog(DEBUG, self.env, self, "done")
 
 	def probe(self, msg):
+		inter_probe_num_req = self.interProbeNumReq_controller.get_num()
 		if self.d > 1 and self.waiting_for_probe == False and \
 				 (self.num_req_gened == 1 or \
-					self.num_req_gened - self.num_req_last_probed >= self.inter_probe_num_req_):
+					self.num_req_gened - self.num_req_last_probed >= inter_probe_num_req):
 			slog(DEBUG, self.env, self, "started", msg_id=msg._id)
 
 			msg.payload.probe = True
@@ -122,8 +175,6 @@ class Client():
 			slog(DEBUG, self.env, self, "will probe", cl_id_l=cl_id_l)
 
 			self.replicate(cl_id_l, msg)
-			step = int(self.inter_probe_num_req * 0.2)
-			self.inter_probe_num_req_ = self.inter_probe_num_req + random.randrange(-step, step + 1)
 
 			slog(DEBUG, self.env, self, "done", msg_id=msg._id)
 

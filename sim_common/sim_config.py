@@ -27,7 +27,7 @@ slow_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
 def log_sim_config():
 	log(INFO, "", N=N, n=n, m=m, ro=ro, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,
 			N_fluctuating_frac=N_fluctuating_frac, net_delay=net_delay, net_delay_additional=net_delay_additional,
-			num_fluctuating_cl=num_fluctuating_cl, normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv)
+			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv)
 
 def get_inter_req_gen_time_rv(m):
 	return Exp(get_req_gen_rate(m))
