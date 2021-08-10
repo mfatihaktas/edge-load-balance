@@ -44,8 +44,8 @@ def sim_PodC(m, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
 	return cum_ET / num_sim
 
 def sim_ET_wrt_p_d():
-	num_req_to_finish = 100 # 100000
-	num_sim = 1 # 3 # 10
+	num_req_to_finish = 20000
+	num_sim = 3 # 10
 
 	## InterProbeNumReq_controller_learningWConstInc
 	log(INFO, "InterProbeNumReq_controller_learningWConstInc")
