@@ -151,30 +151,29 @@ class Client():
 				break
 		slog(DEBUG, self.env, self, "done")
 
-	def replicate(self, cl_id_l, msg):
-		slog(DEBUG, self.env, self, "started", cl_id_l=cl_id_l, msg=msg)
-		for cl_id in cl_id_l:
+	def replicate(self, cl_l, msg):
+		slog(DEBUG, self.env, self, "started", cl_l=cl_l, msg=msg)
+		for cl in cl_l:
 			msg_ = msg.copy()
-			msg_.dst_id = cl_id
-			msg_.payload.cl_id = cl_id
+			msg_.dst_id = cl._id
+			msg_.payload.cl_id = cl._id
 			self.out.put(msg_)
-			slog(DEBUG, self.env, self, "sent", cl_id=cl_id)
+			slog(DEBUG, self.env, self, "sent", cl_id=cl._id)
 		slog(DEBUG, self.env, self, "done")
 
 	def probe(self, msg):
 		inter_probe_num_req = self.interProbeNumReq_controller.get_num()
-		if self.d > 1 and self.waiting_for_probe == False and \
+		if self.d > 0 and self.waiting_for_probe == False and \
 				 (self.num_req_gened == 1 or \
 					self.num_req_gened - self.num_req_last_probed >= inter_probe_num_req):
 			slog(DEBUG, self.env, self, "started", msg_id=msg._id)
 
 			msg.payload.probe = True
 			self.waiting_for_probe = True
-			cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
-			cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
-			slog(DEBUG, self.env, self, "will probe", cl_id_l=cl_id_l)
-
-			self.replicate(cl_id_l, msg)
+			# cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
+			# cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
+			cl_l = random.sample(self.cl_l, self.d)
+			self.replicate(cl_l, msg)
 
 			slog(DEBUG, self.env, self, "done", msg_id=msg._id)
 

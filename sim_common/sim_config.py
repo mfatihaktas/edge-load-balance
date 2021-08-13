@@ -6,7 +6,7 @@ from debug_utils import *
 N, n = 10, 1
 
 # m: # clients
-m = 1 # 2 * N
+m = 2 * N
 
 ro = 0.8
 
