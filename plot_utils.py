@@ -6,6 +6,8 @@ import matplotlib.pyplot as plot
 import itertools, scipy
 import numpy as np
 
+from debug_utils import *
+
 NICE_BLUE = '#66b3ff'
 NICE_RED = '#ff9999'
 NICE_GREEN = '#99ff99'
@@ -120,3 +122,9 @@ def plot_cdf(rv, ax, label, color, max_=None, drawline_x_l=[]):
 	x_l = np.linspace(rv.l, max_, 100)
 	y_l = [rv.cdf(x) for x in x_l]
 	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=2, mew=2, ms=2) # lw=1, mew=1, ms=1
+
+
+def write_to_file(data, fname):
+	with open(fname, 'w') as f:
+		f.write(data)
+		log(INFO, "done", fname=fname)

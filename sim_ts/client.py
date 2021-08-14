@@ -60,7 +60,7 @@ class Client():
 		self.cl_l = cl_l
 		self.out = out
 
-		self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=2000)
+		self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*20)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0

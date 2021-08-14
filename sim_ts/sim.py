@@ -4,7 +4,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir + '/sim_common')
 sys.path.append(parent_dir)
 
-import simpy
+import simpy, json
 import numpy as np
 
 from rvs import *
@@ -32,10 +32,16 @@ def sim_thompsonSampling(m, num_req_to_finish, num_sim=1):
 			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
 		env.run(until=c_l[0].act_recv)
 
-		t_l = []
+		t_l, w_l = [], []
 		for c in c_l:
 			for req in c.req_finished_l:
-				t_l.append(req.epoch_arrived_client - req.epoch_departed_client)
+				t = req.epoch_arrived_client - req.epoch_departed_client
+				t_l.append(t)
+				w_l.append(t - req.serv_time)
+
+		write_to_file(data=json.dumps(t_l), fname=get_json_file_name(header='sim_ts_resptime'))
+		write_to_file(data=json.dumps(w_l), fname=get_json_file_name(header='sim_ts_waittime'))
+
 		ET = np.mean(t_l)
 		log(INFO, "ET= {}".format(ET))
 		cum_ET += ET
@@ -43,9 +49,16 @@ def sim_thompsonSampling(m, num_req_to_finish, num_sim=1):
 	log(INFO, "done")
 	return cum_ET / num_sim
 
-def sim_ET_vs_m():
+def sim_ET_for_single_m():
 	num_req_to_finish = 5000 # 100
-	num_sim = 2 # 10
+	num_sim = 1 # 2 # 10
+
+	ET = sim_thompsonSampling(m, num_req_to_finish, num_sim=1)
+	log(DEBUG, "done", ET=ET)
+
+def sim_ET_vs_m():
+	num_req_to_finish = 10 # 5000 # 100
+	num_sim = 1 # 2 # 10
 
 	m_l, ET_l = [], []
 	for m in [1, 2, N, 2*N, 3*N]:
@@ -76,4 +89,5 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	sim_ET_vs_m()
+	# sim_ET_vs_m()
+	sim_ET_for_single_m()

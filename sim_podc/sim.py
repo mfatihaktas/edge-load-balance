@@ -4,7 +4,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir + '/sim_common')
 sys.path.append(parent_dir)
 
-import simpy
+import simpy, json
 import numpy as np
 
 from rvs import *
@@ -18,7 +18,7 @@ def sim_PodC(m, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(m)
 
-	cum_ET = 0
+	cum_ET, cum_EW = 0, 0
 	for i in range(num_sim):
 		log(DEBUG, "*** {}th sim run started".format(i))
 
@@ -32,16 +32,23 @@ def sim_PodC(m, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
 			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
 		env.run(until=c_l[0].act_recv)
 
-		t_l = []
+		t_l, w_l = [], []
 		for c in c_l:
 			for req in c.req_finished_l:
-				t_l.append(req.epoch_arrived_client - req.epoch_departed_client)
-		ET = np.mean(t_l)
-		log(INFO, "ET= {}".format(ET))
+				t = req.epoch_arrived_client - req.epoch_departed_client
+				t_l.append(t)
+				w_l.append(t - req.serv_time)
+
+		write_to_file(data=json.dumps(t_l), fname=get_json_file_name(header='sim_podc_resptime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+		write_to_file(data=json.dumps(w_l), fname=get_json_file_name(header='sim_podc_waittime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+
+		ET, EW = np.mean(t_l), np.mean(w_l)
+		log(INFO, "", ET=ET, EW=EW)
 		cum_ET += ET
+		cum_EW += EW
 
 	log(INFO, 'done')
-	return cum_ET / num_sim
+	return cum_ET / num_sim, cum_EW / num_sim
 
 def sim_ET_wrt_p_d():
 	num_req_to_finish = 20000
@@ -56,7 +63,7 @@ def sim_ET_wrt_p_d():
 		d_l.append(d)
 
 		p_controller = InterProbeNumReq_controller_learningWConstInc(num=5, inc=1)
-		ET = sim_PodC(m, d, p_controller, num_req_to_finish, num_sim)
+		ET, EW = sim_PodC(m, d, p_controller, num_req_to_finish, num_sim)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 
@@ -90,7 +97,7 @@ def sim_ET_wrt_p_d():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
+			ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
 			log(INFO, "ET= {}".format(ET))
 			ET_l.append(ET)
 		plot.plot(d_l, ET_l, color=next(light_color), label='p= {}'.format(p), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
@@ -107,6 +114,13 @@ def sim_ET_wrt_p_d():
 
 	log(DEBUG, "done")
 
+def sim_ET_for_single_m():
+	num_req_to_finish = 5000 # 100
+
+	d, p = 2, 5
+	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1)
+	log(DEBUG, "done", ET=ET)
+
 def sim_ET_vs_m():
 	num_req_to_finish = 10000 # 100
 	num_sim = 2 # 10
@@ -119,7 +133,7 @@ def sim_ET_vs_m():
 	# for m in [2]:
 		m_l.append(m)
 
-		ET = sim_PodC(m, d, p, num_req_to_finish, num_sim)
+		ET, EW = sim_PodC(m, d, p, num_req_to_finish, num_sim)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 
@@ -143,5 +157,6 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	sim_ET_wrt_p_d()
+	# sim_ET_wrt_p_d()
 	# sim_ET_vs_m()
+	sim_ET_for_single_m()

@@ -18,7 +18,7 @@ inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen
 serv_rate = 1
 serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 
-N_fluctuating_frac = 0.2
+N_fluctuating_frac = 0 # 0.2
 net_delay = 0
 net_delay_additional = 5
 normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
@@ -32,3 +32,13 @@ def log_sim_config():
 
 def get_inter_req_gen_time_rv(m):
 	return Exp(get_req_gen_rate(m))
+
+def get_json_file_name(header):
+	return header + \
+		     '_N_{}'.format(N) + \
+				 '_n_{}'.format(n) + \
+				 '_m_{}'.format(m) + \
+				 '_ro_{}'.format(ro) + \
+				 '_Nff_{}'.format(N_fluctuating_frac) + \
+				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
+				 '.json'
