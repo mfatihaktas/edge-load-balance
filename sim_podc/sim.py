@@ -23,7 +23,7 @@ def sim_PodC(m, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
 		log(DEBUG, "*** {}th sim run started".format(i))
 
 		env = simpy.Environment()
-		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
+		cl_l = [Cluster('cl{}'.format(i), env, n, ignore_probe_cost) for i in range(N)]
 		c_l = [Client('c{}'.format(i), env, d, interProbeNumReq_controller, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l, initial_cl_id=cl_l[m % N]._id) for i in range(m)]
 		if N_fluctuating_frac:
 			net = Net_wFluctuatingDelay('n', env, [*cl_l, *c_l], net_delay, net_delay_additional, normal_dur_rv, slow_dur_rv)
@@ -48,6 +48,7 @@ def sim_ET_wrt_p_d():
 	num_sim = 3 # 10
 
 	## InterProbeNumReq_controller_learningWConstInc
+	'''
 	log(INFO, "InterProbeNumReq_controller_learningWConstInc")
 	d_l, ET_l = [], []
 	for d in [1, 2, 3, 5, N]:
@@ -72,6 +73,7 @@ def sim_ET_wrt_p_d():
 		plot.gcf().clear()
 
 	plot.plot(d_l, ET_l, color=next(dark_color), label='learning', marker='x', linestyle='dotted', lw=2, mew=3, ms=5)
+	'''
 
 	## InterProbeNumReq_controller_constant
 	log(INFO, "InterProbeNumReq_controller_constant")

@@ -123,14 +123,16 @@ class Net_wFluctuatingDelay(Net):
 			self.dst_id__state_until_m
 
 class Cluster():
-	def __init__(self, _id, env, num_worker, out=None):
+	def __init__(self, _id, env, num_worker, ignore_probe_cost=True, out=None):
 		self._id = _id
 		self.env = env
 		self.num_worker = num_worker
 		self.out = out
 
-		# w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
-		w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+		if ignore_probe_cost:
+			w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+		else:
+			w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
 
 		self.master = Master(_id, env, w_l)
 

@@ -23,11 +23,12 @@ net_delay = 0
 net_delay_additional = 5
 normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
+ignore_probe_cost = True
 
 def log_sim_config():
 	log(INFO, "", N=N, n=n, m=m, ro=ro, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,
 			N_fluctuating_frac=N_fluctuating_frac, net_delay=net_delay, net_delay_additional=net_delay_additional,
-			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv)
+			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv, ignore_probe_cost=ignore_probe_cost)
 
 def get_inter_req_gen_time_rv(m):
 	return Exp(get_req_gen_rate(m))
