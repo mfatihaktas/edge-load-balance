@@ -47,11 +47,11 @@ class InterProbeNumReq_controller_learningWConstInc():
 
 			log(DEBUG, "", ET_prev=self.ET_prev, ET_cur=ET_cur)
 			if ET_cur < self.ET_prev * 0.9:
-				self.num += 1
-			else:
 				self.num -= 1
 				if self.num < 1:
 					self.num = 2
+			else:
+				self.num += 1
 
 			self.ET_prev = ET_cur
 			self.T_cur_l.clear()

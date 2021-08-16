@@ -1,5 +1,10 @@
+import os, sys
+current_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(current_dir + '/sim_common')
+
 from plot_utils import *
 from debug_utils import *
+from sim_config import *
 
 def plot_client(c):
 	fontsize = 14
@@ -58,3 +63,48 @@ def plot_worker(w):
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig("plot_{}_n_over_t.png".format(w._id), bbox_inches='tight')
 	plot.gcf().clear()
+
+def plot_cdf_T_W__podc_vs_ts():
+	d, p = 2, 5
+	subfolder_podc, subfolder_ts = 'sim_podc', 'sim_ts'
+	T_podc_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
+	W_podc_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
+	T_ts_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_ts_resptime'.format(subfolder_ts)))
+	W_ts_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_ts_resptime'.format(subfolder_ts)))
+
+	fontsize = 14
+	fig, axs = plot.subplots(1, 2)
+	figsize = (2*6, 4)
+
+	## CDF of W
+	ax = axs[0]
+	plot.sca(ax)
+	add_cdf(W_podc_l, ax, 'PodC', next(nice_color)) # drawline_x_l=[1000]
+	add_cdf(W_ts_l, ax, 'TS', next(nice_color)) # drawline_x_l=[1000]
+	plot.xscale('log')
+	# plot.xticks(rotation=70)
+	plot.ylabel('Pr{W < x}', fontsize=fontsize)
+	plot.xlabel('x', fontsize=fontsize)
+	plot.legend(fontsize=fontsize)
+
+	## CDF of T
+	ax = axs[1]
+	plot.sca(ax)
+	add_cdf(T_podc_l, ax, 'PodC', next(nice_color))
+	add_cdf(T_ts_l, ax, 'TS', next(nice_color))
+	plot.xscale('log')
+	plot.ylabel('Pr{T < x}', fontsize=fontsize)
+	plot.xlabel('x', fontsize=fontsize)
+	plot.legend(fontsize=fontsize)
+
+	fig.set_size_inches(figsize[0], figsize[1] )
+	plot.subplots_adjust(hspace=0.45, wspace=0.45)
+
+	st = plot.suptitle(r'$N= {}, n= {}, m= {}, \rho= {}, S \sim {}$'.format(N, n, m, ro, serv_time_rv), fontsize=14)
+	plot.savefig("plot_cdf_T_W__podc_vs_ts.png", bbox_extra_artists=(st,), bbox_inches='tight')
+	fig.clear()
+
+	log(DEBUG, "done.")
+
+if __name__ == '__main__':
+	plot_cdf_T_W__podc_vs_ts()

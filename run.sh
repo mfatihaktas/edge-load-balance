@@ -59,6 +59,8 @@ elif [ $1 = 'tr' ]; then
   tcpdump -nn -r tcpdump_s0.pcap | less
 elif [ $1 = 'r' ]; then
   $PY rvs.py
+elif [ $1 = 'p' ]; then
+  $PY plot.py
 else
   echo "Arg did not match!"
 fi

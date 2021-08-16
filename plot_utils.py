@@ -3,7 +3,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 matplotlib.use('Agg')
 import matplotlib.pyplot as plot
-import itertools, scipy
+import itertools, scipy, json
 import numpy as np
 
 from debug_utils import *
@@ -91,9 +91,9 @@ def add_cdf(l, ax, label, color, drawline_x_l=[] ):
 		drawline(x)
 
 	mean, std = np.mean(l), np.std(l)
-	drawline(mean, c='k', ls=':')
-	drawline(mean - std, c='k', ls='--')
-	drawline(mean + std, c='k', ls='--')
+	drawline(mean, ls=':')
+	# drawline(mean - std, c='k', ls='--')
+	# drawline(mean + std, c='k', ls='--')
 
 def ylabel(resource, metric):
   if resource == 'cpu' and metric == 'usage':
@@ -123,8 +123,21 @@ def plot_cdf(rv, ax, label, color, max_=None, drawline_x_l=[]):
 	y_l = [rv.cdf(x) for x in x_l]
 	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=2, mew=2, ms=2) # lw=1, mew=1, ms=1
 
-
 def write_to_file(data, fname):
 	with open(fname, 'w') as f:
 		f.write(data)
 		log(INFO, "done", fname=fname)
+
+def read_from_file(fname):
+	d = None
+	with open(fname, 'r') as f:
+		d = f.read()
+		log(INFO, "done", fname=fname)
+	return d
+
+def read_json_from_file(fname):
+	d = None
+	with open(fname) as f:
+		d = json.load(f)
+		log(INFO, "done", fname=fname)
+	return d

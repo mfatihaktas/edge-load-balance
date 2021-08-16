@@ -21,7 +21,7 @@ class GaussianThompsonSampling_slidingWin():
 			self.arm_id_cost_q.append((arm_id, 0))
 
 	def __repr__(self):
-		return 'GaussianThompsonSampling_slidingWin(arm_id_l= {}, win_len)'.format(self.arm_id_l, self.win_len)
+		return 'GaussianThompsonSampling_slidingWin(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
 
 	def record_cost(self, arm_id, cost):
 		self.arm_id_cost_q.append((arm_id, cost))
@@ -50,6 +50,38 @@ class GaussianThompsonSampling_slidingWin():
 
 		return min_arm_id
 
+class GaussianThompsonSampling_slidingWinAtEachArm():
+	def __init__(self, arm_id_l, win_len):
+		self.arm_id_l = arm_id_l
+		self.win_len = win_len
+
+		self.arm_id__cost_q_m = {i: deque(maxlen=win_len) for i in arm_id_l}
+
+	def __repr__(self):
+		return 'GaussianThompsonSampling_slidingWinAtEachArm(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
+
+	def record_cost(self, arm_id, cost):
+		self.arm_id__cost_q_m[arm_id].append(cost)
+		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
+
+	def sample_arm(self):
+		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
+
+		min_arm_id, min_sample = None, float('Inf')
+		for arm_id, cost_q in arm_id__cost_q_m.items():
+			mean = np.mean(cost_q) if len(cost_q) else 0
+			stdev = np.std(cost_q) if len(cost_q) else 1
+			check(stdev >= 0, "Stdev cannot be negative")
+			if stdev == 0:
+				stdev = 1
+			s = np.random.normal(loc=mean, scale=stdev)
+			if s < min_sample:
+				min_sample = s
+				min_arm_id = arm_id
+				log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, min_arm_id=min_arm_id)
+
+		return min_arm_id
+
 class Client():
 	def __init__(self, _id, env, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self._id = _id
@@ -60,7 +92,8 @@ class Client():
 		self.cl_l = cl_l
 		self.out = out
 
-		self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*20)
+		# self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*20)
+		self.ts = GaussianThompsonSampling_slidingWinAtEachArm([cl._id for cl in cl_l], win_len=20)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0

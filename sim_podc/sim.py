@@ -115,7 +115,7 @@ def sim_ET_wrt_p_d():
 	log(DEBUG, "done")
 
 def sim_ET_for_single_m():
-	num_req_to_finish = 5000 # 100
+	num_req_to_finish = 10 # 5000 # 100
 
 	d, p = 2, 5
 	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1)
