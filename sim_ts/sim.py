@@ -39,8 +39,8 @@ def sim_thompsonSampling(m, num_req_to_finish, num_sim=1):
 				t_l.append(t)
 				w_l.append(t - req.serv_time)
 
-		write_to_file(data=json.dumps(t_l), fname=get_json_file_name(header='sim_ts_resptime'))
-		write_to_file(data=json.dumps(w_l), fname=get_json_file_name(header='sim_ts_waittime'))
+		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_ts_resptime'))
+		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_ts_waittime'))
 
 		ET = np.mean(t_l)
 		log(INFO, "ET= {}".format(ET))
@@ -56,7 +56,7 @@ def sim_ET_for_single_m():
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_m():
-	num_req_to_finish = 5000 # 100
+	num_req_to_finish = 100 # 5000
 	num_sim = 3 # 10
 
 	m_l, ET_l = [], []
@@ -77,7 +77,7 @@ def sim_ET_vs_m():
 	plot.title(r'$N= {}, n= {}$'.format(N, n) + ', ' \
 						 r'$\rho= {}$, $S \sim {}$'.format(ro, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_ts_ET_wrt_m_ro_{}_N_{}_Nff_{}.png".format(ro, N, N_fluctuating_frac), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_ts_ET_wrt_m"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")

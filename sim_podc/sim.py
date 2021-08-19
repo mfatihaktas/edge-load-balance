@@ -39,8 +39,8 @@ def sim_PodC(m, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
 				t_l.append(t)
 				w_l.append(t - req.serv_time)
 
-		write_to_file(data=json.dumps(t_l), fname=get_json_file_name(header='sim_podc_resptime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
-		write_to_file(data=json.dumps(w_l), fname=get_json_file_name(header='sim_podc_waittime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_podc_resptime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_podc_waittime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
 
 		ET, EW = np.mean(t_l), np.mean(w_l)
 		log(INFO, "", ET=ET, EW=EW)
@@ -109,13 +109,13 @@ def sim_ET_wrt_p_d():
 	plot.title(r'$N= {}, n= {}, m= {}$'.format(N, n, m) + '\n' \
 						 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_ET_wrt_p_d_lambda_{}_mu_{}_N_{}_m_{}_Nff_{}_ignoreProbeCost_{}_S_{}.png".format(req_gen_rate, serv_rate, N, m, N_fluctuating_frac, ignore_probe_cost, serv_time_rv), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_ET_wrt_p_d"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
 
 def sim_ET_for_single_m():
-	num_req_to_finish = 100 # 5000
+	num_req_to_finish = 5000 # 100
 
 	d, p = 2, 5
 	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1)
@@ -146,7 +146,7 @@ def sim_ET_vs_m():
 	plot.title(r'$N= {}, n= {}$'.format(N, n) + ', ' \
 						 r'$\rho= {}$, $S \sim {}$'.format(ro, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_podc_ET_vs_m_ro_{}_N_{}_Nff_{}.png".format(ro, N, N_fluctuating_frac), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_podc_ET_vs_m"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")

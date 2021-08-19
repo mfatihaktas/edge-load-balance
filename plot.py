@@ -67,10 +67,10 @@ def plot_worker(w):
 def plot_cdf_T_W__podc_vs_ts():
 	d, p = 2, 5
 	subfolder_podc, subfolder_ts = 'sim_podc', 'sim_ts'
-	T_podc_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
-	W_podc_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
-	T_ts_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_ts_resptime'.format(subfolder_ts)))
-	W_ts_l = read_json_from_file(fname=get_json_file_name(header='{}/sim_ts_resptime'.format(subfolder_ts)))
+	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
+	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
+	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(subfolder_ts)))
+	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(subfolder_ts)))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
@@ -101,7 +101,7 @@ def plot_cdf_T_W__podc_vs_ts():
 	plot.subplots_adjust(hspace=0.45, wspace=0.45)
 
 	st = plot.suptitle(r'$N= {}, n= {}, m= {}, \rho= {}, S \sim {}$'.format(N, n, m, ro, serv_time_rv), fontsize=14)
-	plot.savefig("plot_cdf_T_W__podc_vs_ts.png", bbox_extra_artists=(st,), bbox_inches='tight')
+	plot.savefig("plot_cdf_T_W__podc_vs_ts__{}.png".format(), bbox_extra_artists=(st,), bbox_inches='tight')
 	fig.clear()
 
 	log(DEBUG, "done.")

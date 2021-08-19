@@ -33,13 +33,17 @@ def log_sim_config():
 def get_inter_req_gen_time_rv(m):
 	return Exp(get_req_gen_rate(m))
 
-def get_json_file_name(header):
-	return header + \
-		     '_N_{}'.format(N) + \
+def get_filename_tail():
+	return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
 				 '_ro_{}'.format(ro) + \
 				 '_Nff_{}'.format(N_fluctuating_frac) + \
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
-				 '_S_{}'.format(serv_time_rv) + \
-				 '.json'
+				 '_S_{}'.format(serv_time_rv)
+
+def get_filename_png(header):
+	return header + '__' + get_filename_tail() + '.png'
+
+def get_filename_json(header):
+	return header + '__' + get_filename_tail() + '.json'
