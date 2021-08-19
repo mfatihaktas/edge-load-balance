@@ -168,8 +168,8 @@ class Client():
 					self.num_req_gened - self.num_req_last_probed >= inter_probe_num_req):
 			slog(DEBUG, self.env, self, "started", msg_id=msg._id)
 
-			msg.payload.probe = True
 			self.waiting_for_probe = True
+			msg.payload.probe = True
 			# cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
 			# cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
 			cl_l = random.sample(self.cl_l, self.d)

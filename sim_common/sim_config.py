@@ -23,7 +23,7 @@ net_delay = 0
 net_delay_additional = 5
 normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
-ignore_probe_cost = False # True
+ignore_probe_cost = True
 
 def log_sim_config():
 	log(INFO, "", N=N, n=n, m=m, ro=ro, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,
@@ -41,4 +41,5 @@ def get_json_file_name(header):
 				 '_ro_{}'.format(ro) + \
 				 '_Nff_{}'.format(N_fluctuating_frac) + \
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
+				 '_S_{}'.format(serv_time_rv) + \
 				 '.json'

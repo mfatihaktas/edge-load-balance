@@ -50,7 +50,7 @@ def sim_thompsonSampling(m, num_req_to_finish, num_sim=1):
 	return cum_ET / num_sim
 
 def sim_ET_for_single_m():
-	num_req_to_finish = 100 # 5000
+	num_req_to_finish = 5000 # 100
 
 	ET = sim_thompsonSampling(m, num_req_to_finish, num_sim=1)
 	log(DEBUG, "done", ET=ET)
