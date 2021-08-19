@@ -16,14 +16,14 @@ def get_req_gen_rate(m):
 req_gen_rate = get_req_gen_rate(m)
 inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen_rate])
 serv_rate = 1
-serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate]) # Exp(serv_rate)
 
 N_fluctuating_frac = 0 # 0.2
 net_delay = 0
 net_delay_additional = 5
 normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
-ignore_probe_cost = True
+ignore_probe_cost = False # True
 
 def log_sim_config():
 	log(INFO, "", N=N, n=n, m=m, ro=ro, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,

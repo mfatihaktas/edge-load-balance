@@ -109,7 +109,7 @@ def sim_ET_wrt_p_d():
 	plot.title(r'$N= {}, n= {}, m= {}$'.format(N, n, m) + '\n' \
 						 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig("plot_ET_wrt_p_d_lambda_{}_mu_{}_N_{}_m_{}_Nff_{}.png".format(req_gen_rate, serv_rate, N, m, N_fluctuating_frac), bbox_inches='tight')
+	plot.savefig("plot_ET_wrt_p_d_lambda_{}_mu_{}_N_{}_m_{}_Nff_{}_ignoreProbeCost_{}_S_{}.png".format(req_gen_rate, serv_rate, N, m, N_fluctuating_frac, ignore_probe_cost, serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
