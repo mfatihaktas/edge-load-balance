@@ -68,9 +68,9 @@ def plot_cdf_T_W__podc_vs_ts():
 	d, p = 2, 5
 	subfolder_podc, subfolder_ts = 'sim_podc', 'sim_ts'
 	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
-	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
+	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_waittime_d_{}_p_{}'.format(subfolder_podc, d, p)))
 	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(subfolder_ts)))
-	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(subfolder_ts)))
+	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_waittime'.format(subfolder_ts)))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)

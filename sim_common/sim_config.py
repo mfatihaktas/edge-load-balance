@@ -16,7 +16,7 @@ def get_req_gen_rate(m):
 req_gen_rate = get_req_gen_rate(m)
 inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen_rate])
 serv_rate = 1
-serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate]) # Exp(serv_rate)
+serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 
 N_fluctuating_frac = 0 # 0.2
 net_delay = 0
