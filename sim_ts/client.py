@@ -68,7 +68,7 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
 
 		min_arm_id, min_sample = None, float('Inf')
-		for arm_id, cost_q in arm_id__cost_q_m.items():
+		for arm_id, cost_q in self.arm_id__cost_q_m.items():
 			mean = np.mean(cost_q) if len(cost_q) else 0
 			stdev = np.std(cost_q) if len(cost_q) else 1
 			check(stdev >= 0, "Stdev cannot be negative")
