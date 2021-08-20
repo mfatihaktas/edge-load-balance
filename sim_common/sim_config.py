@@ -19,10 +19,12 @@ serv_rate = 1
 serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 
 N_fluctuating_frac = 0.05 # 0 # 0.2
-net_delay = 0
-net_delay_additional = 5
-normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
-slow_dur_rv = DiscreteRV(p_l=[1], v_l=[100])
+# net_delay = 0
+# net_delay_additional = 5
+net_speed = 10 * serv_rate * n
+net_slowdown = 10
+normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
+slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
 def log_sim_config():
@@ -33,12 +35,17 @@ def log_sim_config():
 def get_inter_req_gen_time_rv(m):
 	return Exp(get_req_gen_rate(m))
 
+def get_plot_title():
+	return r'$N= {}, n= {}, N_f= {}, m= {}$'.format(N, n, int(N * N_fluctuating_frac), m) + '\n' + \
+				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
+
 def get_filename_tail():
 	return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
 				 '_ro_{}'.format(ro) + \
 				 '_Nff_{}'.format(N_fluctuating_frac) + \
+				 '_netSlowdown_{}'.format(net_slowdown) + \
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
 				 '_S_{}'.format(serv_time_rv)
 

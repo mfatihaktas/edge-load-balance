@@ -25,11 +25,9 @@ def sim_thompsonSampling(m, num_req_to_finish, num_sim=1):
 		env = simpy.Environment()
 		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
 		c_l = [Client('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
+		net = Net_FCFS('n', env, [*cl_l, *c_l], net_speed)
 		if N_fluctuating_frac:
-			net = Net_wFluctuatingDelay('n', env, [*cl_l, *c_l], net_delay, net_delay_additional, normal_dur_rv, slow_dur_rv)
-			net.reg_as_fluctuating(random.sample(cl_l, int(N * N_fluctuating_frac)))
-		else:
-			net = Net_wConstantDelay('n', env, [*cl_l, *c_l], net_delay)
+			net.reg_as_fluctuating(random.sample(cl_l, int(N * N_fluctuating_frac)), net_slowdown, normal_dur_rv, slow_dur_rv)
 		env.run(until=c_l[0].act_recv)
 
 		t_l, w_l = [], []
@@ -74,8 +72,7 @@ def sim_ET_vs_m():
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$m$', fontsize=fontsize)
-	plot.title(r'$N= {}, n= {}$'.format(N, n) + ', ' \
-						 r'$\rho= {}$, $S \sim {}$'.format(ro, serv_time_rv))
+	plot.title(get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png("plot_ts_ET_wrt_m"), bbox_inches='tight')
 	plot.gcf().clear()
