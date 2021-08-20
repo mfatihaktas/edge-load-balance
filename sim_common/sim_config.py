@@ -18,7 +18,7 @@ inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen
 serv_rate = 1
 serv_time_rv = Exp(serv_rate) # DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 
-N_fluctuating_frac = 0 # 0.2
+N_fluctuating_frac = 0.05 # 0 # 0.2
 net_delay = 0
 net_delay_additional = 5
 normal_dur_rv = DiscreteRV(p_l=[1], v_l=[200])
