@@ -13,10 +13,10 @@ from cluster import *
 
 from sim_config import *
 
-def sim_PodC(m, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
-	log(DEBUG, "started", d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
+	log(DEBUG, "started", ro=ro, d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 
-	inter_req_gen_time_rv = get_inter_req_gen_time_rv(m)
+	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
 	cum_ET, cum_EW = 0, 0
 	for i in range(num_sim):
@@ -116,29 +116,29 @@ def sim_ET_for_single_m():
 	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1)
 	log(DEBUG, "done", ET=ET)
 
-def sim_ET_vs_m():
+def sim_ET_vs_ro():
 	num_req_to_finish = 10000 # 100
 	num_sim = 2 # 10
 
 	d = 2
-	p = 50
+	p = 10
 
-	m_l, ET_l = [], []
-	for m in [1, 2, N, 2*N, 3*N]:
-	# for m in [2]:
-		m_l.append(m)
+	ro_l, ET_l = [], []
+	for ro in [0.2, 0.5, 0.8]:
+		log(INFO, "> ro= {}".format(ro))
+		ro_l.append(ro)
 
-		ET, EW = sim_PodC(m, d, p, num_req_to_finish, num_sim)
+		ET, EW = sim_PodC(ro, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 
-	plot.plot(m_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
-	plot.xlabel(r'$m$', fontsize=fontsize)
-	plot.title(get_plot_title())
+	plot.xlabel(r'$\rho$', fontsize=fontsize)
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png("plot_podc_ET_vs_m"), bbox_inches='tight')
 	plot.gcf().clear()
@@ -152,5 +152,5 @@ if __name__ == '__main__':
 	log_sim_config()
 
 	# sim_ET_wrt_p_d()
-	# sim_ET_vs_m()
-	sim_ET_for_single_m()
+	sim_ET_vs_ro()
+	# sim_ET_for_single_m()
