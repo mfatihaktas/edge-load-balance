@@ -27,6 +27,9 @@ class Msg():
 		self.src_id = src_id
 		self.dst_id = dst_id
 
+		## TODO: Might want to make this more explicit
+		self.size = payload.serv_time
+
 	def __repr__(self):
 		return "Msg(id= {} \n\t payload= {} \n\t src_id= {} \n\t dst_id= {})".format(self._id, self.payload, self.src_id, self.dst_id)
 
@@ -37,6 +40,8 @@ class Payload():
 	def __init__(self, _id, p_typ):
 		self._id = _id
 		self.p_typ = p_typ
+
+		self.serv_time = 1
 
 	def is_req(self):
 		return self.p_typ == 'r'

@@ -127,6 +127,8 @@ class Net_FCFS(Net):
 
 		self.dst_id__state_m = None
 
+		self.act = env.process(self.run())
+
 	def reg_as_fluctuating(self, node_l, slowdown, normal_dur_rv, slow_dur_rv):
 		self.dst_id__state_m = {}
 		for node in node_l:
@@ -146,7 +148,7 @@ class Net_FCFS(Net):
 					slog(DEBUG, self.env, self, "slow", msg_dst_id=msg.dst_id)
 					speed /= self.slowdown
 
-			t = msg.payload.serv_time / speed
+			t = msg.size / speed
 			slog(DEBUG, self.env, self, "serving", t=t)
 			yield self.env.timeout(t)
 
