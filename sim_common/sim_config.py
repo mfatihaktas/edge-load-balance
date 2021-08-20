@@ -11,10 +11,10 @@ m = 2 * N
 serv_rate = 1
 ro = 0.8
 
-def get_req_gen_rate(m):
+def get_req_gen_rate(ro, m):
 	return round(ro * N * n * serv_rate / m, 2)
 
-req_gen_rate = get_req_gen_rate(m)
+req_gen_rate = get_req_gen_rate(ro, m)
 inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen_rate])
 serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate]) # Exp(serv_rate)
 
@@ -32,8 +32,8 @@ def log_sim_config():
 			N_fluctuating_frac=N_fluctuating_frac, net_speed=net_speed, net_slowdown=net_slowdown,
 			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv, ignore_probe_cost=ignore_probe_cost)
 
-def get_inter_req_gen_time_rv(m):
-	return Exp(get_req_gen_rate(m))
+def get_inter_req_gen_time_rv(ro, m):
+	return Exp(get_req_gen_rate(ro, m))
 
 def get_plot_title():
 	return r'$N= {}, n= {}, N_f= {}, m= {}$'.format(N, n, int(N * N_fluctuating_frac), m) + '\n' + \
