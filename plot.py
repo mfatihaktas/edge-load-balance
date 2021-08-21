@@ -100,7 +100,7 @@ def plot_cdf_T_W__podc_vs_ts():
 	fig.set_size_inches(figsize[0], figsize[1] )
 	plot.subplots_adjust(hspace=0.45, wspace=0.45)
 
-	st = plot.suptitle(r'$N= {}, n= {}, m= {}, \rho= {}, S \sim {}$'.format(N, n, m, ro, serv_time_rv), fontsize=14)
+	st = plot.suptitle(r'$d= {}, p= {}, N= {}, n= {}, m= {}, \rho= {}, S \sim {}$'.format(d, p, N, n, m, ro, serv_time_rv), fontsize=14)
 	plot.savefig(get_filename_png("plot_cdf_T_W__podc_vs_ts"), bbox_extra_artists=(st,), bbox_inches='tight')
 	fig.clear()
 

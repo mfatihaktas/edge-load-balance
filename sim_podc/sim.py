@@ -139,7 +139,7 @@ def sim_ET_vs_ro():
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
 	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png("plot_podc_ET_vs_m"), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_podc_ET_vs_ro"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
