@@ -12,6 +12,7 @@ from client import *
 from cluster import *
 
 from sim_config import *
+from sim_utils import *
 
 def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1):
 	log(DEBUG, "started", ro=ro, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
@@ -23,11 +24,9 @@ def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1):
 		log(DEBUG, "*** {}th sim run started".format(i))
 
 		env = simpy.Environment()
-		cl_l = [Cluster('cl{}'.format(i), env, num_worker=n) for i in range(N)]
+		cl_l = get_cl_l(env)
 		c_l = [Client('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
-		net = Net_FCFS('n', env, [*cl_l, *c_l], net_speed)
-		if N_fluctuating_frac:
-			net.reg_as_fluctuating(random.sample(cl_l, int(N * N_fluctuating_frac)), net_slowdown, normal_dur_rv, slow_dur_rv)
+		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
 		t_l, w_l = [], []
@@ -48,7 +47,7 @@ def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1):
 	return cum_ET / num_sim
 
 def sim_ET_for_single_m():
-	num_req_to_finish = 10000 # 100
+	num_req_to_finish = 10 # 10000 # 100
 
 	ET = sim_thompsonSampling(m, num_req_to_finish, num_sim=1)
 	log(DEBUG, "done", ET=ET)
@@ -85,5 +84,5 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	sim_ET_vs_ro()
-	# sim_ET_for_single_m()
+	# sim_ET_vs_ro()
+	sim_ET_for_single_m()

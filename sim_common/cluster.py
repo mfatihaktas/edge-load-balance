@@ -21,6 +21,7 @@ class Net():
 			self.id_out_m[n._id] = n
 
 		self.msg_s = simpy.Store(env)
+		self.act = env.process(self.run())
 
 	def __repr__(self):
 		return "Net(id= {})".format(self._id)
@@ -30,139 +31,26 @@ class Net():
 		msg.epoch_arrived_net = self.env.now
 		self.msg_s.put(msg)
 
-## TODO: The following does not really incur constant delay on every request
-class Net_wConstantDelay(Net):
-	def __init__(self, _id, env, node_l, delay):
-		super().__init__(_id, env, node_l)
-		self.delay = delay
-
-		self.act = env.process(self.run())
-
 	def run(self):
 		while True:
 			msg = yield self.msg_s.get()
 			slog(DEBUG, self.env, self, "forwarding", msg=msg)
 
-			t = self.delay - (self.env.now - msg.epoch_arrived_net)
-			if t > 0:
-				slog(DEBUG, self.env, self, "delaying", msg=msg, t=t)
-				yield self.env.timeout(t)
-
+			check(msg.dst_id in self.id_out_m, "Msg arrived for unreged destination", msg_dst_id=msg.dst_id, id_out_m=self.id_out_m)
 			self.id_out_m[msg.dst_id].put(msg)
 
-class FluctuatingState():
-	def __init__(self, env, normal_dur_rv, slow_dur_rv):
-		self.env = env
-		self.normal_dur_rv = normal_dur_rv
-		self.slow_dur_rv = slow_dur_rv
-
-		self.state = 'n'
-
-		self.act = env.process(self.run())
-
-	def __repr__(self):
-		return "FluctuatingState({})".format(self.state)
-
-	def is_slow(self):
-		return self.state == 's'
-
-	def run(self):
-		while True:
-			if self.state == 'n':
-				dur = self.normal_dur_rv.sample()
-				slog(DEBUG, self.env, self, "will be normal", dur=dur)
-				yield self.env.timeout(dur)
-
-				self.state = 's'
-			elif self.state == 's': # slow
-				dur = self.slow_dur_rv.sample()
-				slog(DEBUG, self.env, self, "will be slow", dur=dur)
-				yield self.env.timeout(dur)
-
-				self.state = 'n'
-			else:
-				assert_("Unexpected state", state=self.state)
-
-class Net_wFluctuatingDelay(Net):
-	def __init__(self, _id, env, node_l, delay, delay_additional, normal_dur_rv, slow_dur_rv):
-		super().__init__(_id, env, node_l)
-		self.delay = delay
-		self.delay_additional = delay_additional
-		self.normal_dur_rv = normal_dur_rv
-		self.slow_dur_rv = slow_dur_rv
-
-		self.dst_id__state_m = {}
-
-		self.act = env.process(self.run())
-
-	def reg_as_fluctuating(self, node_l):
-		for node in node_l:
-			self.dst_id__state_m[node._id] = FluctuatingState(self.env, self.normal_dur_rv, self.slow_dur_rv)
-		log(DEBUG, "reged", dst_id__state_m=self.dst_id__state_m)
-
-	def run(self):
-		while True:
-			msg = yield self.msg_s.get()
-			slog(DEBUG, self.env, self, "forwarding", msg=msg)
-
-			t = self.delay - (self.env.now - msg.epoch_arrived_net)
-			check(t >= 0, "Net delay minus the time spent in the net cannot be negative")
-			if t > 0:
-				slog(DEBUG, self.env, self, "delaying", msg=msg, t=t)
-				yield self.env.timeout(t)
-
-			dst_id = msg.dst_id
-			if dst_id in self.dst_id__state_m:
-				state = self.dst_id__state_m[dst_id]
-				if state.is_slow():
-					slog(DEBUG, self.env, self, "delaying additional", msg=msg, delay_additional=self.delay_additional)
-					yield self.env.timeout(self.delay_additional)
-
-			self.id_out_m[dst_id].put(msg)
-
-class Net_FCFS(Net):
-	def __init__(self, _id, env, node_l, speed):
-		super().__init__(_id, env, node_l)
-		self.speed = speed
-
-		self.dst_id__state_m = None
-
-		self.act = env.process(self.run())
-
-	def reg_as_fluctuating(self, node_l, slowdown, normal_dur_rv, slow_dur_rv):
-		self.dst_id__state_m = {}
-		for node in node_l:
-			self.dst_id__state_m[node._id] = FluctuatingState(self.env, self.normal_dur_rv, self.slow_dur_rv)
-		log(DEBUG, "reged", dst_id__state_m=self.dst_id__state_m)
-
-	def run(self):
-		while True:
-			msg = yield self.msg_s.get()
-			slog(DEBUG, self.env, self, "forwarding", msg=msg)
-
-			speed = self.speed
-			dst_id = msg.dst_id
-			if self.dst_id__state_m is not None and dst_id in self.dst_id__state_m:
-				state = self.dst_id__state_m[dst_id]
-				if state.is_slow():
-					slog(DEBUG, self.env, self, "slow", msg_dst_id=msg.dst_id)
-					speed /= self.slowdown
-
-			t = msg.size / speed
-			slog(DEBUG, self.env, self, "serving", t=t)
-			yield self.env.timeout(t)
-
-			self.id_out_m[dst_id].put(msg)
-
 class Cluster():
-	def __init__(self, _id, env, num_worker, ignore_probe_cost=True, out=None):
+	def __init__(self, _id, env, num_worker, ignore_probe_cost=True, slowdown=1, normal_dur_rv=None, slow_dur_rv=None, out=None):
 		self._id = _id
 		self.env = env
 		self.num_worker = num_worker
 		self.out = out
 
 		if ignore_probe_cost:
-			w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+			if slowdown > 1:
+				w_l = [Worker_wFluctuatingSpeed('{}-w{}'.format(_id, i), env, slowdown, normal_dur_rv, slow_dur_rv, self.out) for i in range(num_worker)]
+			else:
+				w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
 		else:
 			w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
 
