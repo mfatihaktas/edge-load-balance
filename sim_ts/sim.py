@@ -57,7 +57,7 @@ def sim_ET_vs_ro():
 	num_sim = 2 # 10
 
 	ro_l, ET_l = [], []
-	for ro in [0.2, 0.5, 0.8]:
+	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
@@ -84,5 +84,5 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	# sim_ET_vs_ro()
-	sim_ET_for_single_m()
+	sim_ET_vs_ro()
+	# sim_ET_for_single_m()

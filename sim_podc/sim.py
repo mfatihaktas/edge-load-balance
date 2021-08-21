@@ -123,7 +123,7 @@ def sim_ET_vs_ro():
 	p = 10
 
 	ro_l, ET_l = [], []
-	for ro in [0.2, 0.5, 0.8]:
+	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
@@ -137,7 +137,7 @@ def sim_ET_vs_ro():
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
-	plot.title(r'$d= {}, p= {}$'.format(d, p) + get_plot_title())
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png("plot_podc_ET_vs_m"), bbox_inches='tight')
 	plot.gcf().clear()
