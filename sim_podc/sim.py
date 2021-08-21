@@ -14,7 +14,7 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
+def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write_to_json=False):
 	log(DEBUG, "started", ro=ro, d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
@@ -36,8 +36,9 @@ def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1):
 				t_l.append(t)
 				w_l.append(t - req.serv_time)
 
-		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_podc_resptime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
-		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_podc_waittime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+		if write_to_json:
+			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_podc_resptime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_podc_waittime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
 
 		ET, EW = np.mean(t_l), np.mean(w_l)
 		log(INFO, "", ET=ET, EW=EW)
@@ -109,10 +110,10 @@ def sim_ET_wrt_p_d():
 	log(DEBUG, "done")
 
 def sim_ET_for_single_m():
-	num_req_to_finish = 10 # 10000 # 100
+	num_req_to_finish = 10000 # 100
 
 	d, p = 2, 5
-	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1)
+	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():

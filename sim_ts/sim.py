@@ -14,7 +14,7 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1):
+def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1, write_to_json=False):
 	log(DEBUG, "started", ro=ro, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
@@ -36,8 +36,9 @@ def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1):
 				t_l.append(t)
 				w_l.append(t - req.serv_time)
 
-		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_ts_resptime'))
-		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_ts_waittime'))
+		if write_to_json:
+			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_ts_resptime'))
+			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_ts_waittime'))
 
 		ET = np.mean(t_l)
 		log(INFO, "ET= {}".format(ET))
@@ -47,9 +48,9 @@ def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1):
 	return cum_ET / num_sim
 
 def sim_ET_for_single_m():
-	num_req_to_finish = 10 # 10000 # 100
+	num_req_to_finish = 10000 # 100
 
-	ET = sim_thompsonSampling(m, num_req_to_finish, num_sim=1)
+	ET = sim_thompsonSampling(m, num_req_to_finish, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
@@ -84,5 +85,5 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	sim_ET_vs_ro()
-	# sim_ET_for_single_m()
+	# sim_ET_vs_ro()
+	sim_ET_for_single_m()
