@@ -19,7 +19,7 @@ def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1, write_to_json=False):
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
-	cum_ET = 0
+	cum_ET, cum_EW = 0, 0
 	for i in range(num_sim):
 		log(DEBUG, "*** {}th sim run started".format(i))
 
@@ -55,7 +55,7 @@ def sim_ET_for_single_m():
 	log(DEBUG, "done", ET=ET, EW=EW)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000
+	num_req_to_finish = 10 # 10000
 	num_sim = 2 # 10
 
 	ro_l, ET_l, EW_l = [], [], []

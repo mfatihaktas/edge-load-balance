@@ -15,7 +15,7 @@ from sim_config import *
 from sim_utils import *
 
 def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write_to_json=False):
-	log(DEBUG, "started", ro=ro, d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+	log(DEBUG, "started", ro=ro, d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, num_sim=num_sim, write_to_json=write_to_json)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
