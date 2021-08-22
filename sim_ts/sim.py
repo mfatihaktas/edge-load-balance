@@ -40,33 +40,39 @@ def sim_thompsonSampling(ro, num_req_to_finish, num_sim=1, write_to_json=False):
 			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_ts_resptime'))
 			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_ts_waittime'))
 
-		ET = np.mean(t_l)
-		log(INFO, "ET= {}".format(ET))
+		ET, EW = np.mean(t_l), np.mean(w_l)
+		log(INFO, "", ET=ET, EW=EW)
 		cum_ET += ET
+		cum_EW += EW
 
 	log(INFO, "done")
-	return cum_ET / num_sim
+	return cum_ET / num_sim, cum_EW / num_sim
 
 def sim_ET_for_single_m():
 	num_req_to_finish = 10000 # 100
 
-	ET = sim_thompsonSampling(m, num_req_to_finish, num_sim=1, write_to_json=True)
-	log(DEBUG, "done", ET=ET)
+	ET, EW = sim_thompsonSampling(m, num_req_to_finish, num_sim=1, write_to_json=True)
+	log(DEBUG, "done", ET=ET, EW=EW)
 
 def sim_ET_vs_ro():
 	num_req_to_finish = 10000
 	num_sim = 2 # 10
 
-	ro_l, ET_l = [], []
+	ro_l, ET_l, EW_l = [], [], []
 	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET = sim_thompsonSampling(ro, num_req_to_finish, num_sim)
-		log(INFO, "ET= {}".format(ET))
+		ET, EW = sim_thompsonSampling(ro, num_req_to_finish, num_sim)
+		log(INFO, "", ET=ET, EW=EW)
 		ET_l.append(ET)
+		EW_l.append(EW)
+
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ts_ro_ET_l'))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ts_ro_EW_l'))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+	plot.plot(ro_l, EW_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
@@ -85,5 +91,5 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	# sim_ET_vs_ro()
-	sim_ET_for_single_m()
+	sim_ET_vs_ro()
+	# sim_ET_for_single_m()

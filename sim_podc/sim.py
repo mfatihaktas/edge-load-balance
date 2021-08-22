@@ -112,7 +112,7 @@ def sim_ET_wrt_p_d():
 def sim_ET_for_single_m():
 	num_req_to_finish = 10000 # 100
 
-	d, p = 2, 5
+	d, p = 2, 10
 	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET)
 
@@ -123,7 +123,7 @@ def sim_ET_vs_ro():
 	d = 2
 	p = 10
 
-	ro_l, ET_l = [], []
+	ro_l, ET_l, EW_l = [], [], []
 	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
@@ -131,6 +131,10 @@ def sim_ET_vs_ro():
 		ET, EW = sim_PodC(ro, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
+		EW_l.append(EW)
+
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='podc_ro_ET_l_d_{}_p_{}'.format(d, p)))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='podc_ro_EW_l_d_{}_p_{}'.format(d, p)))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
@@ -152,5 +156,5 @@ if __name__ == '__main__':
 	log_sim_config()
 
 	# sim_ET_wrt_p_d()
-	# sim_ET_vs_ro()
-	sim_ET_for_single_m()
+	sim_ET_vs_ro()
+	# sim_ET_for_single_m()

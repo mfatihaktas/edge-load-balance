@@ -36,7 +36,7 @@ class Net():
 			msg = yield self.msg_s.get()
 			slog(DEBUG, self.env, self, "forwarding", msg=msg)
 
-			check(msg.dst_id in self.id_out_m, "Msg arrived for unreged destination", msg_dst_id=msg.dst_id, id_out_m=self.id_out_m)
+			check(msg.dst_id in self.id_out_m, "Msg arrived for an unreged destination", msg_dst_id=msg.dst_id, id_out_m=self.id_out_m)
 			self.id_out_m[msg.dst_id].put(msg)
 
 class Cluster():

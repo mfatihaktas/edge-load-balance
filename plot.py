@@ -64,13 +64,14 @@ def plot_worker(w):
 	plot.savefig("plot_{}_n_over_t.png".format(w._id), bbox_inches='tight')
 	plot.gcf().clear()
 
+SUBFOLDER_PODC, SUBFOLDER_TS = 'sim_podc', 'sim_ts'
+d, p = 2, 10
+
 def plot_cdf_T_W__podc_vs_ts():
-	d, p = 2, 5
-	subfolder_podc, subfolder_ts = 'sim_podc', 'sim_ts'
-	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(subfolder_podc, d, p)))
-	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_waittime_d_{}_p_{}'.format(subfolder_podc, d, p)))
-	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(subfolder_ts)))
-	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_waittime'.format(subfolder_ts)))
+	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_waittime_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(SUBFOLDER_TS)))
+	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_waittime'.format(SUBFOLDER_TS)))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
@@ -106,5 +107,31 @@ def plot_cdf_T_W__podc_vs_ts():
 
 	log(DEBUG, "done.")
 
+def plot_ET_vs_ro():
+	podc_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	ts_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/ts_ro_ET_l'.format(SUBFOLDER_TS)))
+
+	def plot_(ro_ET_l, label):
+		ro_l, ET_l = [], []
+		for ro, ET in ro_ET_l:
+			ro_l.append(ro)
+			ET_l.append(ET)
+		plot.plot(ro_l, ET_l, label=label, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+
+	plot_(podc_ro_ET_l, label='PodC')
+	plot_(ts_ro_ET_l, label='TS')
+
+	fontsize = 14
+	plot.legend(fontsize=fontsize)
+	plot.ylabel(r'$E[T]$', fontsize=fontsize)
+	plot.xlabel(r'$\rho$', fontsize=fontsize)
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title())
+	plot.gcf().set_size_inches(6, 4)
+	plot.savefig(get_filename_png("plot_ET_vs_ro"), bbox_inches='tight')
+	plot.gcf().clear()
+
+	log(DEBUG, "done.")
+
 if __name__ == '__main__':
-	plot_cdf_T_W__podc_vs_ts()
+	# plot_cdf_T_W__podc_vs_ts()
+	plot_ET_vs_ro()
