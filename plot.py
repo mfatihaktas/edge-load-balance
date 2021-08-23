@@ -68,10 +68,10 @@ SUBFOLDER_PODC, SUBFOLDER_TS = 'sim_podc', 'sim_ts'
 d, p = 2, 10
 
 def plot_cdf_T_W__podc_vs_ts():
-	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_resptime_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_waittime_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_resptime'.format(SUBFOLDER_TS)))
-	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_waittime'.format(SUBFOLDER_TS)))
+	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_T_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_W_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_T_l'.format(SUBFOLDER_TS)))
+	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_W_l'.format(SUBFOLDER_TS)))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)

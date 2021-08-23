@@ -37,8 +37,8 @@ def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, w
 				w_l.append(t - req.serv_time)
 
 		if write_to_json:
-			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_podc_resptime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
-			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_podc_waittime_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_podc_T_l_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_podc_W_l_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
 
 		ET, EW = np.mean(t_l), np.mean(w_l)
 		log(INFO, "", ET=ET, EW=EW)
