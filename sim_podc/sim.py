@@ -49,14 +49,15 @@ def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, w
 	return cum_ET / num_sim, cum_EW / num_sim
 
 def sim_ET_wrt_p_d():
-	num_req_to_finish = 20000
-	num_sim = 3 # 10
+	num_req_to_finish = 10000
+	num_sim = 2 # 10
 
 	## InterProbeNumReq_controller_learningWConstInc
-	'''
+	# '''
 	log(INFO, "InterProbeNumReq_controller_learningWConstInc")
 	d_l, ET_l = [], []
-	for d in [1, 2, 3, 5, N]:
+	for d in [1, 2, 5, N]:
+	# for d in [1, 2, 3, 5, N]:
 		log(INFO, "> d= {}".format(d))
 		d_l.append(d)
 
@@ -76,16 +77,18 @@ def sim_ET_wrt_p_d():
 		plot.gcf().clear()
 
 	plot.plot(d_l, ET_l, color=next(dark_color), label='learning', marker='x', linestyle='dotted', lw=2, mew=3, ms=5)
-	'''
+	# '''
 
 	## InterProbeNumReq_controller_constant
 	log(INFO, "InterProbeNumReq_controller_constant")
-	for p in [5, 10, 20, 50, 200, 1000, 2000]:
+	for p in [5, 50, 1000]:
+	# for p in [5, 10, 20, 50, 200, 1000, 2000]:
 	# for p in [2]:
 		log(INFO, ">> p= {}".format(p))
 
 		d_l, ET_l = [], []
-		for d in [1, 2, 3, 5, N]:
+		for d in [1, 2, 3, N]:
+		# for d in [1, 2, 3, 5, N]:
 		# for d in [1, 2, 3, *numpy.arange(5, N + 1, 4)]:
 		# for d in range(1, N + 1):
 		# for d in [2]:
@@ -155,6 +158,6 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	# sim_ET_wrt_p_d()
-	sim_ET_vs_ro()
+	sim_ET_wrt_p_d()
+	# sim_ET_vs_ro()
 	# sim_ET_for_single_m()
