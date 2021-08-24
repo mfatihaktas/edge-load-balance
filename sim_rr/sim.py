@@ -5,7 +5,6 @@ sys.path.append(parent_dir + '/sim_common')
 sys.path.append(parent_dir)
 
 import simpy, json
-import numpy as np
 
 from rvs import *
 from client import *
@@ -14,8 +13,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_ts(num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
-	log(DEBUG, "started", ro=ro, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+def sim_rr(num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
+	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, num_sim=num_sim, write_to_json=write_to_json, ro=ro)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -25,7 +24,7 @@ def sim_ts(num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
 
 		env = simpy.Environment()
 		cl_l = get_cl_l(env)
-		c_l = [Client('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
+		c_l = [Client_RR('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
@@ -37,25 +36,26 @@ def sim_ts(num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
 				w_l.append(t - req.serv_time)
 
 		if write_to_json:
-			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_ts_T_l'))
-			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_ts_W_l'))
+			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_rr_T_l_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
+			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_rr_W_l_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
 
 		ET, EW = np.mean(t_l), np.mean(w_l)
 		log(INFO, "", ET=ET, EW=EW)
 		cum_ET += ET
 		cum_EW += EW
 
-	log(INFO, "done")
+	log(INFO, 'done')
 	return cum_ET / num_sim, cum_EW / num_sim
 
-def sim_ET_single_run():
+def sim_ET_for_single_m():
 	num_req_to_finish = 10000 # 100
 
-	ET, EW = sim_ts(num_req_to_finish, num_sim=1, write_to_json=True)
-	log(DEBUG, "done", ET=ET, EW=EW)
+	d, p = 2, 10
+	ET, EW = sim_rr(num_req_to_finish, write_to_json=True)
+	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000
+	num_req_to_finish = 10 # 10000 # 100
 	num_sim = 2 # 10
 
 	ro_l, ET_l, EW_l = [], [], []
@@ -63,16 +63,15 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_ts(num_req_to_finish, ro, num_sim)
-		log(INFO, "", ET=ET, EW=EW)
+		ET, EW = sim_rr(num_req_to_finish, num_sim, ro=ro)
+		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ts_ro_ET_l'))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ts_ro_EW_l'))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='rr_ro_ET_l'))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='rr_ro_EW_l'))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
-	plot.plot(ro_l, EW_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
@@ -80,7 +79,7 @@ def sim_ET_vs_ro():
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
 	plot.title(get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png("plot_ts_ET_vs_ro"), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_rr_ET_vs_ro"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -91,5 +90,5 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
+	# sim_ET_for_single_m()
 	sim_ET_vs_ro()
-	# sim_ET_single_run()

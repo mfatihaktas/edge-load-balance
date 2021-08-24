@@ -14,8 +14,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_PodC(ro, d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write_to_json=False):
-	log(DEBUG, "started", ro=ro, d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, num_sim=num_sim, write_to_json=write_to_json)
+def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
+	log(DEBUG, "started", d=d, interProbeNumReq_controller=interProbeNumReq_controller, ro=ro, num_req_to_finish=num_req_to_finish, num_sim=num_sim, write_to_json=write_to_json)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -62,7 +62,7 @@ def sim_ET_wrt_p_d():
 		d_l.append(d)
 
 		p_controller = InterProbeNumReq_controller_learningWConstInc(num=5, inc=1)
-		ET, EW = sim_PodC(m, d, p_controller, num_req_to_finish, num_sim)
+		ET, EW = sim_podc(d, p_controller, num_req_to_finish, num_sim)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 
@@ -96,7 +96,7 @@ def sim_ET_wrt_p_d():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
+			ET, EW = sim_podc(d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
 			log(INFO, "ET= {}".format(ET))
 			ET_l.append(ET)
 		plot.plot(d_l, ET_l, color=next(light_color), label='p= {}'.format(p), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
@@ -112,11 +112,11 @@ def sim_ET_wrt_p_d():
 
 	log(DEBUG, "done")
 
-def sim_ET_for_single_m():
+def sim_ET_single_run():
 	num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, EW = sim_PodC(m, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1, write_to_json=True)
+	ET, EW = sim_podc(d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
@@ -131,7 +131,7 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_PodC(ro, d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
+		ET, EW = sim_podc(d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim, ro=ro)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 		EW_l.append(EW)
@@ -160,4 +160,4 @@ if __name__ == '__main__':
 
 	sim_ET_wrt_p_d()
 	# sim_ET_vs_ro()
-	# sim_ET_for_single_m()
+	# sim_ET_single_run()
