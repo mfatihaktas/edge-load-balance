@@ -158,6 +158,6 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	sim_ET_wrt_p_d()
-	# sim_ET_vs_ro()
+	# sim_ET_wrt_p_d()
 	# sim_ET_single_run()
+	sim_ET_vs_ro()

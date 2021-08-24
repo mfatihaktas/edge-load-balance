@@ -19,7 +19,9 @@ inter_req_gen_time_rv = Exp(req_gen_rate) # DiscreteRV(p_l=[1], v_l=[1 / req_gen
 serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 # serv_time_rv = Exp(serv_rate)
 
-N_fluctuating_frac = 0 # 0.3
+N_fluctuating_frac = 0
+# N_fluctuating_frac = 0.3
+# worker_slowdown = 5
 worker_slowdown = 10
 normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
