@@ -109,12 +109,17 @@ def plot_cdf_T_W__podc_vs_ts():
 
 	log(DEBUG, "done.")
 
-def plot_ET_vs_ro():
-	podc_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	ts_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/ts_ro_ET_l'.format(SUBFOLDER_TS)))
-	rr_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/rr_ro_ET_l'.format(SUBFOLDER_RR)))
+def plot_ET_vs_ro(N_fluctuating_frac, serv_time_rv):
+	log(DEBUG, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
+
+	podc_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
+	ts_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/ts_ro_ET_l'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	rr_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/rr_ro_ET_l'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
 
 	def plot_(ro_ET_l, label):
+		if ro_ET_l is None:
+			return
+
 		ro_l, ET_l = [], []
 		for ro, ET in ro_ET_l:
 			ro_l.append(ro)
@@ -129,13 +134,22 @@ def plot_ET_vs_ro():
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
-	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title())
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png("plot_ET_vs_ro"), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_ET_vs_ro", N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done.")
 
+def plot_ET_vs_ro_for_varying_config():
+	log(DEBUG, "started")
+	plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	log(DEBUG, "done.")
+
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
-	plot_ET_vs_ro()
+	# plot_ET_vs_ro()
+	plot_ET_vs_ro_for_varying_config()
