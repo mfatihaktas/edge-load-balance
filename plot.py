@@ -112,9 +112,9 @@ def plot_cdf_T_W__podc_vs_ts():
 def plot_ET_vs_ro(N_fluctuating_frac, serv_time_rv):
 	log(DEBUG, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
-	podc_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
-	ts_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/ts_ro_ET_l'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
-	rr_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/rr_ro_ET_l'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
+	podc_ro_ET_l = read_json_from_file(fname=get_filename_json('{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
+	ts_ro_ET_l = read_json_from_file(fname=get_filename_json('{}/ts_ro_ET_l'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	rr_ro_ET_l = read_json_from_file(fname=get_filename_json('{}/rr_ro_ET_l'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
 
 	def plot_(ro_ET_l, label):
 		if ro_ET_l is None:
