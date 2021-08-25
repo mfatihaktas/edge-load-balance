@@ -64,7 +64,9 @@ def plot_worker(w):
 	plot.savefig("plot_{}_n_over_t.png".format(w._id), bbox_inches='tight')
 	plot.gcf().clear()
 
-SUBFOLDER_PODC, SUBFOLDER_TS = 'sim_podc', 'sim_ts'
+SUBFOLDER_PODC = 'sim_podc'
+SUBFOLDER_TS = 'sim_ts'
+SUBFOLDER_RR = 'sim_rr'
 d, p = 2, 10
 
 def plot_cdf_T_W__podc_vs_ts():
@@ -110,6 +112,7 @@ def plot_cdf_T_W__podc_vs_ts():
 def plot_ET_vs_ro():
 	podc_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
 	ts_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/ts_ro_ET_l'.format(SUBFOLDER_TS)))
+	rr_ro_ET_l = read_json_from_file(fname=get_filename_json(header='{}/rr_ro_ET_l'.format(SUBFOLDER_RR)))
 
 	def plot_(ro_ET_l, label):
 		ro_l, ET_l = [], []
@@ -120,6 +123,7 @@ def plot_ET_vs_ro():
 
 	plot_(podc_ro_ET_l, label='PodC')
 	plot_(ts_ro_ET_l, label='TS')
+	plot_(ts_ro_ET_l, label='RR')
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
