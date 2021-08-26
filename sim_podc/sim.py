@@ -111,7 +111,7 @@ def sim_ET_single_run():
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 100 # 10000 # 100
+	num_req_to_finish = 10000 # 100
 	num_sim = 2 # 10
 
 	d = 2
