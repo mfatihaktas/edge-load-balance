@@ -111,7 +111,7 @@ def sim_ET_single_run():
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000 # 100
+	num_req_to_finish = 100 # 10000 # 100
 	num_sim = 2 # 10
 
 	d = 2
@@ -127,8 +127,8 @@ def sim_ET_vs_ro():
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='podc_ro_ET_l_d_{}_p_{}'.format(d, p)))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='podc_ro_EW_l_d_{}_p_{}'.format(d, p)))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_podc_d_{}_p_{}'.format(d, p)))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_podc_d_{}_p_{}'.format(d, p)))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 

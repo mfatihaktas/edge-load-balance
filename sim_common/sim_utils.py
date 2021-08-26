@@ -21,8 +21,8 @@ def get_stats_m_from_sim_data(c_l, header=None):
 
 			if header is not None:
 				req_info_m_l.append({
-					'rid': req._id,
-					'mid': req.mid,
+					'req_id': req._id,
+					'cl_id': req.cl_id,
 					'epoch_arrived_client': req.epoch_arrived_client,
 					'T': t,
 					'W': t - req.serv_time})
