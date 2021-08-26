@@ -82,7 +82,7 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 
 		return min_arm_id
 
-class Client():
+class Client_TS():
 	def __init__(self, _id, env, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self._id = _id
 		self.env = env
@@ -106,7 +106,7 @@ class Client():
 		self.act_send = env.process(self.run_send())
 
 	def __repr__(self):
-		return 'Client(id= {})'.format(self._id)
+		return 'Client_TS(id= {})'.format(self._id)
 
 	def set_out(self, out):
 		self.out = out

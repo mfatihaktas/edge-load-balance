@@ -25,22 +25,13 @@ def sim_ts(num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
 
 		env = simpy.Environment()
 		cl_l = get_cl_l(env)
-		c_l = [Client('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
+		c_l = [Client_TS('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l) for i in range(m)]
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		t_l, w_l = [], []
-		for c in c_l:
-			for req in c.req_finished_l:
-				t = req.epoch_arrived_client - req.epoch_departed_client
-				t_l.append(t)
-				w_l.append(t - req.serv_time)
+		stats_m = get_stats_m_from_sim_data(c_l, header='ts' if write_to_json else None)
 
-		if write_to_json:
-			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_ts_T_l'))
-			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_ts_W_l'))
-
-		ET, EW = np.mean(t_l), np.mean(w_l)
+		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
 		cum_ET += ET
 		cum_EW += EW
@@ -63,13 +54,13 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_ts(num_req_to_finish, ro, num_sim)
+		ET, EW = sim_ts(num_req_to_finish, ro, num_sim, write_to_json=True)
 		log(INFO, "", ET=ET, EW=EW)
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ts_ro_ET_l'))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ts_ro_EW_l'))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_ts'))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_ts'))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 	plot.plot(ro_l, EW_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)

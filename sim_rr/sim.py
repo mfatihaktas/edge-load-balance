@@ -28,18 +28,9 @@ def sim_rr(num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		t_l, w_l = [], []
-		for c in c_l:
-			for req in c.req_finished_l:
-				t = req.epoch_arrived_client - req.epoch_departed_client
-				t_l.append(t)
-				w_l.append(t - req.serv_time)
+		stats_m = get_stats_m_from_sim_data(c_l, header='rr' if write_to_json else None)
 
-		if write_to_json:
-			write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='sim_rr_T_l_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
-			write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='sim_rr_W_l_d_{}_p_{}'.format(d, interProbeNumReq_controller.num)))
-
-		ET, EW = np.mean(t_l), np.mean(w_l)
+		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
 		cum_ET += ET
 		cum_EW += EW
@@ -63,7 +54,7 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_rr(num_req_to_finish, num_sim, ro=ro)
+		ET, EW = sim_rr(num_req_to_finish, num_sim, ro=ro, write_to_json=True)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 		EW_l.append(EW)

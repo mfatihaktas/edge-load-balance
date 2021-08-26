@@ -59,7 +59,7 @@ class InterProbeNumReq_controller_learningWConstInc():
 		self.num_l.append(self.num)
 		return self.num
 
-class Client():
+class Client_PodC():
 	def __init__(self, _id, env, d, interProbeNumReq_controller,
 							 num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l,
 							 initial_cl_id=None, out=None):
@@ -96,7 +96,7 @@ class Client():
 	# 		'serv_time_rv= {}'.format(self.serv_time_rv) + ')'
 
 	def __repr__(self):
-		return 'Client(id= {})'.format(self._id)
+		return 'Client_PodC(id= {})'.format(self._id)
 
 	def set_out(self, out):
 		self.out = out

@@ -70,10 +70,10 @@ SUBFOLDER_RR = 'sim_rr'
 d, p = 2, 10
 
 def plot_cdf_T_W__podc_vs_ts():
-	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_T_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/sim_podc_W_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_T_l'.format(SUBFOLDER_TS)))
-	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/sim_ts_W_l'.format(SUBFOLDER_TS)))
+	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/W_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
+	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/T_l_ts'.format(SUBFOLDER_TS)))
+	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/W_l_ts'.format(SUBFOLDER_TS)))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
@@ -112,9 +112,10 @@ def plot_cdf_T_W__podc_vs_ts():
 def plot_ET_vs_ro(N_fluctuating_frac, serv_time_rv):
 	log(DEBUG, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
-	podc_ro_ET_l = read_json_from_file(fname=get_filename_json('{}/podc_ro_ET_l_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
-	ts_ro_ET_l = read_json_from_file(fname=get_filename_json('{}/ts_ro_ET_l'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
-	rr_ro_ET_l = read_json_from_file(fname=get_filename_json('{}/rr_ro_ET_l'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
+	d, p = 2, 10
+	ro_ET_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
+	ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	ro_ET_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
 
 	def plot_(ro_ET_l, label):
 		if ro_ET_l is None:
@@ -126,9 +127,9 @@ def plot_ET_vs_ro(N_fluctuating_frac, serv_time_rv):
 			ET_l.append(ET)
 		plot.plot(ro_l, ET_l, label=label, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
-	plot_(podc_ro_ET_l, label='PodC')
-	plot_(ts_ro_ET_l, label='TS')
-	plot_(ts_ro_ET_l, label='RR')
+	plot_(ro_ET_l_podc, label='PodC')
+	plot_(ro_ET_l_ts, label='TS')
+	plot_(ro_ET_l_rr, label='RR')
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
