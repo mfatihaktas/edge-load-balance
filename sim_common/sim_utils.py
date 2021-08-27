@@ -10,7 +10,11 @@ def get_cl_l(env):
 
 	return cl_l
 
-def get_stats_m_from_sim_data(c_l, header=None):
+def get_stats_m_from_sim_data(cl_l, c_l, header=None):
+	if header is not None:
+		for cl in cl_l:
+			write_to_file(data=json.dumps(cl.master.epoch_num_req_l), fname=get_filename_json(header='epoch_num_req_l_{}_{}'.format(cl._id, header)))
+
 	t_l, w_l = [], []
 	for c in c_l:
 		req_info_m_l = []
@@ -27,7 +31,7 @@ def get_stats_m_from_sim_data(c_l, header=None):
 					'T': t,
 					'W': t - req.serv_time})
 		if header is not None:
-			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_cid_{}_{}'.format(c._id, header)))
+			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_{}_{}'.format(c._id, header)))
 
 	if header is not None:
 		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='T_l_{}'.format(header)))

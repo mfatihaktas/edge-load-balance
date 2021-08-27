@@ -153,10 +153,18 @@ def plot_ET_vs_ro_for_varying_config():
 def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	log(DEBUG, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
+	label = 'PodC'
+	# label = 'TS'
+	# label = 'RR'
+	cid = 'c0'
+
 	d, p = 2, 10
-	req_info_m_l_podc = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
-	req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
-	req_info_m_l_rr = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
+	if label == 'PodC':
+		req_info_m_l_podc = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, cid, d, p), N_fluctuating_frac, serv_time_rv))
+	elif label == 'TS':
+		req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_ts'.format(SUBFOLDER_TS, cid), N_fluctuating_frac, serv_time_rv))
+	elif label == 'RR':
+		req_info_m_l_rr = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_rr'.format(SUBFOLDER_RR, cid), N_fluctuating_frac, serv_time_rv))
 
 	cl_id__c_m = {}
 	def plot_(req_info_m_l, label):
@@ -168,22 +176,25 @@ def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_ti
 		for req_info_m in req_info_m_l:
 			cl_id = req_info_m['cl_id']
 			if cl_id not in cl_id__c_m:
-				cl_id__c_m[cl_id] = next(nice_color)
+				cl_id__c_m[cl_id] = next(dark_color)
 			c = cl_id__c_m[cl_id]
 
 			plot.bar([x], height=[req_info_m['T']], color=c) # self.color_map.get_color(info_m_q[_i]['mip'])
 			plot.xticks([])
 			x += 1
 
-	plot_(req_info_m_l_podc, label='PodC')
-	# plot_(req_info_m_l_ts, label='TS')
-	# plot_(req_info_m_l_rr, label='RR')
+	if label == 'PodC':
+		plot_(req_info_m_l_podc, label='PodC')
+	elif label == 'TS':
+		plot_(req_info_m_l_ts, label='TS')
+	elif label == 'RR':
+		plot_(req_info_m_l_rr, label='RR')
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$T$', fontsize=fontsize)
 	plot.xlabel('Requests over time', fontsize=fontsize)
-	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
+	plot.title(r'{}, $d= {}, p= {}$'.format(label, d, p) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
 
 	f = zoom_factory(plot.gca(), base_scale=1.5)
 	plot.show()
@@ -198,4 +209,4 @@ if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
 	# plot_ET_vs_ro()
 	# plot_ET_vs_ro_for_varying_config()
-	plot_T_over_time()
+	plot_T_over_time(N_fluctuating_frac=0)

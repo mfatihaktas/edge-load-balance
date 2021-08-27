@@ -19,6 +19,9 @@ class RRQueue(): # Round Robin
 
 		self.num_dropped = 0
 
+	def len(self):
+		return sum(len(q) for _, q in self.cid_q_m.items())
+
 	def reg(self, cid):
 		if cid not in self.cid_q_m:
 			self.cid_q_m[cid] = deque()
@@ -134,6 +137,8 @@ class Master():
 		self.w_token_s = simpy.Store(env)
 		self.w_q = WQueue([w._id for w in w_l], self.w_token_s, max_qlen=30)
 
+		self.epoch_num_req_l = []
+
 		self.act = env.process(self.run())
 
 	def __repr__(self):
@@ -143,8 +148,15 @@ class Master():
 		for _, w in self.id_w_m.items():
 			w.out = out
 
+	def record_load(self):
+		total_w_qlen = sum(qlen for _, qlen in self.w_q.wid_qlen_heap_m.items())
+		total_num_req = total_w_qlen + self.msg_q.len()
+		self.epoch_num_req_l.append((self.env.now, total_num_req))
+		slog(DEBUG, self.env, self, "done", total_num_req=total_num_req)
+
 	def put(self, msg):
 		slog(DEBUG, self.env, self, "recved", msg=msg)
+		self.record_load()
 
 		p = msg.payload
 		if p.is_req():

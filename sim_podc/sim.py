@@ -29,7 +29,7 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		stats_m = get_stats_m_from_sim_data(c_l, header='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num) if write_to_json else None)
+		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num) if write_to_json else None)
 
 		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
@@ -111,7 +111,7 @@ def sim_ET_single_run():
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10 # 10000 # 100
+	num_req_to_finish = 10000 # 100
 	num_sim = 2 # 10
 
 	d = 2

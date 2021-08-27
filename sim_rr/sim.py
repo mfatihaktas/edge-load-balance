@@ -28,7 +28,7 @@ def sim_rr(num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		stats_m = get_stats_m_from_sim_data(c_l, header='rr' if write_to_json else None)
+		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='rr' if write_to_json else None)
 
 		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
