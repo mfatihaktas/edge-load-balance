@@ -27,7 +27,7 @@ def get_stats_m_from_sim_data(c_l, header=None):
 					'T': t,
 					'W': t - req.serv_time})
 		if header is not None:
-			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_{}'.format(header)))
+			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_cid_{}_{}'.format(c._id, header)))
 
 	if header is not None:
 		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='T_l_{}'.format(header)))

@@ -130,16 +130,7 @@ def sim_ET_vs_ro():
 	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_podc_d_{}_p_{}'.format(d, p)))
 	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_podc_d_{}_p_{}'.format(d, p)))
 
-	fig = plot.figure()
-	ax = fig.add_subplot(111, xlim=(min(ro_l), max(ro_l)), ylim=(0, 1.1*max(ET_l)), autoscale_on=False)
-	plot.sca(ax)
-
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
-
-	zp = ZoomPan()
-	# ax = plot.gca()
-	figZoom = zp.zoom_factory(ax, base_scale=1)
-	figPan = zp.pan_factory(ax)
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)

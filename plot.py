@@ -158,13 +158,20 @@ def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_ti
 	req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
 	req_info_m_l_rr = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
 
+	cl_id__c_m = {}
 	def plot_(req_info_m_l, label):
+		nonlocal cl_id__c_m
 		if req_info_m_l is None:
 			return
 
 		x = 1
 		for req_info_m in req_info_m_l:
-			plot.bar([x], height=[req_info_m['T']], color=next(nice_color)) # self.color_map.get_color(info_m_q[_i]['mip'])
+			cl_id = req_info_m['cl_id']
+			if cl_id not in cl_id__c_m:
+				cl_id__c_m[cl_id] = next(nice_color)
+			c = cl_id__c_m[cl_id]
+
+			plot.bar([x], height=[req_info_m['T']], color=c) # self.color_map.get_color(info_m_q[_i]['mip'])
 			plot.xticks([])
 			x += 1
 
