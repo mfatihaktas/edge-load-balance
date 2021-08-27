@@ -83,7 +83,7 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 		return min_arm_id
 
 class Client_TS():
-	def __init__(self, _id, env, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
+	def __init__(self, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self._id = _id
 		self.env = env
 		self.num_req_to_finish = num_req_to_finish
@@ -93,7 +93,7 @@ class Client_TS():
 		self.out = out
 
 		# self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*20)
-		self.ts = GaussianThompsonSampling_slidingWinAtEachArm([cl._id for cl in cl_l], win_len=20)
+		self.ts = GaussianThompsonSampling_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0
