@@ -61,6 +61,8 @@ elif [ $1 = 'r' ]; then
   $PY rvs.py
 elif [ $1 = 'p' ]; then
   $PY plot.py
+elif [ $1 = 'pu' ]; then
+  $PY plot_utils.py
 else
   echo "Arg did not match!"
 fi

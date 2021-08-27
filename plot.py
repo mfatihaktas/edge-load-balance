@@ -150,7 +150,45 @@ def plot_ET_vs_ro_for_varying_config():
 	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	log(DEBUG, "done.")
 
+def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	log(DEBUG, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
+
+	d, p = 2, 10
+	req_info_m_l_podc = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
+	req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	req_info_m_l_rr = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
+
+	def plot_(req_info_m_l, label):
+		if req_info_m_l is None:
+			return
+
+		x = 1
+		for req_info_m in req_info_m_l:
+			plot.bar([x], height=[req_info_m['T']], color=next(nice_color)) # self.color_map.get_color(info_m_q[_i]['mip'])
+			plot.xticks([])
+			x += 1
+
+	plot_(req_info_m_l_podc, label='PodC')
+	# plot_(req_info_m_l_ts, label='TS')
+	# plot_(req_info_m_l_rr, label='RR')
+
+	fontsize = 14
+	plot.legend(fontsize=fontsize)
+	plot.ylabel(r'$T$', fontsize=fontsize)
+	plot.xlabel('Requests over time', fontsize=fontsize)
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
+
+	f = zoom_factory(plot.gca(), base_scale=1.5)
+	plot.show()
+
+	# plot.gcf().set_size_inches(6, 4)
+	# plot.savefig(get_filename_png("plot_ET_vs_ro", N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
+	# plot.gcf().clear()
+
+	log(DEBUG, "done.")
+
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
 	# plot_ET_vs_ro()
-	plot_ET_vs_ro_for_varying_config()
+	# plot_ET_vs_ro_for_varying_config()
+	plot_T_over_time()

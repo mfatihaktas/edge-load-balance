@@ -137,7 +137,6 @@ def sim_ET_vs_ro():
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	zp = ZoomPan()
-	# ax = plot.gca()
 	figZoom = zp.zoom_factory(ax, base_scale=1)
 	figPan = zp.pan_factory(ax)
 
