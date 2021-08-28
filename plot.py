@@ -111,12 +111,14 @@ def plot_cdf_T_W__podc_vs_ts():
 
 	log(INFO, "done.")
 
-def plot_ET_vs_ro(N_fluctuating_frac, serv_time_rv):
+def plot_ET_vs_ro(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	log(INFO, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
 	d, p = 2, 10
+	w = 100
 	ro_ET_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
-	ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	# ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_{}'.format(SUBFOLDER_TS, w), N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
 
 	def plot_(ro_ET_l, label):
@@ -137,7 +139,7 @@ def plot_ET_vs_ro(N_fluctuating_frac, serv_time_rv):
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
-	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
+	plot.title(r'$d= {}, p= {}, w= {}$'.format(d, p, w) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png("plot_ET_vs_ro", N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
@@ -161,10 +163,12 @@ def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_ti
 	cid = 'c0'
 
 	d, p = 2, 10
+	w = 100
 	if label == 'PodC':
 		req_info_m_l_podc = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, cid, d, p), N_fluctuating_frac, serv_time_rv))
 	elif label == 'TS':
-		req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_ts'.format(SUBFOLDER_TS, cid), N_fluctuating_frac, serv_time_rv))
+		# req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_ts'.format(SUBFOLDER_TS, cid), N_fluctuating_frac, serv_time_rv))
+		req_info_m_l_ts = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_ts_w_{}'.format(SUBFOLDER_TS, cid, w), N_fluctuating_frac, serv_time_rv))
 	elif label == 'RR':
 		req_info_m_l_rr = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_rr'.format(SUBFOLDER_RR, cid), N_fluctuating_frac, serv_time_rv))
 
@@ -216,10 +220,12 @@ def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, 
 	# cl_id = 'cl3'
 
 	d, p = 2, 10
+	w = 100
 	if label == 'PodC':
 		epoch_num_req_l = read_json_from_file(fname=get_filename_json('{}/epoch_num_req_l_{}_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, cl_id, d, p), N_fluctuating_frac, serv_time_rv))
 	elif label == 'TS':
-		epoch_num_req_l = read_json_from_file(fname=get_filename_json('{}/epoch_num_req_l_{}_ts'.format(SUBFOLDER_TS, cl_id), N_fluctuating_frac, serv_time_rv))
+		# epoch_num_req_l = read_json_from_file(fname=get_filename_json('{}/epoch_num_req_l_{}_ts'.format(SUBFOLDER_TS, cl_id), N_fluctuating_frac, serv_time_rv))
+		epoch_num_req_l = read_json_from_file(fname=get_filename_json('{}/epoch_num_req_l_{}_ts_w_{}'.format(SUBFOLDER_TS, cl_id, w), N_fluctuating_frac, serv_time_rv))
 	elif label == 'RR':
 		epoch_num_req_l = read_json_from_file(fname=get_filename_json('{}/epoch_num_req_l_{}_rr'.format(SUBFOLDER_RR, cl_id), N_fluctuating_frac, serv_time_rv))
 
@@ -242,7 +248,7 @@ def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, 
 	plot.legend(fontsize=fontsize)
 	plot.ylabel('Number of requests', fontsize=fontsize)
 	plot.xlabel('Time', fontsize=fontsize)
-	plot.title(r'{}, {}'.format(label, cl_id) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
+	plot.title(r'{}, {}, $d= {}, p= {}, w= {}$'.format(label, cl_id, d, p, w) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv))
 
 	if save_to_png:
 		plot.gcf().set_size_inches(15, 4)
@@ -254,7 +260,7 @@ def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, 
 
 	log(DEBUG, "done.")
 
-def plot_cl_load_over_time_mult_thread():
+def plot_cl_load_over_time_for_varying_config():
 	def plot_(label, cl_id):
 		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
 		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate), save_to_png=True)
@@ -272,9 +278,9 @@ def plot_cl_load_over_time_mult_thread():
 
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
-	# plot_ET_vs_ro()
-	# plot_ET_vs_ro_for_varying_config()
+	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro_for_varying_config()
 	# plot_T_over_time(N_fluctuating_frac=0)
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	plot_cl_load_over_time_mult_thread()
+	# plot_cl_load_over_time_for_varying_config()
