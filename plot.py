@@ -70,6 +70,7 @@ SUBFOLDER_PODC = 'sim_podc'
 SUBFOLDER_TS = 'sim_ts'
 SUBFOLDER_RR = 'sim_rr'
 d, p = 2, 10
+w = 20 # 100
 
 def plot_cdf_T_W__podc_vs_ts():
 	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
@@ -114,8 +115,6 @@ def plot_cdf_T_W__podc_vs_ts():
 def plot_ET_vs_ro(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	log(INFO, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
-	d, p = 2, 10
-	w = 100
 	ro_ET_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
 	# ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_{}'.format(SUBFOLDER_TS, w), N_fluctuating_frac, serv_time_rv))
@@ -154,16 +153,15 @@ def plot_ET_vs_ro_for_varying_config():
 	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	log(INFO, "done.")
 
-def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	log(INFO, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
+def plot_T_over_time(label, cid, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	log(INFO, "started", label=label, cid=cid, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
-	label = 'PodC'
+	# label = 'PodC'
 	# label = 'TS'
 	# label = 'RR'
-	cid = 'c0'
+	# cid = 'c0'
+	# cid = 'c5'
 
-	d, p = 2, 10
-	w = 100
 	if label == 'PodC':
 		req_info_m_l_podc = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, cid, d, p), N_fluctuating_frac, serv_time_rv))
 	elif label == 'TS':
@@ -211,6 +209,22 @@ def plot_T_over_time(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_ti
 
 	log(DEBUG, "done.")
 
+def plot_T_over_time_for_varying_config():
+	# label = 'PodC'
+	label = 'TS'
+	# label = 'RR'
+
+	cid = 'c0'
+	# cid = 'c5'
+
+	# N_fluctuating_frac = 0
+	N_fluctuating_frac = 0.3
+
+	serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+	# serv_time_rv = Exp(serv_rate)
+
+	plot_T_over_time(label, cid, N_fluctuating_frac, serv_time_rv)
+
 def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=False):
 	log(INFO, "started", label=label, cl_id=cl_id, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=save_to_png)
 
@@ -219,8 +233,6 @@ def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, 
 	# label = 'RR'
 	# cl_id = 'cl3'
 
-	d, p = 2, 10
-	w = 100
 	if label == 'PodC':
 		epoch_num_req_l = read_json_from_file(fname=get_filename_json('{}/epoch_num_req_l_{}_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, cl_id, d, p), N_fluctuating_frac, serv_time_rv))
 	elif label == 'TS':
@@ -267,20 +279,24 @@ def plot_cl_load_over_time_for_varying_config():
 		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
 		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate), save_to_png=True)
 
-	plot_(label='PodC', cl_id='cl0')
-	plot_(label='PodC', cl_id='cl3')
-	plot_(label='TS', cl_id='cl0')
-	plot_(label='TS', cl_id='cl3')
-	plot_(label='RR', cl_id='cl0')
-	plot_(label='RR', cl_id='cl3')
+	def plot_for_label(label):
+		plot_(label=label, cl_id='cl0')
+		plot_(label=label, cl_id='cl5')
+		plot_(label=label, cl_id='cl9')
+
+	plot_for_label(label='PodC')
+	plot_for_label(label='TS')
+	plot_for_label(label='RR')
 
 	log(DEBUG, "done.")
 
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
+
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	plot_ET_vs_ro_for_varying_config()
-	# plot_T_over_time(N_fluctuating_frac=0)
+	# plot_ET_vs_ro_for_varying_config()
+
+	# plot_T_over_time_for_varying_config()
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	# plot_cl_load_over_time_for_varying_config()
+	plot_cl_load_over_time_for_varying_config()
