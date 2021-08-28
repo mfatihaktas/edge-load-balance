@@ -63,6 +63,23 @@ elif [ $1 = 'p' ]; then
   $PY plot.py
 elif [ $1 = 'pu' ]; then
   $PY plot_utils.py
+elif [ $1 = 'cd' ]; then
+  rm ./sim_podc/*.json
+  rm ./sim_podc/*.png
+  rm ./sim_ts/*.json
+  rm ./sim_ts/*.png
+  rm ./sim_rr/*.json
+  rm ./sim_rr/*.png
+elif [ $1 = 'mfn' ]; then
+  ## Second answer here:
+  ## https://stackoverflow.com/questions/9612090/how-to-loop-through-file-names-returned-by-find
+  find -E . -regex '.*.wlen.*.' -print0 | while read -d $'\0' path
+  do
+    echo -e "path:\n $path"
+    new_path=`echo "$path" | sed s/wlen/w/g`
+    echo -e "new_path:\n $new_path"
+    mv "$path" "$new_path"
+  done
 else
   echo "Arg did not match!"
 fi
