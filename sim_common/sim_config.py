@@ -39,7 +39,7 @@ def get_plot_title(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time
 	return r'$N= {}, n= {}, N_f= {}, m= {}$'.format(N, n, int(N * N_fluctuating_frac), m) + '\n' + \
 				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
 
-def get_filename_tail(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+def get_filename_tail(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
@@ -49,8 +49,8 @@ def get_filename_tail(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_t
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
 				 '_S_{}'.format(serv_time_rv)
 
-def get_filename_png(header, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return header + '__' + get_filename_tail(N_fluctuating_frac, serv_time_rv) + '.png'
+def get_filename_png(header, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	return header + '__' + get_filename_tail(ro, N_fluctuating_frac, serv_time_rv) + '.png'
 
-def get_filename_json(header, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return header + '__' + get_filename_tail(N_fluctuating_frac, serv_time_rv) + '.json'
+def get_filename_json(header, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	return header + '__' + get_filename_tail(ro, N_fluctuating_frac, serv_time_rv) + '.json'

@@ -13,8 +13,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_rr(num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
-	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, num_sim=num_sim, write_to_json=write_to_json, ro=ro)
+def sim_rr(num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
+	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -28,7 +28,7 @@ def sim_rr(num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='rr' if write_to_json else None)
+		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='rr' if write_to_json else None, ro=ro)
 
 		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
@@ -42,7 +42,7 @@ def sim_ET_for_single_m():
 	num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, EW = sim_rr(num_req_to_finish, write_to_json=True)
+	ET, EW = sim_rr(num_req_to_finish=num_req_to_finish, write_to_json=True)
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
@@ -54,13 +54,13 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_rr(num_req_to_finish, num_sim, ro=ro, write_to_json=True)
+		ET, EW = sim_rr(num_req_to_finish=num_req_to_finish, num_sim=num_sim, ro=ro, write_to_json=True)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_rr'))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_rr'))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_rr', ro=ro))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_rr', ro=ro))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 

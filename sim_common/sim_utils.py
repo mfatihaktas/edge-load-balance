@@ -10,10 +10,10 @@ def get_cl_l(env):
 
 	return cl_l
 
-def get_stats_m_from_sim_data(cl_l, c_l, header=None):
+def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=ro):
 	if header is not None:
 		for cl in cl_l:
-			write_to_file(data=json.dumps(cl.master.epoch_num_req_l), fname=get_filename_json(header='epoch_num_req_l_{}_{}'.format(cl._id, header)))
+			write_to_file(data=json.dumps(cl.master.epoch_num_req_l), fname=get_filename_json(header='epoch_num_req_l_{}_{}'.format(cl._id, header), ro=ro))
 
 	t_l, w_l = [], []
 	for c in c_l:
@@ -31,10 +31,10 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None):
 					'T': t,
 					'W': t - req.serv_time})
 		if header is not None:
-			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_{}_{}'.format(c._id, header)))
+			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_{}_{}'.format(c._id, header), ro=ro))
 
 	if header is not None:
-		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='T_l_{}'.format(header)))
-		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='W_l_{}'.format(header)))
+		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='T_l_{}'.format(header), ro=ro))
+		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='W_l_{}'.format(header), ro=ro))
 
 	return {'ET': np.mean(t_l), 'EW': np.mean(w_l)}

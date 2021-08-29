@@ -157,6 +157,7 @@ class DiscreteRV():
 	# 		'norm_factor= {}'.format(self.norm_factor) + ')'
 
 	def __repr__(self):
+		# return 'Disc(p={}, v={})'.format(self.p_l, self.v_l)
 		return 'Disc(p={}, v={})'.format(self.p_l, self.v_l)
 
 	def mean(self):

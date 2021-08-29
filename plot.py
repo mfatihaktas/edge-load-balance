@@ -77,10 +77,12 @@ def plot_cdf_T_W__podc_vs_ts(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv
 
 	T_podc_l = read_json_from_file(fname=get_filename_json('{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
 	W_podc_l = read_json_from_file(fname=get_filename_json('{}/W_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
-	T_ts_l = read_json_from_file(fname=get_filename_json('{}/T_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
-	W_ts_l = read_json_from_file(fname=get_filename_json('{}/W_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
-	T_rr_l = read_json_from_file(fname=get_filename_json('{}/T_l_rr'.format(SUBFOLDER_PODC), N_fluctuating_frac, serv_time_rv))
-	W_rr_l = read_json_from_file(fname=get_filename_json('{}/W_l_rr'.format(SUBFOLDER_PODC), N_fluctuating_frac, serv_time_rv))
+	T_ts_l = read_json_from_file(fname=get_filename_json('{}/T_l_ts_w_{}'.format(SUBFOLDER_TS, w), N_fluctuating_frac, serv_time_rv))
+	W_ts_l = read_json_from_file(fname=get_filename_json('{}/W_l_ts_w_{}'.format(SUBFOLDER_TS, w), N_fluctuating_frac, serv_time_rv))
+	T_rr_l = read_json_from_file(fname=get_filename_json('{}/T_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
+	W_rr_l = read_json_from_file(fname=get_filename_json('{}/W_l_rr'.format(SUBFOLDER_RR), N_fluctuating_frac, serv_time_rv))
+	T_ucb_l = read_json_from_file(fname=get_filename_json('{}/T_l_ucb'.format(SUBFOLDER_UCB), N_fluctuating_frac, serv_time_rv))
+	W_ucb_l = read_json_from_file(fname=get_filename_json('{}/W_l_ucb'.format(SUBFOLDER_UCB), N_fluctuating_frac, serv_time_rv))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
@@ -92,6 +94,7 @@ def plot_cdf_T_W__podc_vs_ts(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv
 	add_cdf(W_podc_l, ax, 'PodC', next(nice_color)) # drawline_x_l=[1000]
 	add_cdf(W_ts_l, ax, 'TS', next(nice_color))
 	add_cdf(W_rr_l, ax, 'RR', next(nice_color))
+	add_cdf(W_ucb_l, ax, 'UCB', next(nice_color))
 	plot.xscale('log')
 	# plot.xticks(rotation=70)
 	plot.ylabel('Pr{W < x}', fontsize=fontsize)
@@ -104,6 +107,7 @@ def plot_cdf_T_W__podc_vs_ts(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv
 	add_cdf(T_podc_l, ax, 'PodC', next(nice_color))
 	add_cdf(T_ts_l, ax, 'TS', next(nice_color))
 	add_cdf(T_ts_l, ax, 'RR', next(nice_color))
+	add_cdf(T_ucb_l, ax, 'UCB', next(nice_color))
 	plot.xscale('log')
 	plot.ylabel('Pr{T < x}', fontsize=fontsize)
 	plot.xlabel('x', fontsize=fontsize)
@@ -123,8 +127,8 @@ def plot_cdf_T_W__podc_vs_ts_for_varying_config():
 
 	# N_fluctuating_frac = 0
 	N_fluctuating_frac = 0.3
-	# serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
-	serv_time_rv = Exp(serv_rate)
+	serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+	# serv_time_rv = Exp(serv_rate)
 
 	plot_cdf_T_W__podc_vs_ts(N_fluctuating_frac, serv_time_rv)
 

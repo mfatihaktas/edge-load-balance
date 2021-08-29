@@ -14,8 +14,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_ts(num_req_to_finish, w=20, ro=ro, num_sim=1, write_to_json=False):
-	log(DEBUG, "started", w=w, ro=ro, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+def sim_ts(num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
+	log(DEBUG, "started", ro=ro, w=w, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -29,7 +29,7 @@ def sim_ts(num_req_to_finish, w=20, ro=ro, num_sim=1, write_to_json=False):
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='ts_w_{}'.format(w) if write_to_json else None)
+		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='ts_w_{}'.format(w) if write_to_json else None, ro=ro)
 
 		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
@@ -42,7 +42,7 @@ def sim_ts(num_req_to_finish, w=20, ro=ro, num_sim=1, write_to_json=False):
 def sim_ET_single_run():
 	num_req_to_finish = 10000 # 100
 
-	ET, EW = sim_ts(num_req_to_finish, num_sim=1, write_to_json=True)
+	ET, EW = sim_ts(num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET, EW=EW)
 
 def sim_ET_vs_ro():
@@ -55,13 +55,13 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_ts(num_req_to_finish, w, ro, num_sim, write_to_json=True)
+		ET, EW = sim_ts(num_req_to_finish=num_req_to_finish, ro=ro, w=w, num_sim=num_sim, write_to_json=True)
 		log(INFO, "", ET=ET, EW=EW)
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_ts_w_{}'.format(w)))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_ts_w_{}'.format(w)))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_ts_w_{}'.format(w), ro=ro))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_ts_w_{}'.format(w), ro=ro))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 	plot.plot(ro_l, EW_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)

@@ -14,8 +14,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write_to_json=False, ro=ro):
-	log(DEBUG, "started", d=d, interProbeNumReq_controller=interProbeNumReq_controller, ro=ro, num_req_to_finish=num_req_to_finish, num_sim=num_sim, write_to_json=write_to_json)
+def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
+	log(DEBUG, "started", d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -29,7 +29,7 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write
 		net = Net('n', env, [*cl_l, *c_l])
 		env.run(until=c_l[0].act_recv)
 
-		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num) if write_to_json else None)
+		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num) if write_to_json else None, ro=ro)
 
 		ET, EW = stats_m['ET'], stats_m['EW']
 		log(INFO, "", ET=ET, EW=EW)
@@ -87,7 +87,7 @@ def sim_ET_wrt_p_d():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET, EW = sim_podc(d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim)
+			ET, EW = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=num_sim)
 			log(INFO, "ET= {}".format(ET))
 			ET_l.append(ET)
 		plot.plot(d_l, ET_l, color=next(light_color), label='p= {}'.format(p), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
@@ -107,11 +107,11 @@ def sim_ET_single_run():
 	num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, EW = sim_podc(d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim=1, write_to_json=True)
+	ET, EW = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000 # 100
+	num_req_to_finish = 10000
 	num_sim = 2 # 10
 
 	d = 2
@@ -122,13 +122,13 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, EW = sim_podc(d, InterProbeNumReq_controller_constant(p), num_req_to_finish, num_sim, ro=ro, write_to_json=True)
+		ET, EW = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=True)
 		log(INFO, "ET= {}".format(ET))
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_podc_d_{}_p_{}'.format(d, p)))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_podc_d_{}_p_{}'.format(d, p)))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_podc_d_{}_p_{}'.format(d, p), ro=ro))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_podc_d_{}_p_{}'.format(d, p), ro=ro))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
@@ -149,6 +149,6 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	sim_ET_wrt_p_d()
+	# sim_ET_wrt_p_d()
 	# sim_ET_single_run()
-	# sim_ET_vs_ro()
+	sim_ET_vs_ro()
