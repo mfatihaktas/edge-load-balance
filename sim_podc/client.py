@@ -184,9 +184,6 @@ class Client_PodC():
 			req.epoch_departed_client = self.env.now
 			msg = Msg(_id=self.num_req_gened, payload=req)
 
-			## Send also its probe version if need to
-			self.probe(msg)
-
 			## Send message to currently assigned cluster
 			msg.payload.probe = False
 			msg.payload.cl_id = self.assigned_cl_id
@@ -194,6 +191,9 @@ class Client_PodC():
 			msg.dst_id = self.assigned_cl_id
 			self.out.put(msg)
 			slog(DEBUG, self.env, self, "sent", req=req)
+
+			## Send also its probe version if need to
+			self.probe(msg)
 
 			inter_gen_time = self.inter_gen_time_rv.sample()
 			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)

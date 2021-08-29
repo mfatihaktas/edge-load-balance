@@ -51,14 +51,10 @@ class Worker_base():
 
 		self.msg_s = simpy.Store(env)
 		self.msg_to_send_s = simpy.Store(env)
-		self.probe_to_send_s = simpy.Store(env)
+		self.act_send = self.env.process(self.run_send())
 
 	def __repr__(self):
-		return "Worker(id= {})".format(self._id)
-
-	def start_send_procs(self):
-		self.act_send = self.env.process(self.run_send())
-		self.act_probe = self.env.process(self.run_send_probe())
+		return "Worker_base(id= {})".format(self._id)
 
 	def reg_master(self, master):
 		self.master = master
@@ -77,6 +73,18 @@ class Worker_base():
 			msg.dst_id = msg.payload.cid
 			self.out.put(msg)
 
+class Worker_probesWaitBehindEachOther(Worker_base):
+	def __init__(self, _id, env, out=None):
+		super().__init__(_id, env, out)
+
+		self.probe_to_send_s = simpy.Store(env)
+		self.act_probe = self.env.process(self.run_send_probe())
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Worker_probesWaitBehindEachOther(id= {})".format(self._id)
+
 	def run_send_probe(self):
 		while True:
 			msg = yield self.probe_to_send_s.get()
@@ -87,13 +95,6 @@ class Worker_base():
 			slog(DEBUG, self.env, self, "done sleeping for probe")
 
 			self.msg_to_send_s.put(msg)
-
-class Worker(Worker_base):
-	def __init__(self, _id, env, out=None):
-		super().__init__(_id, env, out)
-
-		self.start_send_procs()
-		self.act = env.process(self.run())
 
 	def run(self):
 		while True:
@@ -123,47 +124,16 @@ class Worker(Worker_base):
 
 		slog(DEBUG, self.env, self, "done")
 
-class Worker_probesTreatedAsActualReq(Worker_base):
-	def __init__(self, _id, env, out=None):
-		super().__init__(_id, env, out)
-		self.start_send_procs()
-
-		self.act = env.process(self.run())
-
-	def run(self):
-		while True:
-			msg = yield self.msg_s.get()
-			slog(DEBUG, self.env, self, "working on", msg=msg)
-
-			req = msg.payload
-			slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
-			yield self.env.timeout(req.serv_time)
-			slog(DEBUG, self.env, self, "finished serving")
-
-			## Send to master
-			msg.payload = Info(req._id, InfoType.worker_req_completion)
-			msg.dst_id = msg.src_id
-			msg.src_id = self._id
-			self.master.put(msg)
-
-			res = result_from_req(req)
-			res.epoch_departed_cluster = self.env.now
-			msg.payload = res
-
-			## Send to client
-			msg.src_id = self._id
-			msg.dst_id = msg.payload.cid
-			self.out.put(msg)
-
-		slog(DEBUG, self.env, self, "done")
-
-class Worker_wFluctuatingSpeed(Worker_base):
+class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
 	def __init__(self, _id, env, slowdown, normal_dur_rv, slow_dur_rv, out=None):
 		super().__init__(_id, env, out)
 		self.slowdown = slowdown
 
 		self.state = FluctuatingState(env, normal_dur_rv, slow_dur_rv)
 		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Worker_probesWaitBehindEachOther_fluctuatingSpeed(id= {})".format(self._id)
 
 	def run(self):
 		while True:
@@ -195,5 +165,115 @@ class Worker_wFluctuatingSpeed(Worker_base):
 				self.probe_to_send_s.put(msg)
 			else:
 				self.msg_to_send_s.put(msg)
+
+		slog(DEBUG, self.env, self, "done")
+
+class Worker_probesOnlyWaitBehindActualReqs(Worker_base):
+	def __init__(self, _id, env, out=None):
+		super().__init__(_id, env, out)
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Worker_probesOnlyWaitBehindActualReqs(id= {})".format(self._id)
+
+	def run(self):
+		while True:
+			msg = yield self.msg_s.get()
+			slog(DEBUG, self.env, self, "working on", msg=msg)
+
+			req = msg.payload
+			if not req.probe:
+				slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
+				yield self.env.timeout(req.serv_time)
+				slog(DEBUG, self.env, self, "finished serving")
+
+			## Send to master
+			msg.payload = Info(req._id, InfoType.worker_req_completion)
+			msg.dst_id = msg.src_id
+			msg.src_id = self._id
+			self.master.put(msg)
+
+			res = result_from_req(req)
+			res.epoch_departed_cluster = self.env.now
+			msg.payload = res
+
+			self.msg_to_send_s.put(msg)
+
+		slog(DEBUG, self.env, self, "done")
+
+class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
+	def __init__(self, _id, env, slowdown, normal_dur_rv, slow_dur_rv, out=None):
+		super().__init__(_id, env, out)
+		self.slowdown = slowdown
+
+		self.state = FluctuatingState(env, normal_dur_rv, slow_dur_rv)
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(id= {})".format(self._id)
+
+	def run(self):
+		while True:
+			msg = yield self.msg_s.get()
+			slog(DEBUG, self.env, self, "working on", msg=msg)
+
+			req = msg.payload
+			if not req.probe:
+				speed = 1
+				if self.state.is_slow():
+					speed /= self.slowdown
+
+				t = req.serv_time / speed
+				slog(DEBUG, self.env, self, "serving", t=t)
+				yield self.env.timeout(t)
+				slog(DEBUG, self.env, self, "finished serving")
+
+			## Send to master
+			msg.payload = Info(req._id, InfoType.worker_req_completion)
+			msg.dst_id = msg.src_id
+			msg.src_id = self._id
+			self.master.put(msg)
+
+			res = result_from_req(req)
+			res.epoch_departed_cluster = self.env.now
+			msg.payload = res
+
+			self.msg_to_send_s.put(msg)
+
+		slog(DEBUG, self.env, self, "done")
+
+class Worker_probesTreatedAsActualReq(Worker_base):
+	def __init__(self, _id, env, out=None):
+		super().__init__(_id, env, out)
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Worker_probesTreatedAsActualReq(id= {})".format(self._id)
+
+	def run(self):
+		while True:
+			msg = yield self.msg_s.get()
+			slog(DEBUG, self.env, self, "working on", msg=msg)
+
+			req = msg.payload
+			slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
+			yield self.env.timeout(req.serv_time)
+			slog(DEBUG, self.env, self, "finished serving")
+
+			## Send to master
+			msg.payload = Info(req._id, InfoType.worker_req_completion)
+			msg.dst_id = msg.src_id
+			msg.src_id = self._id
+			self.master.put(msg)
+
+			res = result_from_req(req)
+			res.epoch_departed_cluster = self.env.now
+			msg.payload = res
+
+			## Queue for sending to client
+			self.msg_to_send_s.put(msg)
 
 		slog(DEBUG, self.env, self, "done")

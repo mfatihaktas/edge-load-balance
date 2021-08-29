@@ -48,9 +48,11 @@ class Cluster():
 
 		if ignore_probe_cost:
 			if slowdown > 1:
-				w_l = [Worker_wFluctuatingSpeed('{}-w{}'.format(_id, i), env, slowdown, normal_dur_rv, slow_dur_rv, self.out) for i in range(num_worker)]
+				# Worker_probesWaitBehindEachOther_fluctuatingSpeed
+				w_l = [Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed('{}-w{}'.format(_id, i), env, slowdown, normal_dur_rv, slow_dur_rv, self.out) for i in range(num_worker)]
 			else:
-				w_l = [Worker('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
+				# Worker_probesWaitBehindEachOther
+				w_l = [Worker_probesOnlyWaitBehindActualReqs('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
 		else:
 			w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, self.out) for i in range(num_worker)]
 

@@ -40,11 +40,11 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, num_sim=1, write
 	return cum_ET / num_sim, cum_EW / num_sim
 
 def sim_ET_wrt_p_d():
-	num_req_to_finish = 10000
+	num_req_to_finish = 100 # 10000
 	num_sim = 2 # 10
 
 	## InterProbeNumReq_controller_learningWConstInc
-	# '''
+	'''
 	log(INFO, "InterProbeNumReq_controller_learningWConstInc")
 	d_l, ET_l = [], []
 	for d in [1, 2, 5, N]:
@@ -68,7 +68,7 @@ def sim_ET_wrt_p_d():
 		plot.gcf().clear()
 
 	plot.plot(d_l, ET_l, color=next(dark_color), label='learning', marker='x', linestyle='dotted', lw=2, mew=3, ms=5)
-	# '''
+	'''
 
 	## InterProbeNumReq_controller_constant
 	log(INFO, "InterProbeNumReq_controller_constant")
@@ -149,6 +149,6 @@ if __name__ == '__main__':
 
 	log_sim_config()
 
-	# sim_ET_wrt_p_d()
+	sim_ET_wrt_p_d()
 	# sim_ET_single_run()
-	sim_ET_vs_ro()
+	# sim_ET_vs_ro()
