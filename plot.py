@@ -72,11 +72,15 @@ SUBFOLDER_RR = 'sim_rr'
 d, p = 2, 10
 w = 20 # 100
 
-def plot_cdf_T_W__podc_vs_ts():
-	T_podc_l = read_json_from_file(fname=get_filename_json(header='{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	W_podc_l = read_json_from_file(fname=get_filename_json(header='{}/W_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p)))
-	T_ts_l = read_json_from_file(fname=get_filename_json(header='{}/T_l_ts'.format(SUBFOLDER_TS)))
-	W_ts_l = read_json_from_file(fname=get_filename_json(header='{}/W_l_ts'.format(SUBFOLDER_TS)))
+def plot_cdf_T_W__podc_vs_ts(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	log(INFO, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
+
+	T_podc_l = read_json_from_file(fname=get_filename_json('{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
+	W_podc_l = read_json_from_file(fname=get_filename_json('{}/W_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), N_fluctuating_frac, serv_time_rv))
+	T_ts_l = read_json_from_file(fname=get_filename_json('{}/T_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	W_ts_l = read_json_from_file(fname=get_filename_json('{}/W_l_ts'.format(SUBFOLDER_TS), N_fluctuating_frac, serv_time_rv))
+	T_rr_l = read_json_from_file(fname=get_filename_json('{}/T_l_rr'.format(SUBFOLDER_PODC), N_fluctuating_frac, serv_time_rv))
+	W_rr_l = read_json_from_file(fname=get_filename_json('{}/W_l_rr'.format(SUBFOLDER_PODC), N_fluctuating_frac, serv_time_rv))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
@@ -86,7 +90,8 @@ def plot_cdf_T_W__podc_vs_ts():
 	ax = axs[0]
 	plot.sca(ax)
 	add_cdf(W_podc_l, ax, 'PodC', next(nice_color)) # drawline_x_l=[1000]
-	add_cdf(W_ts_l, ax, 'TS', next(nice_color)) # drawline_x_l=[1000]
+	add_cdf(W_ts_l, ax, 'TS', next(nice_color))
+	add_cdf(W_rr_l, ax, 'RR', next(nice_color))
 	plot.xscale('log')
 	# plot.xticks(rotation=70)
 	plot.ylabel('Pr{W < x}', fontsize=fontsize)
@@ -98,6 +103,7 @@ def plot_cdf_T_W__podc_vs_ts():
 	plot.sca(ax)
 	add_cdf(T_podc_l, ax, 'PodC', next(nice_color))
 	add_cdf(T_ts_l, ax, 'TS', next(nice_color))
+	add_cdf(T_ts_l, ax, 'RR', next(nice_color))
 	plot.xscale('log')
 	plot.ylabel('Pr{T < x}', fontsize=fontsize)
 	plot.xlabel('x', fontsize=fontsize)
@@ -106,9 +112,21 @@ def plot_cdf_T_W__podc_vs_ts():
 	fig.set_size_inches(figsize[0], figsize[1] )
 	plot.subplots_adjust(hspace=0.45, wspace=0.45)
 
-	st = plot.suptitle(r'$d= {}, p= {}, N= {}, n= {}, m= {}, \rho= {}, S \sim {}$'.format(d, p, N, n, m, ro, serv_time_rv), fontsize=14)
-	plot.savefig(get_filename_png("plot_cdf_T_W__podc_vs_ts"), bbox_extra_artists=(st,), bbox_inches='tight')
+	st = plot.suptitle(r'$d= {}, p= {}, w= {}$'.format(d, p, w) + ', ' + get_plot_title(N_fluctuating_frac, serv_time_rv), fontsize=14)
+	plot.savefig(get_filename_png("plot_cdf_T_W"), bbox_extra_artists=(st,), bbox_inches='tight')
 	fig.clear()
+
+	log(INFO, "done.")
+
+def plot_cdf_T_W__podc_vs_ts_for_varying_config():
+	log(INFO, "started")
+
+	# N_fluctuating_frac = 0
+	N_fluctuating_frac = 0.3
+	# serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+	serv_time_rv = Exp(serv_rate)
+
+	plot_cdf_T_W__podc_vs_ts(N_fluctuating_frac, serv_time_rv)
 
 	log(INFO, "done.")
 
@@ -147,10 +165,12 @@ def plot_ET_vs_ro(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_
 
 def plot_ET_vs_ro_for_varying_config():
 	log(INFO, "started")
-	plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+
+	# plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
-	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+
 	log(INFO, "done.")
 
 def plot_T_over_time(label, cid, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
@@ -220,8 +240,8 @@ def plot_T_over_time_for_varying_config():
 	# N_fluctuating_frac = 0
 	N_fluctuating_frac = 0.3
 
-	serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
-	# serv_time_rv = Exp(serv_rate)
+	# serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+	serv_time_rv = Exp(serv_rate)
 
 	plot_T_over_time(label, cid, N_fluctuating_frac, serv_time_rv)
 
@@ -250,7 +270,7 @@ def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, 
 			epoch_l.append(epoch)
 			num_req_l.append(num_req)
 
-			if save_to_png and i > 2000:
+			if save_to_png and i > 2500:
 				break
 		plot.plot(epoch_l, num_req_l, color=next(nice_color), marker='o', linestyle=':', lw=2, mew=3, ms=5)
 	plot_(epoch_num_req_l, label)
@@ -274,9 +294,9 @@ def plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=N_fluctuating_frac, 
 
 def plot_cl_load_over_time_for_varying_config():
 	def plot_(label, cl_id):
-		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
+		# plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
 		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate), save_to_png=True)
-		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
+		# plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
 		plot_cl_load_over_time(label, cl_id, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate), save_to_png=True)
 
 	def plot_for_label(label):
@@ -292,6 +312,7 @@ def plot_cl_load_over_time_for_varying_config():
 
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
+	plot_cdf_T_W__podc_vs_ts_for_varying_config()
 
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	# plot_ET_vs_ro_for_varying_config()
@@ -299,4 +320,4 @@ if __name__ == '__main__':
 	# plot_T_over_time_for_varying_config()
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	plot_cl_load_over_time_for_varying_config()
+	# plot_cl_load_over_time_for_varying_config()

@@ -76,6 +76,9 @@ def add_pdf(l, label, color, bins=50):
 		hist_kws={'edgecolor':'black'}, kde_kws={'linewidth': 3} )
 
 def add_cdf(l, ax, label, color, drawline_x_l=[] ):
+	if l is None:
+		return
+
 	plot.sca(ax)
 	x_l = sorted(l)
 	y_l = np.arange(len(x_l) )/len(x_l)

@@ -72,6 +72,8 @@ elif [ $1 = 'clean' ]; then
   rm ./sim_ts/*.png
   rm ./sim_rr/*.json
   rm ./sim_rr/*.png
+  rm ./sim_ucb/*.json
+  rm ./sim_ucb/*.png
 elif [ $1 = 'mfn' ]; then
   ## Second answer here:
   ## https://stackoverflow.com/questions/9612090/how-to-loop-through-file-names-returned-by-find

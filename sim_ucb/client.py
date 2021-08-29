@@ -3,7 +3,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-import simpy, random
+import simpy, random, math
 from collections import deque
 from collections import defaultdict
 import numpy as np
@@ -11,7 +11,7 @@ import numpy as np
 from msg import *
 from debug_utils import *
 
-class GaussianThompsonSampling_slidingWin():
+class UCB_slidingWin():
 	def __init__(self, arm_id_l, win_len):
 		self.arm_id_l = arm_id_l
 		self.win_len = win_len
@@ -21,7 +21,7 @@ class GaussianThompsonSampling_slidingWin():
 			self.arm_id_cost_q.append((arm_id, 0))
 
 	def __repr__(self):
-		return 'GaussianThompsonSampling_slidingWin(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
+		return 'UCB_slidingWin(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
 
 	def record_cost(self, arm_id, cost):
 		self.arm_id_cost_q.append((arm_id, cost))
@@ -34,23 +34,20 @@ class GaussianThompsonSampling_slidingWin():
 
 		log(DEBUG, "", arm_id__cost_l_m=arm_id__cost_l_m)
 
-		min_arm_id, min_sample = None, float('Inf')
+		min_arm_id, min_cost = None, float('Inf')
 		log(DEBUG, "len(arm_id__cost_l_m)= {}".format(len(arm_id__cost_l_m)))
 		for arm_id, cost_l in arm_id__cost_l_m.items():
-			mean = np.mean(cost_l) if len(cost_l) else 0
-			stdev = np.std(cost_l) if len(cost_l) else 1
-			check(stdev >= 0, "Stdev cannot be negative")
-			if stdev == 0:
-				stdev = 1
-			s = np.random.normal(loc=mean, scale=stdev)
-			if s < min_sample:
-				min_sample = s
+			exploit_cost = np.mean(cost_l) if len(cost_l) else 0 / len(cost_l)
+			explore_cost = 10 * math.sqrt(math.log(len(self.arm_id_cost_q)) / len(cost_l))
+			cost = exploit_cost + explore_cost
+			if cost < min_cost:
+				min_cost = cost
 				min_arm_id = arm_id
-				log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, min_arm_id=min_arm_id)
+				log(DEBUG, "cost < min_cost", cost=cost, exploit_cost=exploit_cost, explore_cost=explore_cost, min_cost=min_cost, min_arm_id=min_arm_id)
 
 		return min_arm_id
 
-class GaussianThompsonSampling_slidingWinAtEachArm():
+class UCB_slidingWinAtEachArm():
 	def __init__(self, arm_id_l, win_len):
 		self.arm_id_l = arm_id_l
 		self.win_len = win_len
@@ -58,7 +55,7 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 		self.arm_id__cost_q_m = {i: deque(maxlen=win_len) for i in arm_id_l}
 
 	def __repr__(self):
-		return 'GaussianThompsonSampling_slidingWinAtEachArm(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
+		return 'UCB_slidingWinAtEachArm(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
 
 	def record_cost(self, arm_id, cost):
 		self.arm_id__cost_q_m[arm_id].append(cost)
@@ -67,22 +64,22 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 	def sample_arm(self):
 		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
 
-		min_arm_id, min_sample = None, float('Inf')
+		## Would be slow
+		# t = sum(len(cost_q) for _, cost_q in arm_id__cost_q_m.items())
+		t = len(self.arm_id_l) * self.win_len
+		min_arm_id, min_cost = None, float('Inf')
 		for arm_id, cost_q in self.arm_id__cost_q_m.items():
-			mean = np.mean(cost_q) if len(cost_q) else 0
-			stdev = np.std(cost_q) if len(cost_q) else 1
-			check(stdev >= 0, "Stdev cannot be negative")
-			if stdev == 0:
-				stdev = 1
-			s = np.random.normal(loc=mean, scale=stdev)
-			if s < min_sample:
-				min_sample = s
+			exploit_cost = np.mean(cost_q) / len(cost_q) if len(cost_q) else 0
+			explore_cost = 10 * math.sqrt(math.log(t) / len(cost_q)) if len(cost_q) else 0
+			cost = exploit_cost + explore_cost
+			if cost < min_cost:
+				min_cost = cost
 				min_arm_id = arm_id
-				log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, min_arm_id=min_arm_id)
+				log(DEBUG, "cost < min_cost", cost=cost, exploit_cost=exploit_cost, explore_cost=explore_cost, min_cost=min_cost, min_arm_id=min_arm_id)
 
 		return min_arm_id
 
-class Client_TS():
+class Client_UCB():
 	def __init__(self, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self._id = _id
 		self.env = env
@@ -92,8 +89,8 @@ class Client_TS():
 		self.cl_l = cl_l
 		self.out = out
 
-		# self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*win_len)
-		self.ts = GaussianThompsonSampling_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
+		self.ucb = UCB_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*win_len)
+		# self.ucb = UCB_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0
@@ -105,7 +102,7 @@ class Client_TS():
 		self.act_send = env.process(self.run_send())
 
 	def __repr__(self):
-		return 'Client_TS(id= {})'.format(self._id)
+		return 'Client_UCB(id= {})'.format(self._id)
 
 	def set_out(self, out):
 		self.out = out
@@ -130,7 +127,7 @@ class Client_TS():
 
 			response_time = res.epoch_arrived_client - res.epoch_departed_client
 			check(response_time > 0, "Responsed time cannot be negative", response_time=response_time)
-			self.ts.record_cost(arm_id=res.cl_id, cost=response_time)
+			self.ucb.record_cost(arm_id=res.cl_id, cost=response_time)
 
 			slog(DEBUG, self.env, self, "",
 					response_time = (res.epoch_arrived_client - res.epoch_departed_client),
@@ -155,7 +152,7 @@ class Client_TS():
 			msg = Msg(_id=self.num_req_gened, payload=req)
 
 			## Send message
-			to_cl_id = self.ts.sample_arm()
+			to_cl_id = self.ucb.sample_arm()
 			log(DEBUG, "to_cl_id= {}".format(to_cl_id))
 			msg.payload.probe = False
 			msg.payload.cl_id = to_cl_id
