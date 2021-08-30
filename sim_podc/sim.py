@@ -40,7 +40,7 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro=ro, num_sim=1
 	return cum_ET / num_sim, cum_EW / num_sim
 
 def sim_ET_wrt_p_d():
-	num_req_to_finish = 100 # 10000
+	num_req_to_finish = 10000
 	num_sim = 2 # 10
 
 	## InterProbeNumReq_controller_learningWConstInc
@@ -127,8 +127,8 @@ def sim_ET_vs_ro():
 		ET_l.append(ET)
 		EW_l.append(EW)
 
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_podc_d_{}_p_{}'.format(d, p), ro=ro))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_podc_d_{}_p_{}'.format(d, p), ro=ro))
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_podc_d_{}_p_{}'.format(d, p), ro=''))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_podc_d_{}_p_{}'.format(d, p), ro=''))
 
 	plot.plot(ro_l, ET_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 

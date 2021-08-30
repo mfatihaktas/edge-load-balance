@@ -35,8 +35,8 @@ def log_sim_config():
 def get_inter_req_gen_time_rv(ro, m):
 	return Exp(get_req_gen_rate(ro, m))
 
-def get_plot_title(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return r'$N= {}, n= {}, N_f= {}, m= {}$'.format(N, n, int(N * N_fluctuating_frac), m) + '\n' + \
+def get_plot_title(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	return r'$\rho= {}, N= {}, n= {}, N_f= {}, m= {}$'.format(ro, N, n, int(N * N_fluctuating_frac), m) + '\n' + \
 				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
 
 def get_filename_tail(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
