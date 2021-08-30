@@ -71,7 +71,7 @@ SUBFOLDER_TS = 'sim_ts'
 SUBFOLDER_RR = 'sim_rr'
 SUBFOLDER_UCB = 'sim_ucb'
 d, p = 2, 10
-w = 20 # 100
+w = 100 # 20 # 100
 
 def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	log(INFO, "started", ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
@@ -328,9 +328,9 @@ if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts_for_varying_config()
 
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	# plot_ET_vs_ro_for_varying_config()
+	plot_ET_vs_ro_for_varying_config()
 
 	# plot_T_over_time_for_varying_config()
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	plot_cl_load_over_time_for_varying_config()
+	# plot_cl_load_over_time_for_varying_config()

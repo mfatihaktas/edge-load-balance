@@ -42,9 +42,10 @@ class FluctuatingState():
 				assert_("Unexpected state", state=self.state)
 
 class Worker_base():
-	def __init__(self, _id, env, out=None):
+	def __init__(self, _id, env, speed=1, out=None):
 		self._id = _id
 		self.env = env
+		self.speed = speed
 		self.out = out
 
 		self.master = None
@@ -74,8 +75,8 @@ class Worker_base():
 			self.out.put(msg)
 
 class Worker_probesWaitBehindEachOther(Worker_base):
-	def __init__(self, _id, env, out=None):
-		super().__init__(_id, env, out)
+	def __init__(self, _id, env, speed=1, out=None):
+		super().__init__(_id, env, speed, out)
 
 		self.probe_to_send_s = simpy.Store(env)
 		self.act_probe = self.env.process(self.run_send_probe())
@@ -103,8 +104,9 @@ class Worker_probesWaitBehindEachOther(Worker_base):
 
 			req = msg.payload
 			if not req.probe:
-				slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
-				yield self.env.timeout(req.serv_time)
+				t = req.serv_time / self.speed
+				slog(DEBUG, self.env, self, "serving", t=t)
+				yield self.env.timeout(t)
 				slog(DEBUG, self.env, self, "finished serving")
 
 			## Send to master
@@ -125,8 +127,8 @@ class Worker_probesWaitBehindEachOther(Worker_base):
 		slog(DEBUG, self.env, self, "done")
 
 class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
-	def __init__(self, _id, env, slowdown, normal_dur_rv, slow_dur_rv, out=None):
-		super().__init__(_id, env, out)
+	def __init__(self, _id, env, speed, slowdown, normal_dur_rv, slow_dur_rv, out=None):
+		super().__init__(_id, env, speed, out)
 		self.slowdown = slowdown
 
 		self.state = FluctuatingState(env, normal_dur_rv, slow_dur_rv)
@@ -142,7 +144,7 @@ class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
 
 			req = msg.payload
 			if not req.probe:
-				speed = 1
+				speed = self.speed
 				if self.state.is_slow():
 					speed /= self.slowdown
 
@@ -169,8 +171,8 @@ class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
 		slog(DEBUG, self.env, self, "done")
 
 class Worker_probesOnlyWaitBehindActualReqs(Worker_base):
-	def __init__(self, _id, env, out=None):
-		super().__init__(_id, env, out)
+	def __init__(self, _id, env, speed=1, out=None):
+		super().__init__(_id, env, speed, out)
 
 		self.act = env.process(self.run())
 
@@ -184,8 +186,9 @@ class Worker_probesOnlyWaitBehindActualReqs(Worker_base):
 
 			req = msg.payload
 			if not req.probe:
-				slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
-				yield self.env.timeout(req.serv_time)
+				t = req.serv_time / self.speed
+				slog(DEBUG, self.env, self, "serving", t=t)
+				yield self.env.timeout(t)
 				slog(DEBUG, self.env, self, "finished serving")
 
 			## Send to master
@@ -203,8 +206,8 @@ class Worker_probesOnlyWaitBehindActualReqs(Worker_base):
 		slog(DEBUG, self.env, self, "done")
 
 class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
-	def __init__(self, _id, env, slowdown, normal_dur_rv, slow_dur_rv, out=None):
-		super().__init__(_id, env, out)
+	def __init__(self, _id, env, speed, slowdown, normal_dur_rv, slow_dur_rv, out=None):
+		super().__init__(_id, env, speed, out)
 		self.slowdown = slowdown
 
 		self.state = FluctuatingState(env, normal_dur_rv, slow_dur_rv)
@@ -221,7 +224,7 @@ class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
 
 			req = msg.payload
 			if not req.probe:
-				speed = 1
+				speed = self.speed
 				if self.state.is_slow():
 					speed /= self.slowdown
 
@@ -245,8 +248,8 @@ class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
 		slog(DEBUG, self.env, self, "done")
 
 class Worker_probesTreatedAsActualReq(Worker_base):
-	def __init__(self, _id, env, out=None):
-		super().__init__(_id, env, out)
+	def __init__(self, _id, env, speed=1, out=None):
+		super().__init__(_id, env, speed, out)
 
 		self.act = env.process(self.run())
 
@@ -259,8 +262,9 @@ class Worker_probesTreatedAsActualReq(Worker_base):
 			slog(DEBUG, self.env, self, "working on", msg=msg)
 
 			req = msg.payload
-			slog(DEBUG, self.env, self, "serving", serv_time=req.serv_time)
-			yield self.env.timeout(req.serv_time)
+			t = req.serv_time / self.speed
+			slog(DEBUG, self.env, self, "serving", t=t)
+			yield self.env.timeout(t)
 			slog(DEBUG, self.env, self, "finished serving")
 
 			## Send to master

@@ -3,10 +3,18 @@ from worker import *
 from sim_config import *
 
 def get_cl_l(env):
+	if hetero_clusters:
+		if N == 10:
+			speed_l = [1, 1, 0.5, 1.5, 0.25, 1.75, 0.3, 1.7, 0.1, 1.9]
+		else:
+			assert_("Unexpected N", N=N)
+	else:
+		speed_l = N * [1]
+
 	Nf = int(N * N_fluctuating_frac)
-	cl_l = [Cluster('cl{}'.format(i), env, n, ignore_probe_cost, worker_slowdown, normal_dur_rv, slow_dur_rv) for i in range(Nf)]
+	cl_l = [Cluster('cl{}'.format(i), env, n, speed_l[i], worker_slowdown, normal_dur_rv, slow_dur_rv, ignore_probe_cost) for i in range(Nf)]
 	for i in range(Nf, N):
-		cl_l.append(Cluster('cl{}'.format(i), env, n, ignore_probe_cost))
+		cl_l.append(Cluster('cl{}'.format(i), env, n, speed_l[i], ignore_probe_cost=ignore_probe_cost))
 
 	return cl_l
 

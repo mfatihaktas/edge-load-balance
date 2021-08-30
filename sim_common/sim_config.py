@@ -10,6 +10,7 @@ m = 2 * N
 
 serv_rate = 1
 ro = 0.8
+hetero_clusters = False
 
 def get_req_gen_rate(ro, m):
 	return round(ro * N * n * serv_rate / m, 2)
@@ -28,7 +29,8 @@ slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
 def log_sim_config():
-	log(INFO, "", N=N, n=n, m=m, ro=ro, inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,
+	log(INFO, "", N=N, n=n, m=m, ro=ro, hetero_clusters=hetero_clusters,
+			inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,
 			N_fluctuating_frac=N_fluctuating_frac, worker_slowdown=worker_slowdown,
 			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv, ignore_probe_cost=ignore_probe_cost)
 
@@ -36,13 +38,22 @@ def get_inter_req_gen_time_rv(ro, m):
 	return Exp(get_req_gen_rate(ro, m))
 
 def get_plot_title(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return r'$\rho= {}, N= {}, n= {}, N_f= {}, m= {}$'.format(ro, N, n, int(N * N_fluctuating_frac), m) + '\n' + \
+	return r'$\rho= {}, N= {}, n= {}, N_f= {}, m= {}, h= {}$'.format(ro, N, n, int(N * N_fluctuating_frac), m, hetero_clusters) + '\n' + \
 				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
 
 def get_filename_tail(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return 'N_{}'.format(N) + \
+	# return 'N_{}'.format(N) + \
+	# 			 '_n_{}'.format(n) + \
+	# 			 '_m_{}'.format(m) + \
+	# 			 '_ro_{}'.format(ro) + \
+	# 			 '_Nff_{}'.format(N_fluctuating_frac) + \
+	# 			 '_workerSlowdown_{}'.format(worker_slowdown) + \
+	# 			 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
+	# 			 '_S_{}'.format(serv_time_rv)
+  return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
+				 '_h_{}'.format(hetero_clusters) + \
 				 '_ro_{}'.format(ro) + \
 				 '_Nff_{}'.format(N_fluctuating_frac) + \
 				 '_workerSlowdown_{}'.format(worker_slowdown) + \
