@@ -91,9 +91,8 @@ def sim_ET_wrt_p_d():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET, ET2, EW, EW2 = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=num_sim)
-			std_T = math.sqrt(ET2 - ET**2) if ET2 - ET**2 > 0 else 0
-			log(INFO, "", ET=ET, std_T=std_T)
+			ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+			log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 			ET_l.append(ET)
 			std_T_l.append(std_T)
 		plot.errorbar(d_l, ET_l, yerr=std_T_l, color=next(light_color), label='p= {}'.format(p), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
@@ -113,11 +112,11 @@ def sim_ET_single_run():
 	num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, ET2, EW, EW2 = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
-	log(DEBUG, "done", ET=ET, ET2=ET2, EW=EW, EW2=EW2)
+	ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
+	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 20000
+	num_req_to_finish = 10000
 	num_sim = 2 # 10
 
 	d = 2
@@ -128,9 +127,7 @@ def sim_ET_vs_ro():
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 
-		ET, ET2, EW, EW2 = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=True)
-		std_T = math.sqrt(ET2 - ET**2) if ET2 - ET**2 > 0 else 0
-		std_W = math.sqrt(EW2 - EW**2) if EW2 - EW**2 > 0 else 0
+		ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=True)
 		log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 		ET_l.append(ET)
 		std_T_l.append(std_T)
