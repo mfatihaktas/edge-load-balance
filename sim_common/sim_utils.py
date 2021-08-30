@@ -15,21 +15,25 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=ro):
 		for cl in cl_l:
 			write_to_file(data=json.dumps(cl.master.epoch_num_req_l), fname=get_filename_json(header='epoch_num_req_l_{}_{}'.format(cl._id, header), ro=ro))
 
-	t_l, w_l = [], []
+	t_l, t2_l = [], []
+	w_l, w2_l = [], []
 	for c in c_l:
 		req_info_m_l = []
 		for req in c.req_finished_l:
 			t = req.epoch_arrived_client - req.epoch_departed_client
+			w = t - req.serv_time
+
 			t_l.append(t)
+			t2_l.append(t**2)
 			w_l.append(t - req.serv_time)
+			w2_l.append(w**2)
 
 			if header is not None:
 				req_info_m_l.append({
 					'req_id': req._id,
 					'cl_id': req.cl_id,
 					'epoch_arrived_client': req.epoch_arrived_client,
-					'T': t,
-					'W': t - req.serv_time})
+					'T': t, 'W': w})
 		if header is not None:
 			write_to_file(data=json.dumps(req_info_m_l), fname=get_filename_json(header='req_info_m_l_{}_{}'.format(c._id, header), ro=ro))
 
@@ -37,4 +41,9 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=ro):
 		write_to_file(data=json.dumps(t_l), fname=get_filename_json(header='T_l_{}'.format(header), ro=ro))
 		write_to_file(data=json.dumps(w_l), fname=get_filename_json(header='W_l_{}'.format(header), ro=ro))
 
-	return {'ET': np.mean(t_l), 'EW': np.mean(w_l)}
+	ET, ET2 = np.mean(t_l), np.mean(t2_l)
+	EW, EW2 = np.mean(w_l), np.mean(w2_l)
+	std_T = math.sqrt(ET2 - ET**2) if ET2 - ET**2 > 0 else 0
+	std_W = math.sqrt(EW2 - EW**2) if EW2 - EW**2 > 0 else 0
+	return {'ET': ET, 'std_T': std_T,
+					'EW': EW, 'std_W': std_W}

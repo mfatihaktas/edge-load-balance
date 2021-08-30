@@ -45,7 +45,7 @@ def plot_client(c):
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig("plot_{}_cdf_interResultTime.png".format(c._id), bbox_inches='tight')
 
-	log(DEBUG, "done.")
+	log(DEBUG, "done")
 
 def plot_master(m):
 	log(DEBUG, "", num_dropped_msgs=m.msg_q.num_dropped)
@@ -121,7 +121,7 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_
 	plot.savefig(get_filename_png("plot_cdf_T_W", ro, N_fluctuating_frac, serv_time_rv), bbox_extra_artists=(st,), bbox_inches='tight')
 	fig.clear()
 
-	log(INFO, "done.")
+	log(INFO, "done")
 
 def plot_cdf_T_W__podc_vs_ts_for_varying_config():
 	log(INFO, "started")
@@ -132,11 +132,11 @@ def plot_cdf_T_W__podc_vs_ts_for_varying_config():
 		plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 		# plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
-	# plot_(ro=0.3)
+	plot_(ro=0.2)
 	plot_(ro=0.5)
 	plot_(ro=0.8)
 
-	log(INFO, "done.")
+	log(INFO, "done")
 
 def plot_ET_vs_ro(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	log(INFO, "started", N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
@@ -169,20 +169,20 @@ def plot_ET_vs_ro(N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_
 	plot.savefig(get_filename_png("plot_ET_vs_ro", ro='', N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
 
-	log(INFO, "done.")
+	log(INFO, "done")
 
 def plot_ET_vs_ro_for_varying_config():
 	log(INFO, "started")
 
-	# plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
-	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	# plot_ET_vs_ro(N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
-	log(INFO, "done.")
+	log(INFO, "done")
 
-def plot_T_over_time(label, cid, ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	log(INFO, "started", label=label, cid=cid, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
+def plot_T_over_time(label, cid, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=False):
+	log(INFO, "started", label=label, cid=cid, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=save_to_png)
 
 	# label = 'PodC'
 	# label = 'TS'
@@ -204,16 +204,17 @@ def plot_T_over_time(label, cid, ro, N_fluctuating_frac=N_fluctuating_frac, serv
 		if req_info_m_l is None:
 			return
 
-		x = 1
-		for req_info_m in req_info_m_l:
+		for i, req_info_m in enumerate(req_info_m_l):
 			cl_id = req_info_m['cl_id']
 			if cl_id not in cl_id__c_m:
 				cl_id__c_m[cl_id] = next(dark_color)
 			c = cl_id__c_m[cl_id]
 
-			plot.bar([x], height=[req_info_m['T']], color=c) # self.color_map.get_color(info_m_q[_i]['mip'])
+			if save_to_png and i > 2500:
+				break
+
+			plot.bar([i + 1], height=[req_info_m['T']], color=c) # self.color_map.get_color(info_m_q[_i]['mip'])
 			plot.xticks([])
-			x += 1
 
 	if label == 'PodC':
 		plot_(req_info_m_l_podc, label='PodC')
@@ -228,30 +229,33 @@ def plot_T_over_time(label, cid, ro, N_fluctuating_frac=N_fluctuating_frac, serv
 	plot.xlabel('Requests over time', fontsize=fontsize)
 	plot.title(r'{}, {}, $d= {}, p= {}$'.format(label, cid, d, p) + ', ' + get_plot_title(ro, N_fluctuating_frac, serv_time_rv))
 
-	f = zoom_factory(plot.gca(), base_scale=1.5)
-	plot.show()
+	if save_to_png:
+		plot.gcf().set_size_inches(10, 4)
+		plot.savefig(get_filename_png("plot_{}_T_over_time_{}".format(cid, label), ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv), bbox_inches='tight')
+		plot.gcf().clear()
+	else:
+		f = zoom_factory(plot.gca(), base_scale=1.5)
+		plot.show()
 
-	# plot.gcf().set_size_inches(6, 4)
-	# plot.savefig(get_filename_png("plot_ET_vs_ro", ro='', N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv), bbox_inches='tight')
-	# plot.gcf().clear()
-
-	log(DEBUG, "done.")
+	log(DEBUG, "done")
 
 def plot_T_over_time_for_varying_config():
-	# label = 'PodC'
-	label = 'TS'
-	# label = 'RR'
+	ro = 0.8
+	def plot_(label, cid):
+		plot_T_over_time(label, cid, ro, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
+		# plot_T_over_time(label, cid, ro, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate), save_to_png=True)
+		plot_T_over_time(label, cid, ro, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
+		# plot_T_over_time(label, cid, ro, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate), save_to_png=True)
 
-	cid = 'c0'
-	# cid = 'c5'
+	def plot_for_label(label):
+		plot_(label=label, cid='c0')
+		plot_(label=label, cid='c5')
 
-	# N_fluctuating_frac = 0
-	N_fluctuating_frac = 0.3
+	plot_for_label(label='PodC')
+	plot_for_label(label='TS')
+	plot_for_label(label='RR')
 
-	# serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
-	serv_time_rv = Exp(serv_rate)
-
-	plot_T_over_time(label, cid, N_fluctuating_frac, serv_time_rv)
+	log(DEBUG, "done")
 
 def plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=False):
 	log(INFO, "started", label=label, cl_id=cl_id, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=save_to_png)
@@ -278,7 +282,7 @@ def plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=N_fluctuating
 			epoch_l.append(epoch)
 			num_req_l.append(num_req)
 
-			if save_to_png and i > 2500:
+			if save_to_png and i > 3500:
 				break
 		plot.plot(epoch_l, num_req_l, color=next(nice_color), marker='o', linestyle=':', lw=2, mew=3, ms=5)
 	plot_(epoch_num_req_l, label)
@@ -291,37 +295,37 @@ def plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=N_fluctuating
 	plot.title(r'{}, {}, $d= {}, p= {}, w= {}$'.format(label, cl_id, d, p, w) + ', ' + get_plot_title(ro, N_fluctuating_frac, serv_time_rv))
 
 	if save_to_png:
-		plot.gcf().set_size_inches(15, 4)
+		plot.gcf().set_size_inches(10, 4)
 		plot.savefig(get_filename_png("plot_{}_load_over_time_{}".format(cl_id, label), ro, N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 		plot.gcf().clear()
 	else:
 		f = zoom_factory(plot.gca(), base_scale=1.5)
 		plot.show()
 
-	log(DEBUG, "done.")
+	log(DEBUG, "done")
 
 def plot_cl_load_over_time_for_varying_config():
 	ro = 0.8
 	def plot_(label, cl_id):
-		# plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
-		plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate), save_to_png=True)
-		# plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
-		plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate), save_to_png=True)
+		plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
+		# plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate), save_to_png=True)
+		plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
+		# plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate), save_to_png=True)
 
 	def plot_for_label(label):
 		plot_(label=label, cl_id='cl0')
 		plot_(label=label, cl_id='cl5')
-		plot_(label=label, cl_id='cl9')
+		# plot_(label=label, cl_id='cl9')
 
 	plot_for_label(label='PodC')
 	plot_for_label(label='TS')
 	plot_for_label(label='RR')
 
-	log(DEBUG, "done.")
+	log(DEBUG, "done")
 
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
-	plot_cdf_T_W__podc_vs_ts_for_varying_config()
+	# plot_cdf_T_W__podc_vs_ts_for_varying_config()
 
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	# plot_ET_vs_ro_for_varying_config()
@@ -329,4 +333,4 @@ if __name__ == '__main__':
 	# plot_T_over_time_for_varying_config()
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	# plot_cl_load_over_time_for_varying_config()
+	plot_cl_load_over_time_for_varying_config()
