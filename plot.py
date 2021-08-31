@@ -73,17 +73,19 @@ SUBFOLDER_UCB = 'sim_ucb'
 d, p = 2, 10
 w = 0 # 20 # 100
 
-def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	log(INFO, "started", ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
+def plot_cdf_T_W__podc_vs_ts(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	log(INFO, "started", ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
-	T_podc_l = read_json_from_file(fname=get_filename_json('{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, N_fluctuating_frac, serv_time_rv))
-	W_podc_l = read_json_from_file(fname=get_filename_json('{}/W_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, N_fluctuating_frac, serv_time_rv))
-	T_ts_l = read_json_from_file(fname=get_filename_json('{}/T_l_ts_w_{}'.format(SUBFOLDER_TS, w), ro, N_fluctuating_frac, serv_time_rv))
-	W_ts_l = read_json_from_file(fname=get_filename_json('{}/W_l_ts_w_{}'.format(SUBFOLDER_TS, w), ro, N_fluctuating_frac, serv_time_rv))
-	T_rr_l = read_json_from_file(fname=get_filename_json('{}/T_l_rr'.format(SUBFOLDER_RR), ro, N_fluctuating_frac, serv_time_rv))
-	W_rr_l = read_json_from_file(fname=get_filename_json('{}/W_l_rr'.format(SUBFOLDER_RR), ro, N_fluctuating_frac, serv_time_rv))
-	T_ucb_l = read_json_from_file(fname=get_filename_json('{}/T_l_ucb_w_{}'.format(SUBFOLDER_UCB, w), ro, N_fluctuating_frac, serv_time_rv))
-	W_ucb_l = read_json_from_file(fname=get_filename_json('{}/W_l_ucb_w_{}'.format(SUBFOLDER_UCB, w), ro, N_fluctuating_frac, serv_time_rv))
+	T_podc_l = read_json_from_file(fname=get_filename_json('{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	W_podc_l = read_json_from_file(fname=get_filename_json('{}/W_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	T_ts_w_0_l = read_json_from_file(fname=get_filename_json('{}/T_l_ts_w_0'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	W_ts_w_0_l = read_json_from_file(fname=get_filename_json('{}/W_l_ts_w_0'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	T_ts_w_20_l = read_json_from_file(fname=get_filename_json('{}/T_l_ts_w_20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	W_ts_w_20_l = read_json_from_file(fname=get_filename_json('{}/W_l_ts_w_20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	T_rr_l = read_json_from_file(fname=get_filename_json('{}/T_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	W_rr_l = read_json_from_file(fname=get_filename_json('{}/W_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	T_ucb_w_20_l = read_json_from_file(fname=get_filename_json('{}/T_l_ucb_w_20'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	W_ucb_w_20_l = read_json_from_file(fname=get_filename_json('{}/W_l_ucb_w_20'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
@@ -92,10 +94,11 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_
 	## CDF of W
 	ax = axs[0]
 	plot.sca(ax)
-	add_cdf(W_podc_l, ax, 'PodC', next(nice_color)) # drawline_x_l=[1000]
-	add_cdf(W_ts_l, ax, 'TS', next(nice_color))
-	add_cdf(W_rr_l, ax, 'RR', next(nice_color))
-	add_cdf(W_ucb_l, ax, 'UCB', next(nice_color))
+	add_cdf(W_podc_l, ax, 'PodC', next(light_color)) # drawline_x_l=[1000]
+	add_cdf(W_ts_w_0_l, ax, 'TS, w=0', next(light_color))
+	add_cdf(W_ts_w_20_l, ax, 'TS, w=20', next(light_color))
+	add_cdf(W_rr_l, ax, 'RR', next(light_color))
+	add_cdf(W_ucb_w_20_l, ax, 'UCB', next(light_color))
 	plot.xscale('log')
 	# plot.xticks(rotation=70)
 	plot.ylabel('Pr{W < x}', fontsize=fontsize)
@@ -105,10 +108,11 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_
 	## CDF of T
 	ax = axs[1]
 	plot.sca(ax)
-	add_cdf(T_podc_l, ax, 'PodC', next(nice_color))
-	add_cdf(T_ts_l, ax, 'TS', next(nice_color))
-	add_cdf(T_rr_l, ax, 'RR', next(nice_color))
-	add_cdf(T_ucb_l, ax, 'UCB', next(nice_color))
+	add_cdf(T_podc_l, ax, 'PodC', next(light_color))
+	add_cdf(T_ts_w_0_l, ax, 'TS, w=0', next(light_color))
+	add_cdf(T_ts_w_20_l, ax, 'TS, w=20', next(light_color))
+	add_cdf(T_rr_l, ax, 'RR', next(light_color))
+	add_cdf(T_ucb_w_20_l, ax, 'UCB, w=20', next(light_color))
 	plot.xscale('log')
 	plot.ylabel('Pr{T < x}', fontsize=fontsize)
 	plot.xlabel('x', fontsize=fontsize)
@@ -117,8 +121,8 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_
 	fig.set_size_inches(figsize[0], figsize[1] )
 	plot.subplots_adjust(hspace=0.45, wspace=0.45)
 
-	st = plot.suptitle(r'$d= {}, p= {}, w= {}$'.format(d, p, w) + ', ' + get_plot_title(ro, N_fluctuating_frac, serv_time_rv), fontsize=14)
-	plot.savefig(get_filename_png("plot_cdf_T_W", ro, N_fluctuating_frac, serv_time_rv), bbox_extra_artists=(st,), bbox_inches='tight')
+	st = plot.suptitle(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), fontsize=14)
+	plot.savefig(get_filename_png("plot_cdf_T_W", ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_extra_artists=(st,), bbox_inches='tight')
 	fig.clear()
 
 	log(INFO, "done")
@@ -126,15 +130,20 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_
 def plot_cdf_T_W__podc_vs_ts_for_varying_config():
 	log(INFO, "started")
 
-	def plot_(ro):
-		plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-		# plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
-		plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-		# plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	def plot_(ro, hetero_clusters):
+		plot_cdf_T_W__podc_vs_ts(ro, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+		plot_cdf_T_W__podc_vs_ts(ro, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+		plot_cdf_T_W__podc_vs_ts(ro, hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+		plot_cdf_T_W__podc_vs_ts(ro, hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
-	plot_(ro=0.2)
-	plot_(ro=0.5)
-	plot_(ro=0.8)
+	plot_(ro=0.2, hetero_clusters=False)
+	plot_(ro=0.5, hetero_clusters=False)
+	plot_(ro=0.8, hetero_clusters=False)
+	plot_(ro=0.9, hetero_clusters=False)
+	plot_(ro=0.2, hetero_clusters=True)
+	plot_(ro=0.5, hetero_clusters=True)
+	plot_(ro=0.8, hetero_clusters=True)
+	plot_(ro=0.9, hetero_clusters=True)
 
 	log(INFO, "done")
 
@@ -142,9 +151,10 @@ def plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuat
 	log(INFO, "started", hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
 	ro_ET_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
-	ro_ET_l_ts = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_{}'.format(SUBFOLDER_TS, w), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
+	ro_ET_l_ts_w_0 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_0'.format(SUBFOLDER_TS), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
+	ro_ET_l_ts_w_20 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_20'.format(SUBFOLDER_TS), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
 	ro_ET_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_rr'.format(SUBFOLDER_RR), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
-	ro_ET_l_ucb = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ucb_w_{}'.format(SUBFOLDER_UCB, w), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
+	ro_ET_l_ucb_w_20 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ucb_w_20'.format(SUBFOLDER_UCB), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
 
 	def plot_(ro_ET_l, label):
 		if ro_ET_l is None:
@@ -154,18 +164,20 @@ def plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuat
 		for ro, ET in ro_ET_l:
 			ro_l.append(ro)
 			ET_l.append(ET)
-		plot.plot(ro_l, ET_l, label=label, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+		plot.plot(ro_l, ET_l, label=label, color=next(light_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
 	plot_(ro_ET_l_podc, label='PodC')
-	plot_(ro_ET_l_ts, label='TS')
+	plot_(ro_ET_l_ts_w_0, label='TS, w=0')
+	plot_(ro_ET_l_ts_w_20, label='TS, w=20')
 	plot_(ro_ET_l_rr, label='RR')
-	plot_(ro_ET_l_ucb, label='UCB')
+	plot_(ro_ET_l_ucb_w_20, label='UCB, w=20')
 
 	fontsize = 14
-	plot.legend(fontsize=fontsize)
+	plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
+	plot.yscale('log')
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
-	plot.title(r'$d= {}, p= {}, w= {}$'.format(d, p, w) + ', ' + get_plot_title(ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png("plot_ET_vs_ro", ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
@@ -178,8 +190,12 @@ def plot_ET_vs_ro_for_varying_config():
 	hetero_clusters = False
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
 	hetero_clusters = True
+	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
@@ -329,10 +345,10 @@ def plot_cl_load_over_time_for_varying_config():
 
 if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts()
-	# plot_cdf_T_W__podc_vs_ts_for_varying_config()
+	plot_cdf_T_W__podc_vs_ts_for_varying_config()
 
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	plot_ET_vs_ro_for_varying_config()
+	# plot_ET_vs_ro_for_varying_config()
 
 	# plot_T_over_time_for_varying_config()
 
