@@ -241,7 +241,7 @@ class Normal(RV):
     self.dist = scipy.stats.norm(mu, sigma)
 
   def __repr__(self):
-    return 'Normal[mu= {}, sigma= {}]'.format(self.mu, self.sigma)
+    return 'Normal(mu= {}, sigma= {})'.format(self.mu, self.sigma)
 
   def cdf(self, x):
     return self.dist.cdf(x)

@@ -1,14 +1,16 @@
 import os, sys
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir + '/sim_common')
 sys.path.append(parent_dir)
 
-import simpy, random
+import simpy, random, math
 from collections import deque
 from collections import defaultdict
 import numpy as np
 
 from msg import *
+from rvs import *
 from debug_utils import *
 
 class GaussianThompsonSampling_slidingWin():
@@ -82,6 +84,64 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 
 		return min_arm_id
 
+class GaussianThompsonSampling_resetWindowOnRareEvent():
+	def __init__(self, arm_id_l, threshold_prob_rare=0.1):
+		self.arm_id_l = arm_id_l
+		self.threshold_prob_rare = threshold_prob_rare
+
+		self.arm_id__cost_q_m = {i: deque() for i in arm_id_l}
+		self.arm_id__mean_var_m = {i: (0, 1) for i in arm_id_l}
+
+	def __repr__(self):
+		return 'GaussianThompsonSampling_resetWindowOnRareEvent(arm_id_l= {}, threshold_prob_rare= {})'.format(self.arm_id_l, self.threshold_prob_rare)
+
+	def record_cost(self, arm_id, cost):
+		cost_q = self.arm_id__cost_q_m[arm_id]
+		n = len(cost_q)
+		_mean, _var = self.arm_id__mean_var_m[arm_id]
+
+		def record():
+			cost_q.append(cost)
+
+			mean = (_mean * n + cost) / (n + 1)
+			## https://math.stackexchange.com/questions/102978/incremental-computation-of-standard-deviation
+			var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1) if n > 0 else 0
+			self.arm_id__mean_var_m[arm_id] = (mean, var)
+
+			log(DEBUG, "Recorded", cost=cost, _mean=_mean, _var=_var, mean=mean, var=var)
+
+		if n < 10:
+			record()
+			return
+
+		_stdev = math.sqrt(_var)
+		cost_rv = Normal(_mean, _stdev)
+		Pr_cost_is_too_large = cost_rv.tail(cost)
+		Pr_cost_is_too_small = cost_rv.cdf(cost)
+		Pr_cost_is_rare = max(Pr_cost_is_too_large, Pr_cost_is_too_small)
+		if Pr_cost_is_rare >= self.threshold_prob_rare:
+			log(DEBUG, "Rare event detected", cost=cost, _mean=_mean, _stdev=_stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
+			cost_q.clear()
+			self.arm_id__mean_var_m[arm_id] = (0, 1)
+		else:
+			record()
+
+		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
+
+	def sample_arm(self):
+		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
+
+		min_arm_id, min_sample = None, float('Inf')
+		for arm_id, (mean, var) in self.arm_id__mean_var_m.items():
+			stdev = math.sqrt(var)
+			s = np.random.normal(loc=mean, scale=stdev)
+			if s < min_sample:
+				min_sample = s
+				min_arm_id = arm_id
+				log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, min_arm_id=min_arm_id)
+
+		return min_arm_id
+
 class Client_TS():
 	def __init__(self, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self._id = _id
@@ -92,8 +152,12 @@ class Client_TS():
 		self.cl_l = cl_l
 		self.out = out
 
-		# self.ts = GaussianThompsonSampling_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*win_len)
-		self.ts = GaussianThompsonSampling_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
+		cl_id_l = [cl._id for cl in cl_l]
+		# self.ts = GaussianThompsonSampling_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
+		if win_len == 0:
+			self.ts = GaussianThompsonSampling_resetWindowOnRareEvent(cl_id_l)
+		else:
+			self.ts = GaussianThompsonSampling_slidingWinAtEachArm(cl_id_l, win_len)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0

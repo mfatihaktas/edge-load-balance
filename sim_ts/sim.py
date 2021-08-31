@@ -50,7 +50,7 @@ def sim_ET_single_run():
 
 def sim_ET_vs_ro():
 	num_req_to_finish = 10000
-	w = 20 # 100
+	w = 0 # 20 # 100
 	num_sim = 2 # 10
 
 	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
@@ -78,7 +78,7 @@ def sim_ET_vs_ro():
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
 	plot.title(get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png("plot_ts_ET_vs_ro"), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_ts_w_{}_ET_vs_ro".format(w)), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
