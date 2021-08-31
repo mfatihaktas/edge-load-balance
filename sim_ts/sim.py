@@ -43,7 +43,9 @@ def sim_ts(num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
 	return cum_ET / num_sim, cum_std_T / num_sim, cum_EW / num_sim, cum_std_W / num_sim
 
 def sim_ET_single_run():
-	num_req_to_finish = 10000 # 100
+	num_req_to_finish = 100 # 10000 # 100
+	ro = 0.8
+  w = 0
 
 	ET, std_T, EW, std_W = sim_ts(num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
@@ -52,6 +54,7 @@ def sim_ET_vs_ro():
 	num_req_to_finish = 10000
 	w = 0 # 20 # 100
 	num_sim = 2 # 10
+	log(INFO, "started", num_req_to_finish=num_req_to_finish, W=W, num_sim=num_sim)
 
 	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
 	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:

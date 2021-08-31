@@ -71,7 +71,7 @@ SUBFOLDER_TS = 'sim_ts'
 SUBFOLDER_RR = 'sim_rr'
 SUBFOLDER_UCB = 'sim_ucb'
 d, p = 2, 10
-w = 20 # 100
+w = 0 # 20 # 100
 
 def plot_cdf_T_W__podc_vs_ts(ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	log(INFO, "started", ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
@@ -177,11 +177,11 @@ def plot_ET_vs_ro_for_varying_config():
 
 	hetero_clusters = False
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	# plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
 
 	hetero_clusters = True
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	# plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
 	log(INFO, "done")
 

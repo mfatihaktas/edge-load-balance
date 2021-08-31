@@ -85,7 +85,7 @@ class GaussianThompsonSampling_slidingWinAtEachArm():
 		return min_arm_id
 
 class GaussianThompsonSampling_resetWindowOnRareEvent():
-	def __init__(self, arm_id_l, threshold_prob_rare=0.1):
+	def __init__(self, arm_id_l, threshold_prob_rare=0.9):
 		self.arm_id_l = arm_id_l
 		self.threshold_prob_rare = threshold_prob_rare
 
@@ -116,9 +116,9 @@ class GaussianThompsonSampling_resetWindowOnRareEvent():
 
 		_stdev = math.sqrt(_var)
 		cost_rv = Normal(_mean, _stdev)
-		Pr_cost_is_too_large = cost_rv.tail(cost)
-		Pr_cost_is_too_small = cost_rv.cdf(cost)
-		Pr_cost_is_rare = max(Pr_cost_is_too_large, Pr_cost_is_too_small)
+		Pr_getting_larger_cost = cost_rv.tail(cost)
+		Pr_getting_smaller_cost = cost_rv.cdf(cost)
+		Pr_cost_is_rare = 1 - min(Pr_getting_larger_cost, Pr_getting_smaller_cost)
 		if Pr_cost_is_rare >= self.threshold_prob_rare:
 			log(DEBUG, "Rare event detected", cost=cost, _mean=_mean, _stdev=_stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
 			cost_q.clear()

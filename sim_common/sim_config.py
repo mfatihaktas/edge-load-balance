@@ -11,6 +11,7 @@ m = 2 * N
 serv_rate = 1
 ro = 0.8
 hetero_clusters = False
+# hetero_clusters = True
 
 def get_req_gen_rate(ro, m):
 	return round(ro * N * n * serv_rate / m, 2)
