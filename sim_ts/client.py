@@ -133,7 +133,7 @@ class GaussianThompsonSampling_resetWindowOnRareEvent():
 
 		min_arm_id, min_sample = None, float('Inf')
 		for arm_id, (mean, var) in self.arm_id__mean_var_m.items():
-			stdev = math.sqrt(var)
+			stdev = math.sqrt(var) if var > 0 else 1
 			s = np.random.normal(loc=mean, scale=stdev)
 			if s < min_sample:
 				min_sample = s
@@ -153,10 +153,10 @@ class Client_TS():
 		self.out = out
 
 		cl_id_l = [cl._id for cl in cl_l]
-		# self.ts = GaussianThompsonSampling_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
 		if win_len == 0:
 			self.ts = GaussianThompsonSampling_resetWindowOnRareEvent(cl_id_l)
 		else:
+			# self.ts = GaussianThompsonSampling_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
 			self.ts = GaussianThompsonSampling_slidingWinAtEachArm(cl_id_l, win_len)
 
 		self.num_req_gened = 0
