@@ -90,6 +90,9 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
+	config_m = parse_argv_for_sim(sys.argv[1:])
+	set_sim_config(config_m)
+
 	log_sim_config()
 
 	# sim_ET_single_run()

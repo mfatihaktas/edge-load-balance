@@ -1,3 +1,5 @@
+import getopt
+
 from cluster import *
 from worker import *
 from sim_config import *
@@ -55,3 +57,24 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=ro):
 	std_W = math.sqrt(EW2 - EW**2) if EW2 - EW**2 > 0 else 0
 	return {'ET': ET, 'std_T': std_T,
 					'EW': EW, 'std_W': std_W}
+
+def parse_argv_for_sim(argv):
+	m = {}
+	try:
+		opts, args = getopt.getopt(argv, '', ['hetero_clusters=', 'N_fluctuating_frac=', 'serv_time_rv='])
+	except getopt.GetoptError:
+		assert_("Wrong args;", opts=opts, args=args)
+
+	for opt, arg in opts:
+		print("opt= {},\n  arg= {}".format(opt, arg))
+		if opt == '--hetero_clusters':
+			m['hetero_clusters'] = bool(arg)
+		elif opt == '--N_fluctuating_frac':
+			m['N_fluctuating_frac'] = float(arg)
+		elif opt == '--serv_time_rv':
+			m['serv_time_rv'] = arg
+		else:
+			assert_("Unexpected opt= {}, arg= {}".format(opt, arg))
+
+	log(DEBUG, "", m=m)
+	return m

@@ -29,6 +29,23 @@ normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
+def set_sim_config(config_m):
+	global hetero_clusters, serv_time_rv, N_fluctuating_frac
+	log(INFO, "started", config_m=config_m)
+
+	if 'hetero_clusters' in config_m:
+		hetero_clusters = config_m['hetero_clusters']
+	if 'N_fluctuating_frac' in config_m:
+		N_fluctuating_frac = config_m['N_fluctuating_frac']
+
+	if 'serv_time_rv' in config_m:
+		if config_m['serv_time_rv'] == 'disc':
+			serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+		elif config_m['serv_time_rv'] == 'exp':
+			serv_time_rv = Exp(serv_rate)
+
+	log(INFO, "done")
+
 def log_sim_config():
 	log(INFO, "", N=N, n=n, m=m, ro=ro, hetero_clusters=hetero_clusters,
 			inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,

@@ -5,6 +5,9 @@ if [ $1 = 'i' ]; then
   srun --partition=main --nodes=1 --ntasks=1 --cpus-per-task=1 --mem=4000 --time=3:00:00 --export=ALL --pty bash -i
 elif [ $1 = 'r' ]; then
   FILE='sim.py'
+  OPTS=''
+  [ -z "$1" ] && { OPTS=$1 }
+
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
@@ -17,11 +20,13 @@ elif [ $1 = 'r' ]; then
 #SBATCH --export=ALL                 # Export your current env to the job env
 #SBATCH --output=log/slurm.%N.%j.out
 export MV2_ENABLE_AFFINITY=0
-srun --mpi=pmi2 python3 $PWD/$FILE
+srun --mpi=pmi2 python3 $PWD/$FILE $OPTS
   " > sbatch_script.sh
 
   rm log/*
   sbatch sbatch_script.sh
+elif [ $1 = 'rc' ]; then
+  ./srun.sh r '--hetero_clusters=False --N_fluctuating_frac=0 --serv_time_rv=disc'
 elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then
