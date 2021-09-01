@@ -6,9 +6,10 @@ if [ $1 = 'i' ]; then
 elif [ $1 = 'r' ]; then
   FILE='sim.py'
   OPTS=''
-  [ -z "$1" ] && { OPTS=$1; }
+  [ -n "$2" ] && { OPTS=$2; echo "OPTS=$OPTS"; }
 
   NTASKS=1
+  SCRIPT_FNAME=sbatch_script_$2.sh
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
 #SBATCH --job-name=$FILE
@@ -21,12 +22,24 @@ elif [ $1 = 'r' ]; then
 #SBATCH --output=log/slurm.%N.%j.out
 export MV2_ENABLE_AFFINITY=0
 srun --mpi=pmi2 python3 $PWD/$FILE $OPTS
-  " > sbatch_script.sh
+  " > $SCRIPT_FNAME
 
   rm log/*
-  sbatch sbatch_script.sh
+  sbatch $SCRIPT_FNAME
 elif [ $1 = 'rc' ]; then
-  ./srun.sh r "--hetero_clusters='False' --N_fluctuating_frac='0' --serv_time_rv='disc'"
+  srun_ () {
+    ./srun.sh r "--hetero_clusters=$1 --N_fluctuating_frac=$2 --serv_time_rv=$3"
+  }
+
+  srun_ 'False' '0' 'disc'
+  srun_ 'False' '0.3' 'disc'
+  srun_ 'False' '0' 'exp'
+  srun_ 'False' '0.3' 'exp'
+
+  srun_ 'True' '0' 'disc'
+  srun_ 'True' '0.3' 'disc'
+  srun_ 'True' '0' 'exp'
+  srun_ 'True' '0.3' 'exp'
 elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then
