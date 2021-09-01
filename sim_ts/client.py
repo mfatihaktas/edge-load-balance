@@ -89,50 +89,44 @@ class GaussianThompsonSampling_resetWindowOnRareEvent():
 		self.arm_id_l = arm_id_l
 		self.threshold_prob_rare = threshold_prob_rare
 
-		self.arm_id__cost_q_m = {i: deque() for i in arm_id_l}
-		self.arm_id__mean_var_m = {i: (0, 1) for i in arm_id_l}
+		self.arm_id__n_mean_var_m = {i: (0, 0, 1) for i in arm_id_l}
 
 	def __repr__(self):
 		return 'GaussianThompsonSampling_resetWindowOnRareEvent(arm_id_l= {}, threshold_prob_rare= {})'.format(self.arm_id_l, self.threshold_prob_rare)
 
 	def record_cost(self, arm_id, cost):
-		cost_q = self.arm_id__cost_q_m[arm_id]
-		n = len(cost_q)
-		_mean, _var = self.arm_id__mean_var_m[arm_id]
+		n, _mean, _var = self.arm_id__n_mean_var_m[arm_id]
 
 		def record():
-			cost_q.append(cost)
-
 			mean = (_mean * n + cost) / (n + 1)
 			## https://math.stackexchange.com/questions/102978/incremental-computation-of-standard-deviation
-			var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1) if n > 0 else 0
-			self.arm_id__mean_var_m[arm_id] = (mean, var)
+			var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1) if n > 0 else 1
+			self.arm_id__n_mean_var_m[arm_id] = (n + 1, mean, var)
 
-			log(DEBUG, "Recorded", cost=cost, _mean=_mean, _var=_var, mean=mean, var=var)
+			log(DEBUG, "Recorded", cost=cost, n=n, _mean=_mean, _var=_var, mean=mean, var=var)
 
-		if n < 10:
+		if n < 6:
 			record()
 			return
 
 		_stdev = math.sqrt(_var)
 		cost_rv = Normal(_mean, _stdev)
-		Pr_getting_larger_cost = cost_rv.tail(cost)
-		Pr_getting_smaller_cost = cost_rv.cdf(cost)
-		Pr_cost_is_rare = 1 - min(Pr_getting_larger_cost, Pr_getting_smaller_cost)
+		Pr_getting_larger_than_cost = cost_rv.tail(cost)
+		Pr_getting_smaller_than_cost = cost_rv.cdf(cost)
+		Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
 		if Pr_cost_is_rare >= self.threshold_prob_rare:
 			log(DEBUG, "Rare event detected", cost=cost, _mean=_mean, _stdev=_stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
-			cost_q.clear()
-			self.arm_id__mean_var_m[arm_id] = (0, 1)
+			self.arm_id__n_mean_var_m[arm_id] = (1, cost, 1)
 		else:
 			record()
 
 		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
 
 	def sample_arm(self):
-		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
+		log(DEBUG, "", arm_id__n_mean_var_m=self.arm_id__n_mean_var_m)
 
 		min_arm_id, min_sample = None, float('Inf')
-		for arm_id, (mean, var) in self.arm_id__mean_var_m.items():
+		for arm_id, (n, mean, var) in self.arm_id__n_mean_var_m.items():
 			stdev = math.sqrt(var) if var > 0 else 1
 			s = np.random.normal(loc=mean, scale=stdev)
 			if s < min_sample:

@@ -81,7 +81,7 @@ def add_cdf(l, ax, label, color, drawline_x_l=[] ):
 
 	plot.sca(ax)
 	x_l = sorted(l)
-	y_l = np.arange(len(x_l) )/len(x_l)
+	y_l = np.arange(len(x_l))/len(x_l)
 	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=2, mew=2, ms=2) # lw=1, mew=1, ms=1
 
 	def drawline(x, c=color, ls='-'):
@@ -90,14 +90,15 @@ def add_cdf(l, ax, label, color, drawline_x_l=[] ):
 		if i == len(x_l):
 			return
 		ax.add_line(
-			matplotlib.lines.Line2D([x_l[i], x_l[i]], [0, y_l[i]], color=c, linestyle=ls) )
+			matplotlib.lines.Line2D([x_l[i], x_l[i]], [0, y_l[i]], color=c, linestyle=ls))
 		ax.add_line(
-			matplotlib.lines.Line2D([0, x_l[i]], [y_l[i], y_l[i]], color=c, linestyle=ls) )
+			matplotlib.lines.Line2D([0, x_l[i]], [y_l[i], y_l[i]], color=c, linestyle=ls))
 
 	for x in drawline_x_l:
 		drawline(x)
 
-	mean, std = np.mean(l), np.std(l)
+	mean = np.mean(l)
+	# std = np.std(l)
 	drawline(mean, ls=':')
 	# drawline(mean - std, c='k', ls='--')
 	# drawline(mean + std, c='k', ls='--')
@@ -130,6 +131,7 @@ def plot_cdf(rv, ax, label, color, max_=None, drawline_x_l=[]):
 	y_l = [rv.cdf(x) for x in x_l]
 	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=2, mew=2, ms=2) # lw=1, mew=1, ms=1
 
+# TODO: Move file utils below to a file_utils.py
 def write_to_file(data, fname):
 	with open(fname, 'w') as f:
 		f.write(data)

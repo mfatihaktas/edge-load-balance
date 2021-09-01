@@ -89,7 +89,7 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, hetero_clusters=hetero_clusters, N_fluctuati
 
 	fontsize = 14
 	fig, axs = plot.subplots(1, 2)
-	figsize = (2*6, 4)
+	figsize = (2*10, 5)
 
 	## CDF of W
 	ax = axs[0]
@@ -103,7 +103,7 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, hetero_clusters=hetero_clusters, N_fluctuati
 	# plot.xticks(rotation=70)
 	plot.ylabel('Pr{W < x}', fontsize=fontsize)
 	plot.xlabel('x', fontsize=fontsize)
-	plot.legend(fontsize=fontsize)
+	legend1 = plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
 
 	## CDF of T
 	ax = axs[1]
@@ -116,13 +116,13 @@ def plot_cdf_T_W__podc_vs_ts(ro=ro, hetero_clusters=hetero_clusters, N_fluctuati
 	plot.xscale('log')
 	plot.ylabel('Pr{T < x}', fontsize=fontsize)
 	plot.xlabel('x', fontsize=fontsize)
-	plot.legend(fontsize=fontsize)
+	legend2 = plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
 
 	fig.set_size_inches(figsize[0], figsize[1] )
 	plot.subplots_adjust(hspace=0.45, wspace=0.45)
 
 	st = plot.suptitle(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), fontsize=14)
-	plot.savefig(get_filename_png("plot_cdf_T_W", ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_extra_artists=(st,), bbox_inches='tight')
+	plot.savefig(get_filename_png("plot_cdf_T_W", ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_extra_artists=(st,legend1,legend2), bbox_inches='tight')
 	fig.clear()
 
 	log(INFO, "done")
@@ -343,7 +343,21 @@ def plot_cl_load_over_time_for_varying_config():
 
 	log(DEBUG, "done")
 
+def check_bug():
+	d, p = 2, 10
+
+	ro = 0.9
+	hetero_clusters = True
+	N_fluctuating_frac = 0.3
+	serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
+
+	T_podc_l = read_json_from_file(fname=get_filename_json('{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	T_podc_l.sort()
+	log(INFO, "", len_T_podc_l=len(T_podc_l), T_podc_l_first_20=T_podc_l[:20])
+
 if __name__ == '__main__':
+	log_to_std()
+
 	# plot_cdf_T_W__podc_vs_ts()
 	plot_cdf_T_W__podc_vs_ts_for_varying_config()
 
@@ -354,3 +368,5 @@ if __name__ == '__main__':
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	# plot_cl_load_over_time_for_varying_config()
+
+	# check_bug()
