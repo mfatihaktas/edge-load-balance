@@ -6,7 +6,7 @@ if [ $1 = 'i' ]; then
 elif [ $1 = 'r' ]; then
   FILE='sim.py'
   OPTS=''
-  [ -z "$1" ] && { OPTS=$1 }
+  [ -z "$1" ] && { OPTS=$1; }
 
   NTASKS=1
   echo "#!/bin/bash
@@ -26,7 +26,7 @@ srun --mpi=pmi2 python3 $PWD/$FILE $OPTS
   rm log/*
   sbatch sbatch_script.sh
 elif [ $1 = 'rc' ]; then
-  ./srun.sh r '--hetero_clusters=False --N_fluctuating_frac=0 --serv_time_rv=disc'
+  ./srun.sh r "--hetero_clusters='False' --N_fluctuating_frac='0' --serv_time_rv='disc'"
 elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then
