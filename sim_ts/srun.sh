@@ -9,7 +9,9 @@ elif [ $1 = 'r' ]; then
   [ -n "$2" ] && { OPTS=$2; echo "OPTS=$OPTS"; }
 
   NTASKS=1
-  SCRIPT_FNAME=sbatch_script_$2.sh
+  RAND_INT=$((1 + $RANDOM % 1000))
+  SCRIPT_FNAME="sbatch_script_$RAND_INT.sh"
+  echo "SCRIPT_FNAME=$SCRIPT_FNAME"
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
 #SBATCH --job-name=$FILE
