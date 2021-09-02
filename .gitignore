@@ -3,7 +3,7 @@
 *.log
 *.out
 *.json
-sbatch_script*
+*sbatch*
 
 log/
 
