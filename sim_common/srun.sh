@@ -28,12 +28,11 @@ elif [ $1 = 'r' ]; then
 #SBATCH --mem=8000                   # Real memory (RAM) required (MB)
 #SBATCH --time=48:00:00              # Total run time limit (HH:MM:SS)
 #SBATCH --export=ALL                 # Export your current env to the job env
-#SBATCH --output=log/${JOB_NAME}.out
+#SBATCH --output=${SUBFOLDER}/log/${JOB_NAME}.out
 export MV2_ENABLE_AFFINITY=0
 srun --mpi=pmi2 python3 ${FILE_PATH} ${OPTS}
   " > $SCRIPT_NAME
 
-  # SBATCH --output=${SUBFOLDER}/log/sim_${JOB_NAME}.out
   sbatch $SCRIPT_NAME
 elif [ $1 = 'rc' ]; then
   srun_ () {
@@ -58,15 +57,15 @@ elif [ $1 = 'rc' ]; then
     SUBFOLDER="sim_$1"
     rm $SUBFOLDER/log/*
 
-    srun_ $SUBFOLDER 0 0   'disc' 1
-    srun_ $SUBFOLDER 0 0   'exp'  2
-    srun_ $SUBFOLDER 0 0.3 'exp'  3
-    srun_ $SUBFOLDER 0 0.3 'exp'  4
+    srun_ $SUBFOLDER 0 0   'disc' # 1
+    srun_ $SUBFOLDER 0 0   'exp'  # 2
+    srun_ $SUBFOLDER 0 0.3 'exp'  # 3
+    srun_ $SUBFOLDER 0 0.3 'exp'  # 4
 
-    srun_ $SUBFOLDER 1 0   'disc' 5
-    srun_ $SUBFOLDER 1 0   'exp'  6
-    srun_ $SUBFOLDER 1 0.3 'disc' 7
-    srun_ $SUBFOLDER 1 0.3 'exp'  8
+    srun_ $SUBFOLDER 1 0   'disc' # 5
+    srun_ $SUBFOLDER 1 0   'exp'  # 6
+    srun_ $SUBFOLDER 1 0.3 'disc' # 7
+    srun_ $SUBFOLDER 1 0.3 'exp'  # 8
   }
 
   srun_w_label 'podc'
