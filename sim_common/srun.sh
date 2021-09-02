@@ -58,16 +58,21 @@ elif [ $1 = 'rc' ]; then
     SUBFOLDER="sim_$1"
     rm $SUBFOLDER/log/*
 
-    srun_ $SUBFOLDER 0 0 'disc' 1
-    srun_ $SUBFOLDER 0 0 'exp' 2
-    srun_ $SUBFOLDER 1 0 'disc' 3
-    srun_ $SUBFOLDER 1 0 'exp' 4
+    srun_ $SUBFOLDER 0 0   'disc' 1
+    srun_ $SUBFOLDER 0 0   'exp'  2
+    srun_ $SUBFOLDER 0 0.3 'exp'  3
+    srun_ $SUBFOLDER 0 0.3 'exp'  4
+
+    srun_ $SUBFOLDER 1 0   'disc' 5
+    srun_ $SUBFOLDER 1 0   'exp'  6
+    srun_ $SUBFOLDER 1 0.3 'disc' 7
+    srun_ $SUBFOLDER 1 0.3 'exp'  8
   }
 
-  # srun_w_label 'podc'
+  srun_w_label 'podc'
   srun_w_label 'ts'
-  # srun_w_label 'rr'
-  # srun_w_label 'ucb'
+  srun_w_label 'rr'
+  srun_w_label 'ucb'
 elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then

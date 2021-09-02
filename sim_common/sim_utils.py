@@ -58,6 +58,35 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=ro):
 	return {'ET': ET, 'std_T': std_T,
 					'EW': EW, 'std_W': std_W}
 
+def sim_common_w_construct_client(label, construct_client, num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=False):
+	log(DEBUG, "started", label=label, num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
+
+	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro)
+
+	cum_ET, cum_std_T = 0, 0
+	cum_EW, cum_std_W = 0, 0
+	for i in range(num_sim):
+		log(DEBUG, "*** {}th sim run started".format(i))
+
+		env = simpy.Environment()
+		cl_l = get_cl_l(env)
+		c_l = [construct_client(j, env, cl_l) for j in range(m)]
+		net = Net('n', env, [*cl_l, *c_l])
+		env.run(until=c_l[0].act_recv)
+
+		stats_m = get_stats_m_from_sim_data(cl_l, c_l, header=label if write_to_json else None, ro=ro)
+
+		ET, std_T = stats_m['ET'], stats_m['std_T']
+		EW, std_W = stats_m['EW'], stats_m['std_W']
+		log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
+		cum_ET += ET
+		cum_std_T += std_T
+		cum_EW += EW
+		cum_std_W += std_W
+
+	log(INFO, 'done')
+	return cum_ET / num_sim, cum_std_T / num_sim, cum_EW / num_sim, cum_std_W / num_sim
+
 def sim_common_ET_vs_ro(label, sim_w_ro):
 	# num_req_to_finish = 10000
 	# num_sim = 2 # 10
