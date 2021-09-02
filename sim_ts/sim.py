@@ -1,4 +1,4 @@
-import os, sys
+import os, sys;71;12M
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir + '/sim_common')
@@ -14,8 +14,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_ts(num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
-	log(DEBUG, "started", ro=ro, w=w, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+def sim_ts(num_req_to_finish=num_req_to_finish, ro=ro, w=20, num_sim=num_sim, write_to_json=False):
+	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, ro=ro, w=w, num_sim=num_sim)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -43,18 +43,17 @@ def sim_ts(num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
 	return cum_ET / num_sim, cum_std_T / num_sim, cum_EW / num_sim, cum_std_W / num_sim
 
 def sim_ET_single_run():
-	num_req_to_finish = 1000 # 10000
+	# num_req_to_finish = 1000 # 10000
 	ro = 0.8
 	w = 0
 
-	ET, std_T, EW, std_W = sim_ts(num_req_to_finish, ro, w, num_sim=1, write_to_json=True)
+	ET, std_T, EW, std_W = sim_ts(num_req_to_finish=num_req_to_finish, ro=ro, w=w, num_sim=1, write_to_json=True)
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000
+	# num_req_to_finish = 10000
+	# num_sim = 2
 	w = 0 # 20 # 100
-	num_sim = 2 # 10
-	log(INFO, "started", num_req_to_finish=num_req_to_finish, w=w, num_sim=num_sim)
 
 	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
 	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
@@ -90,10 +89,7 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	config_m = parse_argv_for_sim(sys.argv[1:])
-	set_sim_config(config_m)
-
 	log_sim_config()
 
-	# sim_ET_single_run()
-	sim_ET_vs_ro()
+	sim_ET_single_run()
+	# sim_ET_vs_ro()

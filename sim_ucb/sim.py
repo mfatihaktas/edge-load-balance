@@ -14,8 +14,8 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_ucb(num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
-	log(DEBUG, "started", ro=ro, w=w, num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+def sim_ucb(num_req_to_finish=num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
+	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, ro=ro, w=w, num_sim=num_sim)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
 
@@ -43,15 +43,15 @@ def sim_ucb(num_req_to_finish, ro=ro, w=20, num_sim=1, write_to_json=False):
 	return cum_ET / num_sim, cum_std_T / num_sim, cum_EW / num_sim, cum_std_W / num_sim
 
 def sim_ET_single_run():
-	num_req_to_finish = 10000 # 100
+	# num_req_to_finish = 10000 # 100
 
 	ET, std_T, EW, std_W = sim_ucb(num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000
+	# num_req_to_finish = 10000
+	# num_sim = 2 # 10
 	w = 20 # 100
-	num_sim = 2 # 10
 
 	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
 	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:

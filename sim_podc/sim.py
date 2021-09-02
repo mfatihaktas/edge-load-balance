@@ -14,7 +14,7 @@ from cluster import *
 from sim_config import *
 from sim_utils import *
 
-def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro=ro, num_sim=1, write_to_json=False):
+def sim_podc(d, interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=False):
 	log(DEBUG, "started", d=d, interProbeNumReq_controller=interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 	inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro, m)
@@ -44,8 +44,8 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro=ro, num_sim=1
 	return cum_ET / num_sim, cum_std_T / num_sim, cum_EW / num_sim, cum_std_W / num_sim
 
 def sim_ET_wrt_p_d():
-	num_req_to_finish = 10000
-	num_sim = 2 # 10
+	# num_req_to_finish = 10000
+	# num_sim = 2 # 10
 
 	## InterProbeNumReq_controller_learningWConstInc
 	'''
@@ -109,15 +109,15 @@ def sim_ET_wrt_p_d():
 	log(DEBUG, "done")
 
 def sim_ET_single_run():
-	num_req_to_finish = 10000 # 100
+	# num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
 	ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 10000
-	num_sim = 2 # 10
+	# num_req_to_finish = 10000
+	# num_sim = 2 # 10
 
 	d = 2
 	p = 10
