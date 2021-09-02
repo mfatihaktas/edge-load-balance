@@ -6,7 +6,7 @@ if [ $1 = 'i' ]; then
 elif [ $1 = 'r' ]; then
   [ -z "$2" ] && { echo "Subfolder?"; exit 1; }
   SUBFOLDER="$2"
-  FILE_PATH="${PWD}/${SUBFOLDER}/sim.py"
+  FILE_PATH="${PWD}/../${SUBFOLDER}/sim.py"
 
   OPTS=""
   [ -n "$3" ] && { OPTS=$3; }
@@ -28,39 +28,44 @@ elif [ $1 = 'r' ]; then
 #SBATCH --mem=8000                   # Real memory (RAM) required (MB)
 #SBATCH --time=48:00:00              # Total run time limit (HH:MM:SS)
 #SBATCH --export=ALL                 # Export your current env to the job env
-#SBATCH --output=${SUBFOLDER}/log/sim_${JOB_NAME}.out
+#SBATCH --output=log/${JOB_NAME}.out
 export MV2_ENABLE_AFFINITY=0
 srun --mpi=pmi2 python3 ${FILE_PATH} ${OPTS}
   " > $SCRIPT_NAME
 
+  # SBATCH --output=${SUBFOLDER}/log/sim_${JOB_NAME}.out
   sbatch $SCRIPT_NAME
 elif [ $1 = 'rc' ]; then
   srun_ () {
     [ -z "$1" ] && { echo "Subfolder?"; exit 1; }
     SUBFOLDER="$1"
+    echo "SUBFOLDER=${SUBFOLDER}"
     [ -z "$2" ] && { echo "hetero_clusters?"; exit 1; }
     HETERO_CLUSTERS="$2"
+    echo "HETERO_CLUSTERS=${HETERO_CLUSTERS}"
     [ -z "$3" ] && { echo "N_fluctuating_frac?"; exit 1; }
     N_FLUCTUATING_FRAC="$3"
+    echo "N_FLUCTUATING_FRAC=${N_FLUCTUATING_FRAC}"
     [ -z "$4" ] && { echo "serv_time_rv?"; exit 1; }
     SERV_TIME_RV="$4"
+    echo "SERV_TIME_RV=${SERV_TIME_RV}"
 
-    ./srun.sh r $SUBFOLDER "--hetero_clusters=${HETERO_CLUSTERS} --N_fluctuating_frac=${N_FLUCTUATING_FRAC} --serv_time_rv=${SERV_TIME_RV}"
+    ./srun.sh r $SUBFOLDER "--hetero_clusters=${HETERO_CLUSTERS} --N_fluctuating_frac=${N_FLUCTUATING_FRAC} --serv_time_rv=${SERV_TIME_RV}" $5
   }
 
   srun_w_label () {
     [ -z "$1" ] && { echo "Label? podc, ts, rr, ucb?"; exit 1; }
     SUBFOLDER="sim_$1"
-    rm "${SUBFOLDER}/log/*"
+    rm $SUBFOLDER/log/*
 
-    srun_ $SUBFOLDER 'False' '0' 'disc'
-    srun_ $SUBFOLDER 'False' '0' 'exp'
-    srun_ $SUBFOLDER 'True' '0' 'disc'
-    srun_ $SUBFOLDER 'True' '0' 'exp'
+    srun_ $SUBFOLDER 0 0 'disc' 1
+    srun_ $SUBFOLDER 0 0 'exp' 2
+    srun_ $SUBFOLDER 1 0 'disc' 3
+    srun_ $SUBFOLDER 1 0 'exp' 4
   }
 
-  srun_w_label 'podc'
-  # srun_w_label 'ts'
+  # srun_w_label 'podc'
+  srun_w_label 'ts'
   # srun_w_label 'rr'
   # srun_w_label 'ucb'
 elif [ $1 = 'l' ]; then

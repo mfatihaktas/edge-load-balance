@@ -68,7 +68,7 @@ def parse_argv_for_sim(argv):
 	for opt, arg in opts:
 		print("opt= {},\n  arg= {}".format(opt, arg))
 		if opt == '--hetero_clusters':
-			m['hetero_clusters'] = bool(arg)
+			m['hetero_clusters'] = bool(int(arg))
 		elif opt == '--N_fluctuating_frac':
 			m['N_fluctuating_frac'] = float(arg)
 		elif opt == '--serv_time_rv':
