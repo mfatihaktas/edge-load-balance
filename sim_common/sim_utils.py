@@ -58,6 +58,41 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=ro):
 	return {'ET': ET, 'std_T': std_T,
 					'EW': EW, 'std_W': std_W}
 
+def sim_common_ET_vs_ro(label, sim_w_ro):
+	# num_req_to_finish = 10000
+	# num_sim = 2 # 10
+	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, num_sim=num_sim, label=label, sim_w_ro=sim_w_ro)
+
+	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
+	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
+		log(INFO, "> ro= {}".format(ro))
+		ro_l.append(ro)
+
+		ET, std_T, EW, std_W = sim_w_ro(ro)
+		log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
+		ET_l.append(ET)
+		std_T_l.append(std_T)
+		EW_l.append(EW)
+		std_W_l.append(std_W)
+
+	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_{}'.format(label), ro=''))
+	write_to_file(data=json.dumps(list(zip(ro_l, std_T_l))), fname=get_filename_json(header='ro_std_T_l_{}'.format(label), ro=''))
+	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_{}'.format(label), ro=''))
+	write_to_file(data=json.dumps(list(zip(ro_l, std_W_l))), fname=get_filename_json(header='ro_std_W_l_{}'.format(label), ro=''))
+
+	plot.errorbar(ro_l, ET_l, yerr=std_T_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
+
+	fontsize = 14
+	plot.legend(fontsize=fontsize)
+	plot.ylabel(r'$E[T]$', fontsize=fontsize)
+	plot.xlabel(r'$\rho$', fontsize=fontsize)
+	plot.title('{}'.format(label) + ', ' + get_plot_title())
+	plot.gcf().set_size_inches(6, 4)
+	plot.savefig(get_filename_png("plot_ET_vs_ro_{}".format(label)), bbox_inches='tight')
+	plot.gcf().clear()
+
+	log(DEBUG, "done")
+
 def parse_argv_for_sim(argv):
 	m = {}
 	try:

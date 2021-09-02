@@ -5,6 +5,7 @@ PY=python3
 
 if [ $1 = 's' ]; then
   $PY sim.py
+  # $PY sim.py --hetero_clusters=0 --N_fluctuating_frac=0.3 --serv_time_rv='exp'
 elif [ $1 = 'r' ]; then
   $PY rvs.py
 else

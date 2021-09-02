@@ -29,7 +29,7 @@ normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
-num_req_to_finish = 100
+num_req_to_finish = 10
 # num_req_to_finish = 10000
 num_sim = 2
 

@@ -49,42 +49,22 @@ def sim_ET_for_single_m():
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	# num_req_to_finish = 10000
+	num_req_to_finish = 100 # 10000
 	# num_sim = 2 # 10
+	w = 0 # 20 # 100
+	log(DEBUG, "started", num_req_to_finish=num_req_to_finish, num_sim=num_sim, w=w)
 
-	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
-	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
-		log(INFO, "> ro= {}".format(ro))
-		ro_l.append(ro)
-
-		ET, std_T, EW, std_W = sim_rr(num_req_to_finish=num_req_to_finish, num_sim=num_sim, ro=ro, write_to_json=True)
-		log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
-		ET_l.append(ET)
-		std_T_l.append(std_T)
-		EW_l.append(EW)
-		std_W_l.append(std_W)
-
-	write_to_file(data=json.dumps(list(zip(ro_l, ET_l))), fname=get_filename_json(header='ro_ET_l_rr', ro=''))
-	write_to_file(data=json.dumps(list(zip(ro_l, std_T_l))), fname=get_filename_json(header='ro_std_T_l_rr', ro=''))
-	write_to_file(data=json.dumps(list(zip(ro_l, EW_l))), fname=get_filename_json(header='ro_EW_l_rr', ro=''))
-	write_to_file(data=json.dumps(list(zip(ro_l, std_W_l))), fname=get_filename_json(header='ro_std_W_l_rr', ro=''))
-
-	plot.errorbar(ro_l, ET_l, yerr=std_T_l, color=next(nice_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
-
-	fontsize = 14
-	plot.legend(fontsize=fontsize)
-	plot.ylabel(r'$E[T]$', fontsize=fontsize)
-	plot.xlabel(r'$\rho$', fontsize=fontsize)
-	plot.title(get_plot_title())
-	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png("plot_rr_ET_vs_ro"), bbox_inches='tight')
-	plot.gcf().clear()
+	sim_w_ro = lambda ro : sim_rr(num_req_to_finish=num_req_to_finish, num_sim=num_sim, ro=ro, write_to_json=True)
+	sim_common_ET_vs_ro('rr', sim_w_ro)
 
 	log(DEBUG, "done")
 
 if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
+
+	config_m = parse_argv_for_sim(sys.argv[1:])
+	set_sim_config(config_m)
 
 	log_sim_config()
 
