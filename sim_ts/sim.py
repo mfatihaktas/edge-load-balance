@@ -50,5 +50,5 @@ if __name__ == '__main__':
 
 	sim_config.log_sim_config()
 
-	sim_ET_single_run()
-	# sim_ET_vs_ro()
+	# sim_ET_single_run()
+	sim_ET_vs_ro()

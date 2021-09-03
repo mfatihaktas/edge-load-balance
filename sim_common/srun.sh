@@ -12,7 +12,7 @@ elif [ $1 = 'r' ]; then
   [ -n "$3" ] && { OPTS=$3; }
   echo "OPTS=${OPTS}"
 
-  SIM_ID=$((1 + $RANDOM % 1000))
+  SIM_ID=$((1 + $RANDOM % 10000))
   [ -n "$4" ] && { SIM_ID=$4; }
   JOB_NAME="sim_${SIM_ID}"
   echo "JOB_NAME=${JOB_NAME}"
@@ -28,13 +28,15 @@ elif [ $1 = 'r' ]; then
 #SBATCH --mem=8000                   # Real memory (RAM) required (MB)
 #SBATCH --time=48:00:00              # Total run time limit (HH:MM:SS)
 #SBATCH --export=ALL                 # Export your current env to the job env
-#SBATCH --output=${SUBFOLDER}/log/${JOB_NAME}.out
+#SBATCH --output=../${SUBFOLDER}/log/${JOB_NAME}.out
 export MV2_ENABLE_AFFINITY=0
 srun --mpi=pmi2 python3 ${FILE_PATH} ${OPTS}
   " > $SCRIPT_NAME
 
   sbatch $SCRIPT_NAME
 elif [ $1 = 'rc' ]; then
+  COUNTER=1
+
   srun_ () {
     [ -z "$1" ] && { echo "Subfolder?"; exit 1; }
     SUBFOLDER="$1"
@@ -50,22 +52,24 @@ elif [ $1 = 'rc' ]; then
     echo "SERV_TIME_RV=${SERV_TIME_RV}"
 
     ./srun.sh r $SUBFOLDER "--hetero_clusters=${HETERO_CLUSTERS} --N_fluctuating_frac=${N_FLUCTUATING_FRAC} --serv_time_rv=${SERV_TIME_RV}" $5
+    COUNTER=$(( COUNTER + 1 ))
   }
 
   srun_w_label () {
     [ -z "$1" ] && { echo "Label? podc, ts, rr, ucb?"; exit 1; }
     SUBFOLDER="sim_$1"
-    rm $SUBFOLDER/log/*
+    rm sbatch_*
+    rm ../$SUBFOLDER/log/*
 
-    srun_ $SUBFOLDER 0 0   'disc' # 1
-    srun_ $SUBFOLDER 0 0   'exp'  # 2
-    srun_ $SUBFOLDER 0 0.3 'exp'  # 3
-    srun_ $SUBFOLDER 0 0.3 'exp'  # 4
+    srun_ $SUBFOLDER 0 0   'disc' $COUNTER
+    srun_ $SUBFOLDER 0 0   'exp'  $COUNTER
+    srun_ $SUBFOLDER 0 0.3 'exp'  $COUNTER
+    srun_ $SUBFOLDER 0 0.3 'exp'  $COUNTER
 
-    srun_ $SUBFOLDER 1 0   'disc' # 5
-    srun_ $SUBFOLDER 1 0   'exp'  # 6
-    srun_ $SUBFOLDER 1 0.3 'disc' # 7
-    srun_ $SUBFOLDER 1 0.3 'exp'  # 8
+    srun_ $SUBFOLDER 1 0   'disc' $COUNTER
+    srun_ $SUBFOLDER 1 0   'exp'  $COUNTER
+    srun_ $SUBFOLDER 1 0.3 'disc' $COUNTER
+    srun_ $SUBFOLDER 1 0.3 'exp'  $COUNTER
   }
 
   srun_w_label 'podc'
