@@ -52,7 +52,7 @@ elif [ $1 = 'rc' ]; then
     echo "SERV_TIME_RV=${SERV_TIME_RV}"
 
     ./srun.sh r $SUBFOLDER "--hetero_clusters=${HETERO_CLUSTERS} --N_fluctuating_frac=${N_FLUCTUATING_FRAC} --serv_time_rv=${SERV_TIME_RV}" $5
-    COUNTER=$(( COUNTER + 1 ))
+    COUNTER=$((COUNTER + 1))
   }
 
   srun_w_label () {
