@@ -71,11 +71,15 @@ srun --mpi=pmi2 python3 ${FILE_PATH} ${OPTS}
   " > $SCRIPT_NAME
 
   sbatch $SCRIPT_NAME
-elif [ $1 = 'rc' ]; then
+elif [ $1 = 'ra' ]; then
   srun_w_label 'podc'
   srun_w_label 'ts'
   srun_w_label 'rr'
   srun_w_label 'ucb'
+elif [ $1 = 'podc' ]; then
+  srun_w_label 'podc'
+elif [ $1 = 'ts' ]; then
+  srun_w_label 'ts'
 elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then
