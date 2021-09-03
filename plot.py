@@ -73,7 +73,7 @@ SUBFOLDER_UCB = 'sim_ucb'
 d, p = 2, 10
 w = 0 # 20 # 100
 
-def plot_cdf_T_W__podc_vs_ts(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+def plot_cdf_T_W__podc_vs_ts(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	log(INFO, "started", ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
 	T_podc_l = read_json_from_file(fname=get_filename_json('{}/T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
@@ -147,7 +147,7 @@ def plot_cdf_T_W__podc_vs_ts_for_varying_config():
 
 	log(INFO, "done")
 
-def plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	log(INFO, "started", hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv)
 
 	ro_ET_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
@@ -201,14 +201,8 @@ def plot_ET_vs_ro_for_varying_config():
 
 	log(INFO, "done")
 
-def plot_T_over_time(label, cid, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=False):
+def plot_T_over_time(label, cid, ro, N_fluctuating_frac, serv_time_rv, save_to_png=False):
 	log(INFO, "started", label=label, cid=cid, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=save_to_png)
-
-	# label = 'PodC'
-	# label = 'TS'
-	# label = 'RR'
-	# cid = 'c0'
-	# cid = 'c5'
 
 	if label == 'PodC':
 		req_info_m_l_podc = read_json_from_file(fname=get_filename_json('{}/req_info_m_l_{}_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, cid, d, p), ro, N_fluctuating_frac, serv_time_rv))
@@ -277,7 +271,7 @@ def plot_T_over_time_for_varying_config():
 
 	log(DEBUG, "done")
 
-def plot_cl_load_over_time(label, cl_id, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=False):
+def plot_cl_load_over_time(label, cl_id, ro, N_fluctuating_frac, serv_time_rv, save_to_png=False):
 	log(INFO, "started", label=label, cl_id=cl_id, ro=ro, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv, save_to_png=save_to_png)
 
 	# label = 'PodC'

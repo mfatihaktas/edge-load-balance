@@ -31,8 +31,8 @@ normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
-# num_req_to_finish = 10
-num_req_to_finish = 10000
+num_req_to_finish = 10
+# num_req_to_finish = 10000
 num_sim = 2
 
 def set_sim_config(config_m):
@@ -63,14 +63,6 @@ def get_plot_title(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_
 				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
 
 def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	# return 'N_{}'.format(N) + \
-	# 			 '_n_{}'.format(n) + \
-	# 			 '_m_{}'.format(m) + \
-	# 			 '_ro_{}'.format(ro) + \
-	# 			 '_Nff_{}'.format(N_fluctuating_frac) + \
-	# 			 '_workerSlowdown_{}'.format(worker_slowdown) + \
-	# 			 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
-	# 			 '_S_{}'.format(serv_time_rv)
   return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
@@ -81,8 +73,14 @@ def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
 				 '_S_{}'.format(serv_time_rv)
 
-def get_filename_png(header, ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return header + '__' + get_filename_tail(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv) + '.png'
+def get_filename_png(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
+	return header + '__' + get_filename_tail(ro if ro_arg is None else ro_arg,
+																					 hetero_clusters if hetero_clusters_arg is None else hetero_clusters_arg,
+																					 N_fluctuating_frac if N_fluctuating_frac_arg is None else N_fluctuating_frac_arg,
+																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + '.png'
 
-def get_filename_json(header, ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return header + '__' + get_filename_tail(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv) + '.json'
+def get_filename_json(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
+	return header + '__' + get_filename_tail(ro if ro_arg is None else ro_arg,
+																					 hetero_clusters if hetero_clusters_arg is None else hetero_clusters_arg,
+																					 N_fluctuating_frac if N_fluctuating_frac_arg is None else N_fluctuating_frac_arg,
+																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + '.json'

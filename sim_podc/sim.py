@@ -7,19 +7,19 @@ sys.path.append(parent_dir)
 import simpy, json
 import numpy as np
 
-from rvs import *
-from client import *
-from cluster import *
+import client
 
-from sim_config import *
-from sim_utils import *
+import sim_config
+import sim_utils
+from debug_utils import *
 
-def sim_podc(d, interProbeNumReq_controller, num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=False):
+def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro, num_sim, write_to_json=False):
 	log(DEBUG, "started", d=d, interProbeNumReq_controller=interProbeNumReq_controller)
 
-	return sim_common_w_construct_client(label='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num),
-																			 construct_client=lambda i, env, cl_l: Client_PodC('c{}'.format(i), env, d, interProbeNumReq_controller, num_req_to_finish, inter_req_gen_time_rv, serv_time_rv, cl_l, initial_cl_id=cl_l[i % N]._id),
-																			 num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
+	return sim_utils.sim_common_w_construct_client(
+					 label='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num),
+					 construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: client.Client_PodC('c{}'.format(i), env, d, interProbeNumReq_controller, sim_config.num_req_to_finish, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l, initial_cl_id=cl_l[i % sim_config.N]._id),
+					 num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 def sim_ET_wrt_p_d():
 	# num_req_to_finish = 10000
@@ -69,7 +69,7 @@ def sim_ET_wrt_p_d():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=num_sim)
+			ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=client.InterProbeNumReq_controller_constant(p), num_req_to_finish=sim_config.num_req_to_finish, num_sim=sim_config.num_sim)
 			log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 			ET_l.append(ET)
 			std_T_l.append(std_T)
@@ -90,17 +90,17 @@ def sim_ET_single_run():
 	# num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, num_sim=1, write_to_json=True)
+	ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=sim_config.num_req_to_finish, ro=sim_config.ro, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	# num_req_to_finish = 100 # 10000
+	num_req_to_finish = 100 # 10000
 	# num_sim = 2 # 10
 	d, p = 2, 10
 	log(DEBUG, "started", d=d, p=p)
 
-	sim_w_ro = lambda ro : sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=True)
-	sim_common_ET_vs_ro('podc_d_{}_p_{}'.format(d, p), sim_w_ro)
+	sim_w_ro = lambda ro : sim_podc(d=d, interProbeNumReq_controller=client.InterProbeNumReq_controller_constant(p), num_req_to_finish=sim_config.num_req_to_finish, ro=ro, num_sim=sim_config.num_sim, write_to_json=True)
+	sim_utils.sim_common_ET_vs_ro('podc_d_{}_p_{}'.format(d, p), sim_w_ro)
 
 	log(DEBUG, "done")
 
@@ -108,10 +108,10 @@ if __name__ == '__main__':
 	log_to_std()
 	log_to_file('sim.log')
 
-	config_m = parse_argv_for_sim(sys.argv[1:])
-	set_sim_config(config_m)
+	config_m = sim_utils.parse_argv_for_sim(sys.argv[1:])
+	sim_config.set_sim_config(config_m)
 
-	log_sim_config()
+	sim_config.log_sim_config()
 
 	# sim_ET_wrt_p_d()
 	# sim_ET_single_run()
