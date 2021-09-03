@@ -29,7 +29,7 @@ srun_w_label () {
 
   srun_ $SUBFOLDER 0 0   'disc' $COUNTER
   srun_ $SUBFOLDER 0 0   'exp'  $COUNTER
-  srun_ $SUBFOLDER 0 0.3 'exp'  $COUNTER
+  srun_ $SUBFOLDER 0 0.3 'disc' $COUNTER
   srun_ $SUBFOLDER 0 0.3 'exp'  $COUNTER
 
   srun_ $SUBFOLDER 1 0   'disc' $COUNTER

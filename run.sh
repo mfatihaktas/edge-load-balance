@@ -64,11 +64,20 @@ elif [ $1 = 'p' ]; then
 elif [ $1 = 'pu' ]; then
   $PY plot_utils.py
 elif [ $1 = 'clean' ]; then
-  rm *.json
-  rm *.png
-  rm ./sim_common/*.json
-  rm ./sim_common/*.png
-  rm ./sim_common/sbatch_*
+  rm_ () {
+    [ -z "$1" ] && { echo "Label?"; exit 1; }
+    SUBFOLDER="sim_$1"
+
+    rm $SUBFOLDER/*.json
+    rm $SUBFOLDER/*.png
+    rm $SUBFOLDER/sbatch_*
+  }
+
+  rm_ 'common'
+  rm_ 'podc'
+  rm_ 'ts'
+  rm_ 'rr'
+  rm_ 'ucb'
 elif [ $1 = 'mfn' ]; then
   ## Second answer here:
   ## https://stackoverflow.com/questions/9612090/how-to-loop-through-file-names-returned-by-find

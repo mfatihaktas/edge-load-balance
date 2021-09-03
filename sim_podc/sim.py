@@ -11,6 +11,7 @@ import client
 
 import sim_config
 import sim_utils
+from plot_utils import *
 from debug_utils import *
 
 def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro, num_sim, write_to_json=False):
@@ -60,7 +61,7 @@ def sim_ET_wrt_p_d():
 		log(INFO, ">> p= {}".format(p))
 
 		d_l, ET_l, std_T_l = [], [], []
-		for d in [1, 2, 3, N]:
+		for d in [1, 2, 3, sim_config.N]:
 		# for d in [1, 2, 3, 5, N]:
 		# for d in [1, 2, 3, *numpy.arange(5, N + 1, 4)]:
 		# for d in range(1, N + 1):
@@ -69,7 +70,7 @@ def sim_ET_wrt_p_d():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=client.InterProbeNumReq_controller_constant(p), num_req_to_finish=sim_config.num_req_to_finish, num_sim=sim_config.num_sim)
+			ET, std_T, EW, std_W = sim_podc(d, client.InterProbeNumReq_controller_constant(p), sim_config.num_req_to_finish, sim_config.ro, sim_config.num_sim)
 			log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 			ET_l.append(ET)
 			std_T_l.append(std_T)
@@ -79,9 +80,9 @@ def sim_ET_wrt_p_d():
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$d$', fontsize=fontsize)
-	plot.title(get_plot_title())
+	plot.title(sim_config.get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png("plot_ET_wrt_p_d"), bbox_inches='tight')
+	plot.savefig(sim_config.get_filename_png("plot_ET_wrt_p_d"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -90,7 +91,7 @@ def sim_ET_single_run():
 	# num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, std_T, EW, std_W = sim_podc(d=d, interProbeNumReq_controller=InterProbeNumReq_controller_constant(p), num_req_to_finish=sim_config.num_req_to_finish, ro=sim_config.ro, num_sim=1, write_to_json=True)
+	ET, std_T, EW, std_W = sim_podc(d, InterProbeNumReq_controller_constant(p), sim_config.num_req_to_finish, sim_config.ro, num_sim=1, write_to_json=True)
 	log(DEBUG, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
