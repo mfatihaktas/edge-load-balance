@@ -37,7 +37,7 @@ def sim_ET_vs_ro():
 	log(DEBUG, "started", w=w)
 
 	sim_w_ro = lambda ro : sim_ts(num_req_to_finish=sim_config.num_req_to_finish, ro=ro, w=w, num_sim=sim_config.num_sim, write_to_json=True)
-	sim_common_ET_vs_ro('ts_w_{}'.format(w), sim_w_ro)
+	sim_utils.sim_common_ET_vs_ro('ts_w_{}'.format(w), sim_w_ro)
 
 	log(DEBUG, "done")
 

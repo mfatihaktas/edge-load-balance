@@ -31,8 +31,8 @@ normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
-num_req_to_finish = 10
-# num_req_to_finish = 10000
+# num_req_to_finish = 10
+num_req_to_finish = 10000
 num_sim = 2
 
 def set_sim_config(config_m):
@@ -63,7 +63,7 @@ def get_plot_title(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_
 				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
 
 def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-  return 'N_{}'.format(N) + \
+	return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
 				 '_h_{}'.format(hetero_clusters) + \

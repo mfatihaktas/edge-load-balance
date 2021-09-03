@@ -66,14 +66,9 @@ elif [ $1 = 'pu' ]; then
 elif [ $1 = 'clean' ]; then
   rm *.json
   rm *.png
-  rm ./sim_podc/*.json
-  rm ./sim_podc/*.png
-  rm ./sim_ts/*.json
-  rm ./sim_ts/*.png
-  rm ./sim_rr/*.json
-  rm ./sim_rr/*.png
-  rm ./sim_ucb/*.json
-  rm ./sim_ucb/*.png
+  rm ./sim_common/*.json
+  rm ./sim_common/*.png
+  rm ./sim_common/sbatch_*
 elif [ $1 = 'mfn' ]; then
   ## Second answer here:
   ## https://stackoverflow.com/questions/9612090/how-to-loop-through-file-names-returned-by-find
