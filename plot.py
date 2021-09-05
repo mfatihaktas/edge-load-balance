@@ -372,6 +372,7 @@ if __name__ == '__main__':
 
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	plot_ET_vs_ro_for_varying_config()
+	# print("N_fluctuating_frac= {}".format(N_fluctuating_frac))
 
 	# plot_T_over_time_for_varying_config()
 

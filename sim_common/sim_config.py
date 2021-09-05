@@ -23,7 +23,7 @@ inter_req_gen_time_rv = get_inter_req_gen_time_rv(ro)
 serv_time_rv = DiscreteRV(p_l=[1], v_l=[1 / serv_rate])
 # serv_time_rv = Exp(serv_rate)
 
-N_fluctuating_frac = 0
+N_fluctuating_frac = round(0.0, 1)
 # N_fluctuating_frac = 0.3
 # worker_slowdown = 5
 worker_slowdown = 10
@@ -68,7 +68,7 @@ def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac
 				 '_m_{}'.format(m) + \
 				 '_h_{}'.format(hetero_clusters) + \
 				 '_ro_{}'.format(ro) + \
-				 '_Nff_{}'.format(N_fluctuating_frac) + \
+				 '_Nff_{:.1f}'.format(N_fluctuating_frac) + \
 				 '_workerSlowdown_{}'.format(worker_slowdown) + \
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
 				 '_S_{}'.format(serv_time_rv)
