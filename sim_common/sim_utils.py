@@ -30,8 +30,7 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=sim_config.ro):
 		for cl in cl_l:
 			file_utils.write_to_file(data=json.dumps(cl.master.epoch_num_req_l), fname=sim_config.get_filename_json(header='epoch_num_req_l_{}_{}'.format(cl._id, header), ro_arg=ro))
 
-	t_l, t2_l = [], []
-	w_l, w2_l = [], []
+	t_l, w_l = [], []
 	for c in c_l:
 		req_info_m_l = []
 		for req in c.req_finished_l:
@@ -39,9 +38,7 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=sim_config.ro):
 			w = t - req.serv_time
 
 			t_l.append(t)
-			t2_l.append(t**2)
-			w_l.append(t - req.serv_time)
-			w2_l.append(w**2)
+			w_l.append(w)
 
 			if header is not None:
 				req_info_m_l.append({
@@ -56,10 +53,8 @@ def get_stats_m_from_sim_data(cl_l, c_l, header=None, ro=sim_config.ro):
 		file_utils.write_to_file(data=json.dumps(t_l), fname=sim_config.get_filename_json(header='T_l_{}'.format(header), ro_arg=ro))
 		file_utils.write_to_file(data=json.dumps(w_l), fname=sim_config.get_filename_json(header='W_l_{}'.format(header), ro_arg=ro))
 
-	ET, ET2 = np.mean(t_l), np.mean(t2_l)
-	EW, EW2 = np.mean(w_l), np.mean(w2_l)
-	std_T = math.sqrt(ET2 - ET**2) if ET2 - ET**2 > 0 else 0
-	std_W = math.sqrt(EW2 - EW**2) if EW2 - EW**2 > 0 else 0
+	ET, std_T = np.mean(t_l), np.std(t_l)
+	EW, std_W = np.mean(w_l), np.std(w_l)
 	return {'ET': ET, 'std_T': std_T,
 					'EW': EW, 'std_W': std_W}
 

@@ -153,26 +153,39 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 
 	ro = ''
 	ro_ET_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_podc = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, d, p), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_ts_w_0 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_0'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
-	# ro_ET_l_ts_w_20 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_ts_w_0 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ts_w_0'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_ET_l_ts_w_20 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_ts_w_20 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ts_w_20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_ucb_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ucb_w_100'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_ucb_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ucb_w_100'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 
-	def plot_(ro_ET_l, label):
+	def plot_(ro_ET_l, ro_std_T_l, label):
 		if ro_ET_l is None:
 			return
 
-		ro_l, ET_l = [], []
-		for ro, ET in ro_ET_l:
+		check(len(ro_ET_l) == len(ro_std_T_l), "ro_ET_l and ro_std_T_l must have the same size")
+
+		ro_l, ET_l, std_T_l = [], [], []
+		for i in range(len(ro_ET_l)):
+			ro, ET = ro_ET_l[i]
+			ro_, std_T = ro_ET_l[i]
+			check(ro == ro_, "ro's should match for ET and std_T")
+
 			ro_l.append(ro)
 			ET_l.append(ET)
+			std_T_l.append(std_T)
+		# plot.errorbar(ro_l, ET_l, yerr=std_T_l, label=label, color=next(light_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 		plot.plot(ro_l, ET_l, label=label, color=next(light_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
-	plot_(ro_ET_l_podc, label='PodC')
-	plot_(ro_ET_l_ts_w_0, label='TS, w=0')
-	# plot_(ro_ET_l_ts_w_20, label='TS, w=20')
-	plot_(ro_ET_l_rr, label='RR')
-	plot_(ro_ET_l_ucb_w_100, label='UCB, w=100')
+	plot_(ro_ET_l_podc, ro_std_T_l_podc, label='PodC')
+	plot_(ro_ET_l_ts_w_0, ro_std_T_l_ts_w_0, label='TS-ROR')
+	plot_(ro_ET_l_ts_w_20, ro_std_T_l_ts_w_20, label='TS, w=20')
+	plot_(ro_ET_l_rr, ro_std_T_l_rr, label='RR')
+	plot_(ro_ET_l_ucb_w_100, ro_std_T_l_ucb_w_100, label='UCB, w=100')
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
