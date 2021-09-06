@@ -71,7 +71,7 @@ srun --mpi=pmi2 python3 ${FILE_PATH} ${OPTS}
   " > $SCRIPT_NAME
 
   sbatch $SCRIPT_NAME
-elif [ $1 = 'ra' ]; then
+elif [ $1 = 'all' ]; then
   srun_w_label 'podc'
   srun_w_label 'ts'
   srun_w_label 'rr'
