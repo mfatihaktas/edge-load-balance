@@ -61,7 +61,7 @@ def sim_ET_wrt_p_d():
 		log(INFO, ">> p= {}".format(p))
 
 		d_l, ET_l, std_T_l = [], [], []
-		for d in [1, 2, 3, sim_config.N]:
+		for d in [1, 2, 3, 4, sim_config.N]:
 		# for d in [1, 2, 3, 5, N]:
 		# for d in [1, 2, 3, *numpy.arange(5, N + 1, 4)]:
 		# for d in range(1, N + 1):
@@ -95,7 +95,7 @@ def sim_ET_single_run():
 	log(DEBUG, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():
-	num_req_to_finish = 100 # 10000
+	# num_req_to_finish = 100 # 10000
 	# num_sim = 2 # 10
 	d, p = 2, 10
 	log(DEBUG, "started", d=d, p=p)
