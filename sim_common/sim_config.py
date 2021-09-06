@@ -32,8 +32,10 @@ slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
 # num_req_to_finish = 10
-num_req_to_finish = 10000
-num_sim = 2
+# num_req_to_finish = 10000
+num_req_to_finish = 15000
+# num_sim = 2
+num_sim = 3
 
 def set_sim_config(config_m):
 	global hetero_clusters, serv_time_rv, N_fluctuating_frac
