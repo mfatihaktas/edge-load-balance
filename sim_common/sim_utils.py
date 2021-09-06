@@ -93,7 +93,8 @@ def sim_common_ET_vs_ro(label, sim_w_ro):
 	log(DEBUG, "started", num_req_to_finish=sim_config.num_req_to_finish, num_sim=sim_config.num_sim, label=label, sim_w_ro=sim_w_ro)
 
 	ro_l, ET_l, std_T_l, EW_l, std_W_l = [], [], [], [], []
-	for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
+	# for ro in [0.2, 0.5, 0.65, 0.8, 0.9]:
+	for ro in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
 		log(INFO, "> ro= {}".format(ro))
 		ro_l.append(ro)
 

@@ -167,7 +167,7 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 		if ro_ET_l is None:
 			return
 
-		check(len(ro_ET_l) == len(ro_std_T_l), "ro_ET_l and ro_std_T_l must have the same size")
+		# check(len(ro_ET_l) == len(ro_std_T_l), "ro_ET_l and ro_std_T_l must have the same size")
 
 		ro_l, ET_l, std_T_l = [], [], []
 		for i in range(len(ro_ET_l)):
@@ -177,7 +177,7 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 
 			ro_l.append(ro)
 			ET_l.append(ET)
-			std_T_l.append(std_T)
+			# std_T_l.append(std_T)
 		# plot.errorbar(ro_l, ET_l, yerr=std_T_l, label=label, color=next(light_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 		plot.plot(ro_l, ET_l, label=label, color=next(light_color), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 

@@ -69,7 +69,7 @@ elif [ $1 = 'clean' ]; then
     SUBFOLDER="sim_$1"
 
     rm $SUBFOLDER/*.json
-    rm $SUBFOLDER/*.png
+    # rm $SUBFOLDER/*.png
     rm $SUBFOLDER/sbatch_*
   }
 
