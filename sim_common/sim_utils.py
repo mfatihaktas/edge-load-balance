@@ -66,7 +66,7 @@ def sim_common_w_construct_client(label, construct_client, num_req_to_finish=sim
 	cum_ET, cum_std_T = 0, 0
 	cum_EW, cum_std_W = 0, 0
 	for i in range(num_sim):
-		log(DEBUG, "*** {}th sim run started".format(i))
+		log(DEBUG, "*** {}th sim run".format(i))
 
 		env = simpy.Environment()
 		cl_l = get_cl_l(env)

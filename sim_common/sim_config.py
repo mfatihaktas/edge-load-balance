@@ -34,6 +34,7 @@ ignore_probe_cost = True
 # num_req_to_finish = 10
 # num_req_to_finish = 10000
 num_req_to_finish = 15000
+# num_sim = 1
 # num_sim = 2
 num_sim = 3
 
@@ -62,7 +63,7 @@ def log_sim_config():
 
 def get_plot_title(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	return r'$\rho= {}, N= {}, n= {}, N_f= {}, m= {}, h= {}$'.format(ro, N, n, int(N * N_fluctuating_frac), m, hetero_clusters) + '\n' + \
-				 r'$X \sim {}$, $S \sim {}$'.format(inter_req_gen_time_rv, serv_time_rv)
+				 r'$X \sim Exp(\mu)$, $S \sim {}$'.format(serv_time_rv)
 
 def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	return 'N_{}'.format(N) + \

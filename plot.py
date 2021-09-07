@@ -185,7 +185,7 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	plot_(ro_ET_l_ts_w_0, ro_std_T_l_ts_w_0, label='TS-ROR')
 	plot_(ro_ET_l_ts_w_20, ro_std_T_l_ts_w_20, label='TS, w=20')
 	plot_(ro_ET_l_rr, ro_std_T_l_rr, label='RR')
-	plot_(ro_ET_l_ucb_w_100, ro_std_T_l_ucb_w_100, label='UCB, w=100')
+	# plot_(ro_ET_l_ucb_w_100, ro_std_T_l_ucb_w_100, label='UCB, w=100')
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
