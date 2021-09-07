@@ -78,9 +78,7 @@ def sim_ET_wrt_d_p():
 		# plot.errorbar(d_l, ET_l, yerr=std_T_l, color=next(light_color), label='p= {}'.format(p), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 		plot.plot(d_l, ET_l, color=next(light_color), label='p= {}'.format(p), marker='x', linestyle='solid', lw=2, mew=3, ms=5)
 
-		print("***************************************")
 		write_to_file(data=json.dumps(list(zip(d_l, ET_l))), fname=sim_config.get_filename_json(header='d_ET_l_podc_p_{}'.format(p), ro_arg=sim_config.ro))
-		print("***************************************")
 
 	fontsize = 14
 	plot.legend(fontsize=fontsize)
