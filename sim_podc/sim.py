@@ -23,7 +23,7 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro, num_sim, wri
 					 construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: client.Client_PodC('c{}'.format(i), env, d, interProbeNumReq_controller, sim_config.num_req_to_finish, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l, initial_cl_id=cl_l[i % sim_config.N]._id),
 					 num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
-def sim_ET_wrt_d_p():
+def sim_ET_vs_d_p():
 	# num_req_to_finish = 10000
 	# num_sim = 2 # 10
 
@@ -86,7 +86,7 @@ def sim_ET_wrt_d_p():
 	plot.xlabel(r'$d$', fontsize=fontsize)
 	plot.title(sim_config.get_plot_title())
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(sim_config.get_filename_png("plot_ET_wrt_d_p"), bbox_inches='tight')
+	plot.savefig(sim_config.get_filename_png("plot_ET_vs_d_p"), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -118,6 +118,6 @@ if __name__ == '__main__':
 
 	sim_config.log_sim_config()
 
-	sim_ET_wrt_d_p()
+	sim_ET_vs_d_p()
 	# sim_ET_single_run()
 	# sim_ET_vs_ro()
