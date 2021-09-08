@@ -83,7 +83,7 @@ def add_cdf(l, ax, label, color, drawline_x_l=[] ):
 	plot.sca(ax)
 	x_l = sorted(l)
 	y_l = np.arange(len(x_l))/len(x_l)
-	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=2, mew=2, ms=2) # lw=1, mew=1, ms=1
+	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=3, mew=2, ms=5) # lw=1, mew=1, ms=1
 
 	def drawline(x, c=color, ls='-'):
 		i = 0

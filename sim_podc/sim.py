@@ -56,7 +56,8 @@ def sim_ET_vs_d_p():
 
 	## InterProbeNumReq_controller_constant
 	log(INFO, "InterProbeNumReq_controller_constant")
-	for p in [5, 10, 50, 1000]:
+	for p in [1, 200]:
+	# for p in [5, 10, 50, 1000]:
 	# for p in [5, 10, 20, 50, 200, 1000, 2000]:
 	# for p in [2]:
 		log(INFO, ">> p= {}".format(p))
