@@ -33,7 +33,7 @@ def sim_ET_single_run():
 def sim_ET_vs_ro():
 	# num_req_to_finish = 100 # 10000
 	# num_sim = 2 # 10
-	w = 0 # 20 # 100
+	w = -20 # 0 # 20 # 100
 	log(DEBUG, "started", w=w)
 
 	sim_w_ro = lambda ro : sim_ts(num_req_to_finish=sim_config.num_req_to_finish, ro=ro, w=w, num_sim=sim_config.num_sim, write_to_json=True)

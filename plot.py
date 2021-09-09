@@ -95,7 +95,7 @@ def plot_ET_vs_d_p(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	plot.legend(fontsize=fontsize)
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$d$', fontsize=fontsize)
-	plot.title(get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	plot.title(get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv='Constant'))
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png('ET_vs_d_p', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()

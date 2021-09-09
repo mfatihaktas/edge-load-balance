@@ -149,8 +149,10 @@ class Client_TS():
 		cl_id_l = [cl._id for cl in cl_l]
 		if win_len == 0:
 			self.ts = GaussianThompsonSampling_resetWindowOnRareEvent(cl_id_l)
+		elif win_len < 0:
+			win_len = abs(win_len)
+			self.ts = GaussianThompsonSampling_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
 		else:
-			# self.ts = GaussianThompsonSampling_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
 			self.ts = GaussianThompsonSampling_slidingWinAtEachArm(cl_id_l, win_len)
 
 		self.num_req_gened = 0
