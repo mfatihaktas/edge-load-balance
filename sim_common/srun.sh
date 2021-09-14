@@ -80,6 +80,8 @@ elif [ $1 = 'podc' ]; then
   srun_w_label 'podc'
 elif [ $1 = 'ts' ]; then
   srun_w_label 'ts'
+elif [ $1 = 'ucb' ]; then
+  srun_w_label 'ucb'
 elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then

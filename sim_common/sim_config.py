@@ -35,8 +35,8 @@ ignore_probe_cost = True
 # num_req_to_finish = 10000
 num_req_to_finish = 15000
 # num_sim = 1
-# num_sim = 2
-num_sim = 3
+num_sim = 2
+# num_sim = 3
 
 def set_sim_config(config_m):
 	global hetero_clusters, serv_time_rv, N_fluctuating_frac
@@ -61,9 +61,13 @@ def log_sim_config():
 			N_fluctuating_frac=N_fluctuating_frac, worker_slowdown=worker_slowdown,
 			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv, ignore_probe_cost=ignore_probe_cost)
 
-def get_plot_title(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
-	return r'$\rho= {}, N= {}, n= {}, N_f= {}, m= {}, h= {}$'.format(ro, N, n, int(N * N_fluctuating_frac), m, hetero_clusters) + '\n' + \
-				 r'$X \sim Exp$, $S \sim {}$'.format(serv_time_rv)
+def get_plot_title(ro=None, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
+	# return r'$\rho= {}, $'.format(ro) if ro is not None else '' + \
+  #        r'$N= {}, n= {}, N_f= {}, m= {}, h= {}$'.format(N, n, int(N * N_fluctuating_frac), m, hetero_clusters) + '\n' + \
+	# 			 r'$X \sim Exp$, $S \sim {}$'.format(serv_time_rv)
+	# return r'$\rho= {}, $'.format(ro) if ro is not None else '' + \
+	# 			 r'$N= {}, n= {}, N_f= {}, m= {}, S \sim {}$'.format(N, n, int(N * N_fluctuating_frac), m, serv_time_rv)
+	return r'$\rho= {}, N= {}, n= {}, N_f= {}, m= {}, S \sim {}$'.format(ro, N, n, int(N * N_fluctuating_frac), m, serv_time_rv)
 
 def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	return 'N_{}'.format(N) + \
@@ -76,11 +80,18 @@ def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
 				 '_S_{}'.format(serv_time_rv)
 
-def get_filename_png(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
+def get_filename(header, extension, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
 	return header + '__' + get_filename_tail(ro if ro_arg is None else ro_arg,
 																					 hetero_clusters if hetero_clusters_arg is None else hetero_clusters_arg,
 																					 N_fluctuating_frac if N_fluctuating_frac_arg is None else N_fluctuating_frac_arg,
-																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + '.png'
+																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + \
+																					 '.' + extension
+
+def get_filename_png(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
+	return get_filename(header, 'png', ro_arg, hetero_clusters_arg, N_fluctuating_frac_arg, serv_time_rv_arg)
+
+def get_filename_pdf(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
+	return get_filename(header, 'pdf', ro_arg, hetero_clusters_arg, N_fluctuating_frac_arg, serv_time_rv_arg)
 
 def get_filename_json(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
 	return header + '__' + get_filename_tail(ro if ro_arg is None else ro_arg,

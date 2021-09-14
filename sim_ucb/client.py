@@ -3,7 +3,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-import simpy, random, math
+import simpy, random, math, scipy
 from collections import deque
 from collections import defaultdict
 import numpy as np
@@ -12,9 +12,10 @@ from msg import *
 from debug_utils import *
 
 class UCB_slidingWin():
-	def __init__(self, arm_id_l, win_len):
+	def __init__(self, arm_id_l, win_len, percentile=0.1):
 		self.arm_id_l = arm_id_l
 		self.win_len = win_len
+		self.percentile = percentile
 
 		self.arm_id_cost_q = deque(maxlen=win_len)
 		for arm_id in self.arm_id_l:
@@ -27,7 +28,8 @@ class UCB_slidingWin():
 		self.arm_id_cost_q.append((arm_id, cost))
 		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
 
-	def sample_arm(self):
+	## Deprecated
+	def __sample_arm(self):
 		arm_id__cost_l_m = defaultdict(list)
 		for (arm_id, cost) in self.arm_id_cost_q:
 			arm_id__cost_l_m[arm_id].append(cost)
@@ -44,13 +46,36 @@ class UCB_slidingWin():
 				min_cost = cost
 				min_arm_id = arm_id
 				log(DEBUG, "cost < min_cost", cost=cost, exploit_cost=exploit_cost, explore_cost=explore_cost, min_cost=min_cost, min_arm_id=min_arm_id)
+		return min_arm_id
+
+	def sample_arm(self):
+		arm_id__cost_l_m = defaultdict(list)
+		for (arm_id, cost) in self.arm_id_cost_q:
+			arm_id__cost_l_m[arm_id].append(cost)
+
+		log(DEBUG, "", arm_id__cost_l_m=arm_id__cost_l_m)
+
+		min_arm_id, min_cost = None, float('Inf')
+		log(DEBUG, "len(arm_id__cost_l_m)= {}".format(len(arm_id__cost_l_m)))
+		for arm_id, cost_l in arm_id__cost_l_m.items():
+			mean = np.mean(cost_l) if len(cost_l) else 0
+			stdev = np.std(cost_l) if len(cost_l) else 1
+			if stdev == 0:
+				stdev = 1
+
+			cost = scipy.stats.norm.ppf(self.percentile, loc=mean, scale=stdev)
+			if cost < min_cost:
+				log(DEBUG, "cost < min_cost", cost=cost, min_cost=min_cost, min_arm_id=min_arm_id)
+				min_cost = cost
+				min_arm_id = arm_id
 
 		return min_arm_id
 
 class UCB_slidingWinAtEachArm():
-	def __init__(self, arm_id_l, win_len):
+	def __init__(self, arm_id_l, win_len, percentile=0.1):
 		self.arm_id_l = arm_id_l
 		self.win_len = win_len
+		self.percentile = percentile
 
 		self.arm_id__cost_q_m = {i: deque(maxlen=win_len) for i in arm_id_l}
 
@@ -61,7 +86,8 @@ class UCB_slidingWinAtEachArm():
 		self.arm_id__cost_q_m[arm_id].append(cost)
 		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
 
-	def sample_arm(self):
+	## Deprecated
+	def __sample_arm(self):
 		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
 
 		## Would be slow
@@ -79,6 +105,25 @@ class UCB_slidingWinAtEachArm():
 
 		return min_arm_id
 
+	def sample_arm(self):
+		log(DEBUG, "", arm_id__cost_q_m=self.arm_id__cost_q_m)
+
+		min_arm_id, min_cost = None, float('Inf')
+		for arm_id, cost_q in self.arm_id__cost_q_m.items():
+			mean = np.mean(cost_q) if len(cost_q) else 0
+			stdev = np.std(cost_q) if len(cost_q) else 1
+			if stdev == 0:
+				stdev = 1
+
+			cost = scipy.stats.norm.ppf(self.percentile, loc=mean, scale=stdev)
+			# log(WARNING, "", mean=mean, stdev=stdev, cost=cost)
+			if cost < min_cost:
+				log(DEBUG, "cost < min_cost", cost=cost, min_cost=min_cost, min_arm_id=min_arm_id)
+				min_cost = cost
+				min_arm_id = arm_id
+
+		return min_arm_id
+
 class Client_UCB():
 	def __init__(self, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self._id = _id
@@ -89,8 +134,8 @@ class Client_UCB():
 		self.cl_l = cl_l
 		self.out = out
 
-		self.ucb = UCB_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*win_len)
-		# self.ucb = UCB_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
+		# self.ucb = UCB_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*win_len)
+		self.ucb = UCB_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0

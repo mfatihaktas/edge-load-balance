@@ -97,7 +97,7 @@ def plot_ET_vs_d_p(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	plot.xlabel(r'$d$', fontsize=fontsize)
 	plot.title(get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv='Constant'))
 	plot.gcf().set_size_inches(6, 4)
-	plot.savefig(get_filename_png('ET_vs_d_p', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
+	plot.savefig(get_filename_pdf('ET_vs_d_p', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
 
 	log(DEBUG, "done")
@@ -209,6 +209,8 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	ro_std_T_l_ts_w_20 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ts_w_20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_ts_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_100'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_std_T_l_ts_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ts_w_100'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_ET_l_ts_w_m20 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ts_w_-20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_ts_w_m20 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ts_w_-20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_std_T_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_ucb_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ucb_w_100'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
@@ -249,6 +251,7 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 		append(ro_ET_l_ts_w_0, 'TS-ROR')
 		append(ro_ET_l_ts_w_20, 'TS, w=20')
 		append(ro_ET_l_ts_w_100, 'TS, w=100')
+		append(ro_ET_l_ts_w_m20, 'TS, w=-20')
 		append(ro_ET_l_rr, 'RR')
 		# append(ro_ET_l_ucb_w_100, 'UCB, w=100')
 
@@ -263,7 +266,8 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	plot.yscale('log')
 	plot.ylabel(r'$E[T]$', fontsize=fontsize)
 	plot.xlabel(r'$\rho$', fontsize=fontsize)
-	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro='', hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
+	# plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro=None, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv))
+	plot.title(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro=None, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv="Constant(1)"))
 	plot.gcf().set_size_inches(6, 4)
 	plot.savefig(get_filename_png("plot_ET_vs_ro", ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 	plot.gcf().clear()
@@ -275,15 +279,15 @@ def plot_ET_vs_ro_for_varying_config():
 
 	hetero_clusters = False
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+	# plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	# plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
 	hetero_clusters = True
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
+	# plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
 	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
-	plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
+	# plot_ET_vs_ro(hetero_clusters=hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
 	log(INFO, "done")
 
