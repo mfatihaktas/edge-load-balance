@@ -9,6 +9,7 @@ from collections import defaultdict
 import numpy as np
 
 from msg import *
+from rvs import Normal
 from debug_utils import *
 
 class UCB_slidingWin():
@@ -22,7 +23,7 @@ class UCB_slidingWin():
 			self.arm_id_cost_q.append((arm_id, 0))
 
 	def __repr__(self):
-		return 'UCB_slidingWin(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
+		return 'UCB_slidingWin(arm_id_l= {}, win_len= {}, percentile= {})'.format(self.arm_id_l, self.win_len, self.percentile)
 
 	def record_cost(self, arm_id, cost):
 		self.arm_id_cost_q.append((arm_id, cost))
@@ -65,7 +66,7 @@ class UCB_slidingWin():
 
 			cost = scipy.stats.norm.ppf(self.percentile, loc=mean, scale=stdev)
 			if cost < min_cost:
-				log(DEBUG, "cost < min_cost", cost=cost, min_cost=min_cost, min_arm_id=min_arm_id)
+				log(DEBUG, "cost < min_cost", cost=cost, arm_id=arm_id, min_cost=min_cost, min_arm_id=min_arm_id)
 				min_cost = cost
 				min_arm_id = arm_id
 
@@ -80,7 +81,7 @@ class UCB_slidingWinAtEachArm():
 		self.arm_id__cost_q_m = {i: deque(maxlen=win_len) for i in arm_id_l}
 
 	def __repr__(self):
-		return 'UCB_slidingWinAtEachArm(arm_id_l= {}, win_len= {})'.format(self.arm_id_l, self.win_len)
+		return 'UCB_slidingWinAtEachArm(arm_id_l= {}, win_len= {}, percentile= {})'.format(self.arm_id_l, self.win_len, self.percentile)
 
 	def record_cost(self, arm_id, cost):
 		self.arm_id__cost_q_m[arm_id].append(cost)
@@ -118,7 +119,61 @@ class UCB_slidingWinAtEachArm():
 			cost = scipy.stats.norm.ppf(self.percentile, loc=mean, scale=stdev)
 			# log(WARNING, "", mean=mean, stdev=stdev, cost=cost)
 			if cost < min_cost:
-				log(DEBUG, "cost < min_cost", cost=cost, min_cost=min_cost, min_arm_id=min_arm_id)
+				log(DEBUG, "cost < min_cost", cost=cost, arm_id=arm_id, min_cost=min_cost, min_arm_id=min_arm_id)
+				min_cost = cost
+				min_arm_id = arm_id
+
+		return min_arm_id
+
+class UCB_resetWindowOnRareEvent():
+	def __init__(self, arm_id_l, percentile=0.1, threshold_prob_rare=0.9):
+		self.arm_id_l = arm_id_l
+		self.percentile = percentile
+		self.threshold_prob_rare = threshold_prob_rare
+
+		self.arm_id__n_mean_var_m = {i: (0, 0, 1) for i in arm_id_l}
+
+	def __repr__(self):
+		return 'UCB_resetWindowOnRareEvent(arm_id_l= {}, percentile= {})'.format(self.arm_id_l, self.percentile)
+
+	def record_cost(self, arm_id, cost):
+		n, _mean, _var = self.arm_id__n_mean_var_m[arm_id]
+
+		def record():
+			mean = (_mean * n + cost) / (n + 1)
+			## https://math.stackexchange.com/questions/102978/incremental-computation-of-standard-deviation
+			var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1) if n > 0 else 1
+			self.arm_id__n_mean_var_m[arm_id] = (n + 1, mean, var)
+
+			log(DEBUG, "Recorded", cost=cost, n=n, _mean=_mean, _var=_var, mean=mean, var=var)
+
+		if n < 6:
+			record()
+			return
+
+		_stdev = math.sqrt(_var)
+		cost_rv = Normal(_mean, _stdev)
+		Pr_getting_larger_than_cost = cost_rv.tail(cost)
+		Pr_getting_smaller_than_cost = cost_rv.cdf(cost)
+		Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
+		if Pr_cost_is_rare >= self.threshold_prob_rare:
+			log(DEBUG, "Rare event detected", cost=cost, _mean=_mean, _stdev=_stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
+			self.arm_id__n_mean_var_m[arm_id] = (1, cost, 1)
+		else:
+			record()
+
+		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
+
+	def sample_arm(self):
+		log(DEBUG, "", arm_id__n_mean_var_m=self.arm_id__n_mean_var_m)
+
+		min_arm_id, min_cost = None, float('Inf')
+		for arm_id, (n, mean, var) in self.arm_id__n_mean_var_m.items():
+			stdev = math.sqrt(var) if var > 0 else 1
+
+			cost = scipy.stats.norm.ppf(self.percentile, loc=mean, scale=stdev)
+			if cost < min_cost:
+				log(DEBUG, "cost < min_cost", cost=cost, arm_id=arm_id, min_cost=min_cost, min_arm_id=min_arm_id)
 				min_cost = cost
 				min_arm_id = arm_id
 
@@ -134,8 +189,14 @@ class Client_UCB():
 		self.cl_l = cl_l
 		self.out = out
 
-		# self.ucb = UCB_slidingWin([cl._id for cl in cl_l], win_len=len(cl_l)*win_len)
-		self.ucb = UCB_slidingWinAtEachArm([cl._id for cl in cl_l], win_len)
+		cl_id_l = [cl._id for cl in cl_l]
+		if win_len == 0:
+			self.ucb = UCB_resetWindowOnRareEvent(cl_id_l)
+		elif win_len < 0:
+			win_len = abs(win_len)
+			self.ucb = UCB_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
+		else:
+			self.ucb = UCB_slidingWinAtEachArm(cl_id_l, win_len)
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0
