@@ -19,7 +19,7 @@ def sim_ucb(num_req_to_finish, ro, w, num_sim, write_to_json=False):
 
 	return sim_utils.sim_common_w_construct_client(
 		label='ucb_w_{}'.format(w),
-		construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: Client_UCB('c{}'.format(i), env, num_req_to_finish, w, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l),
+		construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: Client_UCB(i, 'c{}'.format(i), env, num_req_to_finish, w, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l),
 		num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 def sim_ET_single_run():

@@ -84,7 +84,7 @@ def sim_common_w_construct_client(label, construct_client, num_req_to_finish=sim
 		cum_EW += EW
 		cum_std_W += std_W
 
-	log(INFO, 'done')
+	log(INFO, "done")
 	return cum_ET / num_sim, cum_std_T / num_sim, cum_EW / num_sim, cum_std_W / num_sim
 
 def sim_common_ET_vs_ro(label, sim_w_ro):

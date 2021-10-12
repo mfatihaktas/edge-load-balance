@@ -11,6 +11,7 @@ import numpy as np
 from msg import *
 from rvs import Normal
 from debug_utils import *
+import sim_config
 
 class UCB_slidingWin():
 	def __init__(self, arm_id_l, win_len, percentile=0.1):
@@ -180,7 +181,8 @@ class UCB_resetWindowOnRareEvent():
 		return min_arm_id
 
 class Client_UCB():
-	def __init__(self, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
+	def __init__(self, i, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
+		self.i = i
 		self._id = _id
 		self.env = env
 		self.num_req_to_finish = num_req_to_finish
@@ -197,6 +199,8 @@ class Client_UCB():
 			self.ucb = UCB_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
 		else:
 			self.ucb = UCB_slidingWinAtEachArm(cl_id_l, win_len)
+
+		self.set_inter_gen_time_list()
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0
@@ -216,6 +220,10 @@ class Client_UCB():
 	def put(self, msg):
 		slog(DEBUG, self.env, self, "recved", msg=msg)
 		self.msg_s.put(msg)
+
+	def set_inter_gen_time_list(self):
+		self.inter_req_gen_time_l = sim_config.get_inter_req_gen_time_list(self.i, self.inter_gen_time_rv, self.num_req_to_finish)
+		check(self.inter_req_gen_time_l is not None, "inter_req_gen_time_l cannot be None.")
 
 	def run_recv(self):
 		while True:
@@ -252,6 +260,13 @@ class Client_UCB():
 
 	def run_send(self):
 		while True:
+			if self.inter_req_gen_time_l:
+				inter_gen_time = self.inter_req_gen_time_l.pop()
+			else:
+				inter_gen_time = self.inter_gen_time_rv.sample()
+			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)
+			yield self.env.timeout(inter_gen_time)
+
 			self.num_req_gened += 1
 			req = Request(_id=self.num_req_gened, cid=self._id, serv_time=self.serv_time_rv.sample())
 			req.epoch_departed_client = self.env.now
@@ -266,9 +281,5 @@ class Client_UCB():
 			msg.dst_id = to_cl_id
 			self.out.put(msg)
 			slog(DEBUG, self.env, self, "sent", req=req)
-
-			inter_gen_time = self.inter_gen_time_rv.sample()
-			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)
-			yield self.env.timeout(inter_gen_time)
 
 		slog(DEBUG, self.env, self, "done")
