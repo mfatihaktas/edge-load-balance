@@ -13,7 +13,7 @@ def gen_inter_gen_time_list(ci, inter_gen_time_rv, num_req_to_finish):
 		return
 
 	inter_gen_time_l = []
-	for _ in range(10 * num_req_to_finish):
+	for _ in range(3 * num_req_to_finish):
 		inter_gen_time_l.append(inter_gen_time_rv.sample())
 
 	write_to_file(json.dumps(inter_gen_time_l), filename)
