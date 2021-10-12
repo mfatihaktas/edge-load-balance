@@ -18,7 +18,7 @@ def sim_rr(num_req_to_finish, ro, num_sim, write_to_json=False):
 
 	return sim_utils.sim_common_w_construct_client(
 					 label='rr',
-					 construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: Client_RR('c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l),
+					 construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: Client_RR(i, 'c{}'.format(i), env, num_req_to_finish, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l),
 					 num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 def sim_ET_for_single_m():

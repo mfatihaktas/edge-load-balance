@@ -8,9 +8,11 @@ import simpy, random
 
 from msg import *
 from debug_utils import *
+import sim_config
 
 class Client_RR():
-	def __init__(self, _id, env, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
+	def __init__(self, i, _id, env, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
+		self.i = i
 		self._id = _id
 		self.env = env
 		self.num_req_to_finish = num_req_to_finish
@@ -18,6 +20,8 @@ class Client_RR():
 		self.serv_time_rv = serv_time_rv
 		self.cl_l = cl_l
 		self.out = out
+
+		self.set_inter_gen_time_list()
 
 		self.cur_i = random.randint(0, len(cl_l) - 1)
 
@@ -47,6 +51,10 @@ class Client_RR():
 	def put(self, msg):
 		slog(DEBUG, self.env, self, "recved", msg=msg)
 		self.msg_s.put(msg)
+
+	def set_inter_gen_time_list(self):
+		self.inter_req_gen_time_l = sim_config.get_inter_req_gen_time_list(self.i, self.inter_gen_time_rv, self.num_req_to_finish)
+		check(self.inter_req_gen_time_l is not None, "inter_req_gen_time_l cannot be None.")
 
 	def run_recv(self):
 		while True:
@@ -80,6 +88,13 @@ class Client_RR():
 
 	def run_send(self):
 		while True:
+			if self.inter_req_gen_time_l:
+				inter_gen_time = self.inter_req_gen_time_l.pop()
+			else:
+				inter_gen_time = self.inter_gen_time_rv.sample()
+			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)
+			yield self.env.timeout(inter_gen_time)
+
 			self.num_req_gened += 1
 			req = Request(_id=self.num_req_gened, cid=self._id, serv_time=self.serv_time_rv.sample())
 			req.epoch_departed_client = self.env.now
@@ -93,9 +108,5 @@ class Client_RR():
 			msg.dst_id = msg.payload.cl_id
 			self.out.put(msg)
 			slog(DEBUG, self.env, self, "sent", req=req)
-
-			inter_gen_time = self.inter_gen_time_rv.sample()
-			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)
-			yield self.env.timeout(inter_gen_time)
 
 		slog(DEBUG, self.env, self, "done")

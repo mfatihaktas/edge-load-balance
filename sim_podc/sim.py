@@ -20,7 +20,7 @@ def sim_podc(d, interProbeNumReq_controller, num_req_to_finish, ro, num_sim, wri
 
 	return sim_utils.sim_common_w_construct_client(
 					 label='podc_d_{}_p_{}'.format(d, interProbeNumReq_controller.num),
-					 construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: client.Client_PodC('c{}'.format(i), env, d, interProbeNumReq_controller, sim_config.num_req_to_finish, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l, initial_cl_id=cl_l[i % sim_config.N]._id),
+					 construct_client=lambda i, env, cl_l, inter_req_gen_time_rv: client.Client_PodC(i, 'c{}'.format(i), env, d, interProbeNumReq_controller, sim_config.num_req_to_finish, inter_req_gen_time_rv, sim_config.serv_time_rv, cl_l, initial_cl_id=cl_l[i % sim_config.N]._id),
 					 num_req_to_finish=num_req_to_finish, ro=ro, num_sim=num_sim, write_to_json=write_to_json)
 
 def sim_ET_vs_d_p():
@@ -56,7 +56,7 @@ def sim_ET_vs_d_p():
 
 	## InterProbeNumReq_controller_constant
 	log(INFO, "InterProbeNumReq_controller_constant")
-	for p in [1, 200]:
+	for p in [10, 200]:
 	# for p in [5, 10, 50, 1000]:
 	# for p in [5, 10, 20, 50, 200, 1000, 2000]:
 	# for p in [2]:
@@ -119,6 +119,6 @@ if __name__ == '__main__':
 
 	sim_config.log_sim_config()
 
-	sim_ET_vs_d_p()
+	# sim_ET_vs_d_p()
 	# sim_ET_single_run()
-	# sim_ET_vs_ro()
+	sim_ET_vs_ro()

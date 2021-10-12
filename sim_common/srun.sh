@@ -1,6 +1,8 @@
 #!/bin/bash
 echo $1 $2 $3
 
+PY=python3
+
 COUNTER=1
 
 srun_ () {
@@ -86,6 +88,8 @@ elif [ $1 = 'l' ]; then
   squeue -u mfa51
 elif [ $1 = 'k' ]; then
   scancel --user=mfa51 # -n learning
+elif [ $1 = 'b' ]; then
+  $PY bootstrap.py
 else
   echo "Arg did not match!"
 fi

@@ -1,4 +1,10 @@
+import os, sys
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
 from rvs import *
+from file_utils import *
 from debug_utils import *
 
 # N: # clusters
@@ -31,12 +37,14 @@ normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
-# num_req_to_finish = 10
+num_req_to_finish = 10
 # num_req_to_finish = 10000
-num_req_to_finish = 15000
+# num_req_to_finish = 15000
 # num_sim = 1
 num_sim = 2
 # num_sim = 3
+
+RO_l = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 def set_sim_config(config_m):
 	global hetero_clusters, serv_time_rv, N_fluctuating_frac
@@ -98,3 +106,13 @@ def get_filename_json(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuati
 																					 hetero_clusters if hetero_clusters_arg is None else hetero_clusters_arg,
 																					 N_fluctuating_frac if N_fluctuating_frac_arg is None else N_fluctuating_frac_arg,
 																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + '.json'
+
+def get_inter_req_gen_time_filename(ci, inter_gen_time_rv, num_req_to_finish):
+	import os.path
+	filename = "bootstrap_data/ci_{}_inter_req_gen_time_{}_num_req_to_finish_{}.json".format(ci, inter_gen_time_rv, num_req_to_finish)
+	file_path = os.path.dirname(__file__) + '/{}'.format(filename)
+	return file_path
+
+def get_inter_req_gen_time_list(ci, inter_gen_time_rv, num_req_to_finish):
+	filename = get_inter_req_gen_time_filename(ci, inter_gen_time_rv, num_req_to_finish)
+	return read_json_from_file(filename)

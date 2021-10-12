@@ -10,6 +10,7 @@ from collections import deque
 
 from msg import *
 from debug_utils import *
+import sim_config
 
 class InterProbeNumReq_controller_constant():
 	def __init__(self, num):
@@ -61,9 +62,10 @@ class InterProbeNumReq_controller_learningWConstInc():
 		return self.num
 
 class Client_PodC():
-	def __init__(self, _id, env, d, interProbeNumReq_controller,
+	def __init__(self, i, _id, env, d, interProbeNumReq_controller,
 							 num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l,
 							 initial_cl_id=None, out=None):
+		self.i = i
 		self._id = _id
 		self.env = env
 		self.d = d
@@ -73,6 +75,8 @@ class Client_PodC():
 		self.serv_time_rv = serv_time_rv
 		self.cl_l = cl_l
 		self.out = out
+
+		self.set_inter_gen_time_list()
 
 		self.num_req_gened = 0
 		self.num_req_finished = 0
@@ -105,6 +109,10 @@ class Client_PodC():
 	def put(self, msg):
 		slog(DEBUG, self.env, self, "recved", msg=msg)
 		self.msg_s.put(msg)
+
+	def set_inter_gen_time_list(self):
+		self.inter_req_gen_time_l = sim_config.get_inter_req_gen_time_list(self.i, self.inter_gen_time_rv, self.num_req_to_finish)
+		check(self.inter_req_gen_time_l is not None, "inter_req_gen_time_l cannot be None.")
 
 	def run_recv(self):
 		while True:
@@ -167,7 +175,7 @@ class Client_PodC():
 		if self.d > 0 and self.waiting_for_probe == False and \
 				 (self.num_req_gened == 1 or \
 					self.num_req_gened - self.num_req_last_probed >= inter_probe_num_req):
-			slog(DEBUG, self.env, self, "started", msg_id=msg._id)
+			slog(DEBUG, self.env, self, "started", msg_id=msg._id, num_req_gened=self.num_req_gened, num_req_last_probed=self.num_req_last_probed, inter_probe_num_req=inter_probe_num_req)
 
 			self.waiting_for_probe = True
 			msg.payload.probe = True
@@ -180,6 +188,13 @@ class Client_PodC():
 
 	def run_send(self):
 		while True:
+			if self.inter_req_gen_time_l:
+				inter_gen_time = self.inter_req_gen_time_l.pop()
+			else:
+				inter_gen_time = self.inter_gen_time_rv.sample()
+			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)
+			yield self.env.timeout(inter_gen_time)
+
 			self.num_req_gened += 1
 			req = Request(_id=self.num_req_gened, cid=self._id, serv_time=self.serv_time_rv.sample())
 			req.epoch_departed_client = self.env.now
@@ -194,10 +209,6 @@ class Client_PodC():
 			slog(DEBUG, self.env, self, "sent", req=req)
 
 			## Send also its probe version if need to
-			self.probe(msg)
-
-			inter_gen_time = self.inter_gen_time_rv.sample()
-			slog(DEBUG, self.env, self, "sleeping", inter_gen_time=inter_gen_time)
-			yield self.env.timeout(inter_gen_time)
+			self.probe(msg.copy())
 
 		slog(DEBUG, self.env, self, "done")
