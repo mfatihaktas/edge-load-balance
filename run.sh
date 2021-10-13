@@ -71,6 +71,10 @@ elif [ $1 = 'clean' ]; then
     rm $SUBFOLDER/*.json
     # rm $SUBFOLDER/*.png
     rm $SUBFOLDER/sbatch_*
+
+    ## Use it when rm returns
+    ## -bash: /usr/bin/rm: Argument list too long
+    # find . -name "*.pdf" -print0 | xargs -0 rm
   }
 
   rm_ 'common'

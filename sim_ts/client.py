@@ -101,12 +101,17 @@ class GaussianThompsonSampling_resetWindowOnRareEvent():
 		def record():
 			mean = (_mean * n + cost) / (n + 1)
 			## https://math.stackexchange.com/questions/102978/incremental-computation-of-standard-deviation
-			var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1) if n > 0 else 1
+			# elif n < 3:
+			# 	var = mean**2
+			if n == 0:
+				var = mean**2
+			else:
+				var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1)
 			self.arm_id__n_mean_var_m[arm_id] = (n + 1, mean, var)
 
 			log(DEBUG, "Recorded", cost=cost, n=n, _mean=_mean, _var=_var, mean=mean, var=var)
 
-		if n < 6:
+		if n < 5:
 			record()
 			return
 
@@ -117,7 +122,7 @@ class GaussianThompsonSampling_resetWindowOnRareEvent():
 		Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
 		if Pr_cost_is_rare >= self.threshold_prob_rare:
 			log(DEBUG, "Rare event detected", cost=cost, _mean=_mean, _stdev=_stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
-			self.arm_id__n_mean_var_m[arm_id] = (1, cost, 1)
+			self.arm_id__n_mean_var_m[arm_id] = (1, cost, cost**2)
 		else:
 			record()
 

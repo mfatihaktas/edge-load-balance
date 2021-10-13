@@ -249,9 +249,9 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 
 		append(ro_ET_l_podc, 'PodC')
 		append(ro_ET_l_ts_w_0, 'TS-ROR')
-		append(ro_ET_l_ts_w_20, 'TS, w=20')
-		append(ro_ET_l_ts_w_100, 'TS, w=100')
-		append(ro_ET_l_ts_w_m20, 'TS, w=-20')
+		# append(ro_ET_l_ts_w_20, 'TS, w=20')
+		# append(ro_ET_l_ts_w_100, 'TS, w=100')
+		# append(ro_ET_l_ts_w_m20, 'TS, w=-20')
 		append(ro_ET_l_rr, 'RR')
 		# append(ro_ET_l_ucb_w_100, 'UCB, w=100')
 
@@ -331,8 +331,8 @@ def plot_T_over_time(cid, ro, hetero_clusters, N_fluctuating_frac, serv_time_rv,
 
 	plot_(subfolder=SUBFOLDER_PODC, header='podc_d_{}_p_{}'.format(d, p), label='PodC')
 	plot_(subfolder=SUBFOLDER_TS, header='ts_w_0', label='TS, w=0')
-	plot_(subfolder=SUBFOLDER_TS, header='ts_w_20', label='TS, w=20')
-	plot_(subfolder=SUBFOLDER_TS, header='ts_w_100', label='TS, w=100')
+	# plot_(subfolder=SUBFOLDER_TS, header='ts_w_20', label='TS, w=20')
+	# plot_(subfolder=SUBFOLDER_TS, header='ts_w_100', label='TS, w=100')
 	plot_(subfolder=SUBFOLDER_RR, header='rr', label='RR')
 
 	log(DEBUG, "done")
@@ -363,7 +363,7 @@ def plot_cl_load_over_time(cl_id, ro, hetero_clusters, N_fluctuating_frac, serv_
 			epoch_l.append(epoch)
 			num_req_l.append(num_req)
 
-			if save_to_png and i > 3500:
+			if save_to_png and i > 6500:
 				break
 		plot.plot(epoch_l, num_req_l, color=next(nice_color), marker='o', linestyle=':', lw=2, mew=3, ms=5)
 
@@ -375,7 +375,7 @@ def plot_cl_load_over_time(cl_id, ro, hetero_clusters, N_fluctuating_frac, serv_
 		plot.title(r'{}, {}, $d= {}, p= {}$'.format(label, cl_id, d, p) + ', ' + get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 
 		if save_to_png:
-			plot.gcf().set_size_inches(10, 4)
+			plot.gcf().set_size_inches(15, 4)
 			plot.savefig(get_filename_png("plot_{}_loadOverTime_{}".format(cl_id, header), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), bbox_inches='tight')
 			plot.gcf().clear()
 		else:
@@ -391,6 +391,7 @@ def plot_cl_load_over_time(cl_id, ro, hetero_clusters, N_fluctuating_frac, serv_
 	log(DEBUG, "done")
 
 def plot_cl_load_over_time_for_varying_config():
+	# ro = 0.3
 	ro = 0.8
 	def plot_(cl_id):
 		# plot_cl_load_over_time(cl_id, ro=ro, hetero_clusters=True, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
@@ -398,7 +399,7 @@ def plot_cl_load_over_time_for_varying_config():
 		plot_cl_load_over_time(cl_id, ro=ro, hetero_clusters=True, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]), save_to_png=True)
 		# plot_cl_load_over_time(cl_id, ro=ro, hetero_clusters=True, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate), save_to_png=True)
 
-	# plot_(cl_id='cl0')
+	plot_(cl_id='cl0')
 	plot_(cl_id='cl9')
 
 	log(DEBUG, "done")
@@ -418,7 +419,7 @@ def check_bug():
 if __name__ == '__main__':
 	log_to_std()
 
-	plot_ET_vs_d_p_for_varying_config()
+	# plot_ET_vs_d_p_for_varying_config()
 
 	# plot_cdf_T_W__podc_vs_ts()
 	# plot_cdf_T_W__podc_vs_ts_for_varying_config()
@@ -430,6 +431,6 @@ if __name__ == '__main__':
 	# plot_T_over_time_for_varying_config()
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	# plot_cl_load_over_time_for_varying_config()
+	plot_cl_load_over_time_for_varying_config()
 
 	# check_bug()
