@@ -84,6 +84,7 @@ class Client_PodC():
 
 		self.req_finished_l = []
 
+		self.id_cl_m = {cl._id : cl for cl in cl_l}
 		self.assigned_cl_id = initial_cl_id if initial_cl_id is not None else random.sample(self.cl_l, 1)[0]._id
 		self.waiting_for_probe = False
 
@@ -179,9 +180,9 @@ class Client_PodC():
 
 			self.waiting_for_probe = True
 			msg.payload.probe = True
-			# cl_id_l = [cl._id for cl in self.cl_l if cl._id != self.assigned_cl_id]
-			# cl_id_l = [self.assigned_cl_id, *random.sample(cl_id_l, self.d - 1)]
-			cl_l = random.sample(self.cl_l, self.d)
+			cl_l = [cl for cl in self.cl_l if cl._id != self.assigned_cl_id]
+			cl_l = [self.id_cl_m[self.assigned_cl_id], *random.sample(cl_l, self.d - 1)]
+			# cl_l = random.sample(self.cl_l, self.d)
 			self.replicate(cl_l, msg)
 
 			slog(DEBUG, self.env, self, "done", msg_id=msg._id)
