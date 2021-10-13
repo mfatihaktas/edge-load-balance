@@ -213,6 +213,8 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	ro_std_T_l_ts_w_m20 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ts_w_-20'.format(SUBFOLDER_TS), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_std_T_l_rr = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_rr'.format(SUBFOLDER_RR), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_ET_l_ucb_w_0 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ucb_w_0'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_T_l_ucb_w_0 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ucb_w_0'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_ET_l_ucb_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_ET_l_ucb_w_100'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_std_T_l_ucb_w_100 = read_json_from_file(fname=get_filename_json('{}/ro_std_T_l_ucb_w_100'.format(SUBFOLDER_UCB), ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 
@@ -253,7 +255,8 @@ def plot_ET_vs_ro(hetero_clusters, N_fluctuating_frac, serv_time_rv):
 		# append(ro_ET_l_ts_w_100, 'TS, w=100')
 		# append(ro_ET_l_ts_w_m20, 'TS, w=-20')
 		append(ro_ET_l_rr, 'RR')
-		# append(ro_ET_l_ucb_w_100, 'UCB, w=100')
+		append(ro_ET_l_ucb_w_0, 'UCB-ROR')
+		append(ro_ET_l_ucb_w_100, 'UCB, w=100')
 
 		last_ET__ro_ET_l__label_l.sort()
 		for _, ro_ET_l, label in reversed(last_ET__ro_ET_l__label_l):
@@ -426,10 +429,10 @@ if __name__ == '__main__':
 	# plot_cdf_T_W__podc_vs_ts_for_varying_config()
 
 	# plot_ET_vs_ro(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
-	# plot_ET_vs_ro_for_varying_config()
+	plot_ET_vs_ro_for_varying_config()
 	# print("N_fluctuating_frac= {}".format(N_fluctuating_frac))
 
-	plot_T_over_time_for_varying_config()
+	# plot_T_over_time_for_varying_config()
 
 	# plot_cl_load_over_time(N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 	# plot_cl_load_over_time_for_varying_config()
