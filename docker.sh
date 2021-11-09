@@ -1,5 +1,4 @@
 #!/bin/bash
-echo $1 $2 $3
 
 # Note: container host address: docker.for.mac.localhost
 

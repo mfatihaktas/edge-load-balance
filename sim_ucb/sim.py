@@ -25,7 +25,8 @@ def sim_ucb(num_req_to_finish, ro, w, num_sim, write_to_json=False):
 def sim_ET_single_run():
 	# num_req_to_finish = 10000 # 100
 
-	ET, std_T, EW, std_W = sim_ucb(num_req_to_finish=sim_config.num_req_to_finish, ro=sim_config.ro, w=sim_config.w, num_sim=1, write_to_json=True)
+	m = sim_ucb(num_req_to_finish=sim_config.num_req_to_finish, ro=sim_config.ro, w=sim_config.w, num_sim=1, write_to_json=True)
+	ET, std_T, EW, std_W = m['ET'], m['std_T'], m['EW'], m['std_W']
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():

@@ -9,6 +9,7 @@ import simpy, random
 from msg import *
 from debug_utils import *
 import sim_config
+import client_utils
 
 class Client_RR():
 	def __init__(self, i, _id, env, num_req_to_finish, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
@@ -99,6 +100,9 @@ class Client_RR():
 			req = Request(_id=self.num_req_gened, cid=self._id, serv_time=self.serv_time_rv.sample())
 			req.epoch_departed_client = self.env.now
 			msg = Msg(_id=self.num_req_gened, payload=req)
+
+			req.min_wait_time = client_utils.min_wait_time(self.cl_l)
+			req.chosen_wait_time = self.cl_l[self.cur_i].min_wait_time()
 
 			## Send message
 			msg.payload.probe = False

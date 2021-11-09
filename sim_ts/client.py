@@ -13,6 +13,7 @@ from msg import *
 from rvs import *
 from debug_utils import *
 import sim_config
+import client_utils
 
 class GaussianThompsonSampling_slidingWin():
 	def __init__(self, arm_id_l, win_len):
@@ -153,6 +154,7 @@ class Client_TS():
 		self.cl_l = cl_l
 		self.out = out
 
+		self.id_cl_m = {cl._id : cl for cl in cl_l}
 		self.set_inter_gen_time_list()
 
 		cl_id_l = [cl._id for cl in cl_l]
@@ -232,11 +234,14 @@ class Client_TS():
 			self.num_req_gened += 1
 			req = Request(_id=self.num_req_gened, cid=self._id, serv_time=self.serv_time_rv.sample())
 			req.epoch_departed_client = self.env.now
-			msg = Msg(_id=self.num_req_gened, payload=req)
+
+			to_cl_id = self.ts.sample_arm()
+			req.min_wait_time = client_utils.min_wait_time(self.cl_l)
+			req.chosen_wait_time = self.id_cl_m[to_cl_id].min_wait_time()
 
 			## Send message
-			to_cl_id = self.ts.sample_arm()
 			log(DEBUG, "to_cl_id= {}".format(to_cl_id))
+			msg = Msg(_id=self.num_req_gened, payload=req)
 			msg.payload.probe = False
 			msg.payload.cl_id = to_cl_id
 			msg.src_id = self._id

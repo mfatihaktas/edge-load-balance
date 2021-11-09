@@ -3,9 +3,7 @@ echo $1 $2 $3
 
 PY=python3
 
-if [ $1 = 's' ]; then
-  source ./bin/activate
-elif [ $1 = 'n' ]; then
+if [ $1 = 'n' ]; then
   $PY net_single_master.py
 elif [ $1 = 'n2' ]; then
   $PY net_two_masters.py

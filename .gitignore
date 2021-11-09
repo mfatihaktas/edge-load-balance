@@ -5,6 +5,7 @@
 *.json
 *sbatch*
 
+venv/
 log/
 
 # Byte-compiled / optimized / DLL files

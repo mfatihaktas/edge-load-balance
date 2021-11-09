@@ -11,6 +11,7 @@ from collections import deque
 from msg import *
 from debug_utils import *
 import sim_config
+import client_utils
 
 class InterProbeNumReq_controller_constant():
 	def __init__(self, num):
@@ -200,6 +201,9 @@ class Client_PodC():
 			req = Request(_id=self.num_req_gened, cid=self._id, serv_time=self.serv_time_rv.sample())
 			req.epoch_departed_client = self.env.now
 			msg = Msg(_id=self.num_req_gened, payload=req)
+
+			req.min_wait_time = client_utils.min_wait_time(self.cl_l)
+			req.chosen_wait_time = self.id_cl_m[self.assigned_cl_id].min_wait_time()
 
 			## Send message to currently assigned cluster
 			msg.payload.probe = False

@@ -15,7 +15,8 @@ class Request():
 		self.epoch_departed_cluster = None
 		self.epoch_arrived_client = None
 
-		self.num_server_share = None
+		self.min_wait_time = None
+		self.chosen_wait_time = None
 
 	def __repr__(self):
 		return "Request(id= {}, src_id= {}, dst_id= {}, serv_time= {})".format(self._id, self.src_id, self.dst_id, self.serv_time)
@@ -110,4 +111,6 @@ def result_from_req(req):
 	r.epoch_arrived_cluster = req.epoch_arrived_cluster
 	r.epoch_departed_cluster = req.epoch_departed_cluster
 	r.epoch_arrived_client = req.epoch_arrived_client
+	r.min_wait_time = req.min_wait_time
+	r.chosen_wait_time = req.chosen_wait_time
 	return r

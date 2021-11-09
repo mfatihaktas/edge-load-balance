@@ -22,8 +22,8 @@ nice_color = itertools.cycle((NICE_BLUE, NICE_RED, NICE_GREEN, NICE_ORANGE))
 nice2_color = itertools.cycle((NICE_BLUE, NICE_RED, NICE_GREEN, NICE_ORANGE, 'olive', 'purple'))
 dark_color = itertools.cycle(('green', 'purple', 'blue', 'magenta', 'purple', 'gray', 'brown', 'turquoise', 'gold', 'olive', 'silver', 'rosybrown', 'plum', 'goldenrod', 'lightsteelblue', 'lightpink', 'orange', 'darkgray', 'orangered'))
 light_color = itertools.cycle(('silver', 'rosybrown', 'plum', 'lightsteelblue', 'lightpink', 'orange', 'turquoise'))
-linestyle = itertools.cycle(('-', '--', '-.', ':') )
-marker_cycle = itertools.cycle(('x', '+', 'v', '^', 'p', 'd', '<', '>', '1' , '2', '3', '4') )
+linestyle = itertools.cycle(('-', '--', '-.', ':'))
+marker_cycle = itertools.cycle(('x', '+', 'v', '^', 'p', 'd', '<', '>', '1' , '2', '3', '4'))
 skinny_marker_l = ['x', '+', '1', '2', '3', '4']
 
 mew, ms = 1, 2 # 3, 5
@@ -131,6 +131,9 @@ def plot_cdf(rv, ax, label, color, max_=None, drawline_x_l=[]):
 	x_l = np.linspace(rv.l, max_, 100)
 	y_l = [rv.cdf(x) for x in x_l]
 	plot.plot(x_l, y_l, label=label, color=color, marker='.', linestyle=':', lw=2, mew=2, ms=2) # lw=1, mew=1, ms=1
+
+def plot_save(file_name, directory='plots', **kwargs):
+	plot.savefig("{}/{}".format(directory, file_name), **kwargs)
 
 ## Got ZoomPan from
 ## https://stackoverflow.com/questions/11551049/matplotlib-plot-zooming-with-scroll-wheel

@@ -27,7 +27,8 @@ def sim_ET_single_run():
 	ro = 0.8
 	w = 0
 
-	ET, std_T, EW, std_W = sim_ts(num_req_to_finish=sim_config.num_req_to_finish, ro=ro, w=w, num_sim=1, write_to_json=True)
+	m = sim_ts(num_req_to_finish=sim_config.num_req_to_finish, ro=ro, w=w, num_sim=1, write_to_json=True)
+	ET, std_T, EW, std_W = m['ET'], m['std_T'], m['EW'], m['std_W']
 	log(INFO, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():

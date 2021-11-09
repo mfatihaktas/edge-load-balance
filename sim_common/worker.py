@@ -74,6 +74,9 @@ class Worker_base():
 			msg.dst_id = msg.payload.cid
 			self.out.put(msg)
 
+	def min_wait_time(self):
+		return sum(msg.payload.serv_time for msg in self.msg_s.items)
+
 class Worker_probesWaitBehindEachOther(Worker_base):
 	def __init__(self, _id, env, speed=1, out=None):
 		super().__init__(_id, env, speed, out)

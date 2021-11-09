@@ -72,7 +72,8 @@ def sim_ET_vs_d_p():
 			log(INFO, "> d= {}".format(d))
 			d_l.append(d)
 
-			ET, std_T, EW, std_W = sim_podc(d, client.InterProbeNumReq_controller_constant(p), sim_config.num_req_to_finish, sim_config.ro, sim_config.num_sim)
+			m = sim_podc(d, client.InterProbeNumReq_controller_constant(p), sim_config.num_req_to_finish, sim_config.ro, sim_config.num_sim)
+			ET, std_T, EW, std_W = m['ET'], m['std_T'], m['EW'], m['std_W']
 			log(INFO, "", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 			ET_l.append(ET)
 			std_T_l.append(std_T)
@@ -96,7 +97,8 @@ def sim_ET_single_run():
 	# num_req_to_finish = 10000 # 100
 
 	d, p = 2, 10
-	ET, std_T, EW, std_W = sim_podc(d, InterProbeNumReq_controller_constant(p), sim_config.num_req_to_finish, sim_config.ro, num_sim=1, write_to_json=True)
+	m = sim_podc(d, InterProbeNumReq_controller_constant(p), sim_config.num_req_to_finish, sim_config.ro, num_sim=1, write_to_json=True)
+	ET, std_T, EW, std_W = m['ET'], m['std_T'], m['EW'], m['std_W']
 	log(DEBUG, "done", ET=ET, std_T=std_T, EW=EW, std_W=std_W)
 
 def sim_ET_vs_ro():

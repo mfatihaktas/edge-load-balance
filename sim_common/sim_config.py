@@ -81,31 +81,20 @@ def get_filename_tail(ro=ro, hetero_clusters=hetero_clusters, N_fluctuating_frac
 	return 'N_{}'.format(N) + \
 				 '_n_{}'.format(n) + \
 				 '_m_{}'.format(m) + \
-				 '_h_{}'.format(hetero_clusters) + \
+				 '_hetero_{}'.format(hetero_clusters) + \
 				 '_ro_{}'.format(ro) + \
 				 '_Nff_{:.1f}'.format(N_fluctuating_frac) + \
 				 '_workerSlowdown_{}'.format(worker_slowdown) + \
 				 '_ignoreProbeCost_{}'.format(ignore_probe_cost) + \
-				 '_S_{}'.format(serv_time_rv)
+				 '_S_{}'.format(serv_time_rv) + \
+				 '_numReq_{}'.format(num_req_to_finish)
 
-def get_filename(header, extension, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
+def get_filename(header, ext, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
 	return header + '__' + get_filename_tail(ro if ro_arg is None else ro_arg,
 																					 hetero_clusters if hetero_clusters_arg is None else hetero_clusters_arg,
 																					 N_fluctuating_frac if N_fluctuating_frac_arg is None else N_fluctuating_frac_arg,
 																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + \
-																					 '.' + extension
-
-def get_filename_png(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
-	return get_filename(header, 'png', ro_arg, hetero_clusters_arg, N_fluctuating_frac_arg, serv_time_rv_arg)
-
-def get_filename_pdf(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
-	return get_filename(header, 'pdf', ro_arg, hetero_clusters_arg, N_fluctuating_frac_arg, serv_time_rv_arg)
-
-def get_filename_json(header, ro_arg=None, hetero_clusters_arg=None, N_fluctuating_frac_arg=None, serv_time_rv_arg=None):
-	return header + '__' + get_filename_tail(ro if ro_arg is None else ro_arg,
-																					 hetero_clusters if hetero_clusters_arg is None else hetero_clusters_arg,
-																					 N_fluctuating_frac if N_fluctuating_frac_arg is None else N_fluctuating_frac_arg,
-																					 serv_time_rv if serv_time_rv_arg is None else serv_time_rv_arg) + '.json'
+																					 '.' + ext
 
 def get_inter_req_gen_time_filename(ci, inter_gen_time_rv, num_req_to_finish):
 	import os.path

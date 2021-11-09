@@ -9,7 +9,9 @@ WARNING = 2
 ERROR = 3
 CRITICAL = 4
 
-logger = logging.getLogger('edge_cloud')
+LOGGER_NAME = 'edge_cloud'
+
+logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(logging.INFO)
 # logger.setLevel(logging.DEBUG)
 
@@ -21,22 +23,24 @@ FORMAT = '%(levelname)s] %(func_name)s: %(msg)s'
 formatter = logging.Formatter(FORMAT)
 
 def log_to_std():
-	logger = logging.getLogger('edge_cloud')
+	logger = logging.getLogger(LOGGER_NAME)
 	sh = logging.StreamHandler()
 	sh.setFormatter(formatter)
 	logger.addHandler(sh)
 
 level_log_m = {INFO: logger.info, DEBUG: logger.debug, WARNING: logger.warning, ERROR: logger.error, CRITICAL: logger.critical}
 
-def log_to_file(filename):
-	logger = logging.getLogger('edge_cloud')
-	# for hdlr in logger.handlers[:]: # remove all old handlers
-	#		logger.removeHandler(hdlr)
+def log_to_file(filename, directory='./log'):
+  if directory and not os.path.exists(directory):
+    os.makedirs(directory)
 
-	fh = logging.FileHandler(filename, mode='w') # mode='w'
-	fh.setLevel(logging.DEBUG)
-	fh.setFormatter(formatter)
-	logger.addHandler(fh)
+  logger = logging.getLogger(LOGGER_NAME)
+
+  filepath = '{}/{}'.format(directory, filename)
+  fh = logging.FileHandler(filepath, mode='w')
+  fh.setLevel(logging.DEBUG)
+  fh.setFormatter(formatter)
+  logger.addHandler(fh)
 
 def get_extra():
 	# caller_list = []

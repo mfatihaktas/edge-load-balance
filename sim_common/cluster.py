@@ -49,14 +49,14 @@ class Cluster():
 		if ignore_probe_cost:
 			if slowdown > 1:
 				# Worker_probesWaitBehindEachOther_fluctuatingSpeed
-				w_l = [Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed('{}-w{}'.format(_id, i), env, speed, slowdown, normal_dur_rv, slow_dur_rv, self.out) for i in range(num_worker)]
+				self.w_l = [Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed('{}-w{}'.format(_id, i), env, speed, slowdown, normal_dur_rv, slow_dur_rv, self.out) for i in range(num_worker)]
 			else:
 				# Worker_probesWaitBehindEachOther
-				w_l = [Worker_probesOnlyWaitBehindActualReqs('{}-w{}'.format(_id, i), env, speed, self.out) for i in range(num_worker)]
+				self.w_l = [Worker_probesOnlyWaitBehindActualReqs('{}-w{}'.format(_id, i), env, speed, self.out) for i in range(num_worker)]
 		else:
-			w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, speed, self.out) for i in range(num_worker)]
+			self.w_l = [Worker_probesTreatedAsActualReq('{}-w{}'.format(_id, i), env, speed, self.out) for i in range(num_worker)]
 
-		self.master = Master(_id, env, w_l)
+		self.master = Master(_id, env, self.w_l)
 
 	def __repr__(self):
 		return "Cluster(id= {})".format(self._id)
@@ -67,3 +67,6 @@ class Cluster():
 	def put(self, msg):
 		slog(DEBUG, self.env, self, "recved", msg=msg)
 		self.master.put(msg)
+
+	def min_wait_time(self):
+		return min(w.min_wait_time() for w in self.w_l)
