@@ -173,7 +173,7 @@ def plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 
 	ro = ''
 	ro_EX_l_podc = read_json_from_file(fname=get_filename('{}/ro_E{}_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, X, d, p), 'json', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
-	ro_std_X_l_podc = read_json_from_file(fname=get_filename('{}/ro_std_X_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, X, d, p), 'json', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
+	ro_std_X_l_podc = read_json_from_file(fname=get_filename('{}/ro_std_{}_l_podc_d_{}_p_{}'.format(SUBFOLDER_PODC, X, d, p), 'json', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_EX_l_ts_w_0 = read_json_from_file(fname=get_filename('{}/ro_E{}_l_ts_w_0'.format(SUBFOLDER_TS, X), 'json', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_std_X_l_ts_w_0 = read_json_from_file(fname=get_filename('{}/ro_std_{}_l_ts_w_0'.format(SUBFOLDER_TS, X), 'json', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
 	ro_EX_l_ts_w_20 = read_json_from_file(fname=get_filename('{}/ro_E{}_l_ts_w_20'.format(SUBFOLDER_TS, X), 'json', ro, hetero_clusters, N_fluctuating_frac, serv_time_rv))
@@ -218,11 +218,12 @@ def plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 	def plot_w_ordering_legends():
 		last_EX__ro_EX_l__label_l = []
 		def append(ro_EX_l, label):
-			last_EX__ro_EX_l__label_l.append((ro_EX_l[-1][1], ro_EX_l, label))
+			if ro_EX_l:
+				last_EX__ro_EX_l__label_l.append((ro_EX_l[-1][1], ro_EX_l, label))
 
 		append(ro_EX_l_podc, 'PodC')
 		append(ro_EX_l_ts_w_0, 'TS-ROR')
-		append(ro_EX_l_ts_w_20, 'TS, w=20')
+		# append(ro_EX_l_ts_w_20, 'TS, w=20')
 		# append(ro_EX_l_ts_w_100, 'TS, w=100')
 		# append(ro_EX_l_ts_w_m20, 'TS, w=-20')
 		append(ro_EX_l_rr, 'RR')
@@ -251,7 +252,7 @@ def plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 def plot_EX_vs_ro_for_varying_config(X):
 	log(INFO, "started", X=X)
 
-	hetero_clusters = False
+	# hetero_clusters = False
 	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
 	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
@@ -398,7 +399,8 @@ if __name__ == '__main__':
 
 	# plot_cdf_X_for_varying_config()
 
-	plot_EX_vs_ro_for_varying_config(X='T')
+	# plot_EX_vs_ro_for_varying_config(X='T')
+	plot_EX_vs_ro_for_varying_config(X='RW')
 
 	# plot_X_over_time_for_varying_config(X='T')
 

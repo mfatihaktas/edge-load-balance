@@ -67,12 +67,12 @@ elif [ $1 = 'clean' ]; then
     SUBFOLDER="sim_$1"
 
     rm $SUBFOLDER/*.json
-    # rm $SUBFOLDER/*.png
+    rm $SUBFOLDER/*.png
     rm $SUBFOLDER/sbatch_*
 
     ## Use it when rm returns
     ## -bash: /usr/bin/rm: Argument list too long
-    # find . -name "*.pdf" -print0 | xargs -0 rm
+    # find . -name "*.json" -print0 | xargs -0 rm
   }
 
   rm_ 'common'
