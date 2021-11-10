@@ -181,5 +181,46 @@ def exp_zoom_pan():
 
 	plot.show()
 
+"""
+## How to multi-plot
+	fontsize = 14
+	fig, axs = plot.subplots(1, 2)
+	figsize = (2*10, 5)
+
+	## CDF of W
+	ax = axs[0]
+	plot.sca(ax)
+	add_cdf(W_podc_l, ax, 'PodC', next(nice2_color)) # drawline_x_l=[1000]
+	add_cdf(W_ts_w_0_l, ax, 'TS, w=0', next(nice2_color))
+	add_cdf(W_ts_w_20_l, ax, 'TS, w=20', next(nice2_color))
+	add_cdf(W_ts_w_100_l, ax, 'TS, w=100', next(nice2_color))
+	add_cdf(W_rr_l, ax, 'RR', next(nice2_color))
+	# add_cdf(W_ucb_w_100_l, ax, 'UCB', next(nice2_color))
+	plot.xscale('log')
+	# plot.xticks(rotation=70)
+	plot.ylabel('Pr{W < x}', fontsize=fontsize)
+	plot.xlabel('x', fontsize=fontsize)
+	legend1 = plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
+
+	## CDF of T
+	ax = axs[1]
+	plot.sca(ax)
+	add_cdf(T_podc_l, ax, 'PodC', next(nice2_color))
+	add_cdf(T_ts_w_0_l, ax, 'TS, w=0', next(nice2_color))
+	add_cdf(T_ts_w_20_l, ax, 'TS, w=20', next(nice2_color))
+	add_cdf(T_ts_w_100_l, ax, 'TS, w=100', next(nice2_color))
+	add_cdf(T_rr_l, ax, 'RR', next(nice2_color))
+	# add_cdf(T_ucb_w_100_l, ax, 'UCB, w=100', next(nice2_color))
+	plot.xscale('log')
+	plot.ylabel('Pr{T < x}', fontsize=fontsize)
+	plot.xlabel('x', fontsize=fontsize)
+	legend2 = plot.legend(fontsize=fontsize, bbox_to_anchor=(1.01, 1))
+
+	fig.set_size_inches(figsize[0], figsize[1] )
+	plot.subplots_adjust(hspace=0.45, wspace=0.45)
+
+	st = plot.suptitle(r'$d= {}, p= {}$'.format(d, p) + ', ' + get_plot_title(ro, hetero_clusters, N_fluctuating_frac, serv_time_rv), fontsize=14)
+"""
+
 if __name__ == '__main__':
 	exp_zoom_pan()
