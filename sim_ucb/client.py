@@ -12,6 +12,7 @@ from msg import *
 from rvs import Normal
 from debug_utils import *
 import sim_config
+import client_utils
 
 class UCB_slidingWin():
 	def __init__(self, arm_id_l, win_len, percentile=0.1):
@@ -191,6 +192,8 @@ class Client_UCB():
 		self.cl_l = cl_l
 		self.out = out
 
+		self.id_cl_m = {cl._id : cl for cl in cl_l}
+
 		cl_id_l = [cl._id for cl in cl_l]
 		if win_len == 0:
 			self.ucb = UCB_resetWindowOnRareEvent(cl_id_l)
@@ -272,9 +275,13 @@ class Client_UCB():
 			req.epoch_departed_client = self.env.now
 			msg = Msg(_id=self.num_req_gened, payload=req)
 
-			## Send message
 			to_cl_id = self.ucb.sample_arm()
 			log(DEBUG, "to_cl_id= {}".format(to_cl_id))
+
+			req.min_wait_time = client_utils.min_wait_time(self.cl_l)
+			req.chosen_wait_time = self.id_cl_m[to_cl_id].min_wait_time()
+
+			## Send message
 			msg.payload.probe = False
 			msg.payload.cl_id = to_cl_id
 			msg.src_id = self._id
