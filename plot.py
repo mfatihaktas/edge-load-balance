@@ -223,12 +223,12 @@ def plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 
 		append(ro_EX_l_podc, 'PodC')
 		append(ro_EX_l_ts_w_0, 'TS-ROR')
-		# append(ro_EX_l_ts_w_20, 'TS, w=20')
-		# append(ro_EX_l_ts_w_100, 'TS, w=100')
+		append(ro_EX_l_ts_w_20, 'TS, w=20')
+		append(ro_EX_l_ts_w_100, 'TS, w=100')
 		# append(ro_EX_l_ts_w_m20, 'TS, w=-20')
 		append(ro_EX_l_rr, 'RR')
 		append(ro_EX_l_ucb_w_0, 'UCB-ROR')
-		# append(ro_EX_l_ucb_w_100, 'UCB, w=100')
+		append(ro_EX_l_ucb_w_100, 'UCB, w=100')
 
 		last_EX__ro_EX_l__label_l.sort()
 		for _, ro_EX_l, label in reversed(last_EX__ro_EX_l__label_l):
@@ -252,10 +252,10 @@ def plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac, serv_time_rv):
 def plot_EX_vs_ro_for_varying_config(X):
 	log(INFO, "started", X=X)
 
-	# hetero_clusters = False
-	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	hetero_clusters = False
+	plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0, serv_time_rv=Exp(serv_rate))
-	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
+	plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=DiscreteRV(p_l=[1], v_l=[1 / serv_rate]))
 	# plot_EX_vs_ro(X, hetero_clusters, N_fluctuating_frac=0.3, serv_time_rv=Exp(serv_rate))
 
 	hetero_clusters = True

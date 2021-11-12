@@ -16,8 +16,8 @@ m = 2 * N
 
 serv_rate = 1
 ro = 0.8
-hetero_clusters = False
-# hetero_clusters = True
+# hetero_clusters = False
+hetero_clusters = True
 
 def get_req_gen_rate(ro):
 	return round(ro * N * n * serv_rate / m, 2)
@@ -33,12 +33,12 @@ N_fluctuating_frac = round(0.0, 1)
 # N_fluctuating_frac = 0.3
 # worker_slowdown = 5
 worker_slowdown = 10
-normal_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
+fast_dur_rv = DiscreteRV(p_l=[1], v_l=[int(300 * 1/serv_rate)])
 slow_dur_rv = DiscreteRV(p_l=[1], v_l=[int(100 * 1/serv_rate)])
 ignore_probe_cost = True
 
-# num_req_to_finish = 10
-num_req_to_finish = 10000
+num_req_to_finish = 10
+# num_req_to_finish = 10000
 # num_req_to_finish = 15000
 # num_sim = 1
 num_sim = 2
@@ -67,7 +67,7 @@ def log_sim_config():
 	log(INFO, "", N=N, n=n, m=m, ro=ro, hetero_clusters=hetero_clusters,
 			inter_req_gen_time_rv=inter_req_gen_time_rv, serv_time_rv=serv_time_rv,
 			N_fluctuating_frac=N_fluctuating_frac, worker_slowdown=worker_slowdown,
-			normal_dur_rv=normal_dur_rv, slow_dur_rv=slow_dur_rv, ignore_probe_cost=ignore_probe_cost)
+			fast_dur_rv=fast_dur_rv, slow_dur_rv=slow_dur_rv, ignore_probe_cost=ignore_probe_cost)
 
 def get_plot_title(ro=None, hetero_clusters=hetero_clusters, N_fluctuating_frac=N_fluctuating_frac, serv_time_rv=serv_time_rv):
 	# return r'$\rho= {}, $'.format(ro) if ro is not None else '' + \

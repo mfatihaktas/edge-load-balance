@@ -4,40 +4,49 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 import simpy
+from enum import Enum
 
 from msg import result_from_req, InfoType, Info
 from debug_utils import *
 
-class FluctuatingState():
-	def __init__(self, env, normal_dur_rv, slow_dur_rv):
+class SpeedState(Enum):
+	FAST = 1
+	SLOW = 2
+
+class Speedometer():
+	def __init__(self, env, slow_speed, fast_dur_rv, slow_dur_rv):
 		self.env = env
-		self.normal_dur_rv = normal_dur_rv
+		self.slow_speed = slow_speed
+		self.fast_dur_rv = fast_dur_rv
 		self.slow_dur_rv = slow_dur_rv
 
-		self.state = 'n'
+		self.state = SpeedState.FAST
 
 		self.act = env.process(self.run())
 
 	def __repr__(self):
-		return "FluctuatingState({})".format(self.state)
+		return "Speedometer({})".format(self.state)
 
-	def is_slow(self):
-		return self.state == 's'
+	def speed(self):
+		if self.state == SpeedState.FAST:
+			return 1
+		elif self.state == SpeedState.SLOW:
+		 return slow_speed
 
 	def run(self):
 		while True:
-			if self.state == 'n':
-				dur = self.normal_dur_rv.sample()
-				slog(DEBUG, self.env, self, "will be normal", dur=dur)
+			if self.state == SpeedState.FAST:
+				dur = self.fast_dur_rv.sample()
+				slog(DEBUG, self.env, self, "will be fast", dur=dur)
 				yield self.env.timeout(dur)
 
-				self.state = 's'
-			elif self.state == 's': # slow
+				self.state = SpeedState.SLOW
+			elif self.state == SpeedState.SLOW:
 				dur = self.slow_dur_rv.sample()
 				slog(DEBUG, self.env, self, "will be slow", dur=dur)
 				yield self.env.timeout(dur)
 
-				self.state = 'n'
+				self.state = SpeedState.FAST
 			else:
 				assert_("Unexpected state", state=self.state)
 
@@ -130,11 +139,9 @@ class Worker_probesWaitBehindEachOther(Worker_base):
 		slog(DEBUG, self.env, self, "done")
 
 class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
-	def __init__(self, _id, env, speed, slowdown, normal_dur_rv, slow_dur_rv, out=None):
+	def __init__(self, _id, env, speed, slowdown, fast_dur_rv, slow_dur_rv, out=None):
 		super().__init__(_id, env, speed, out)
-		self.slowdown = slowdown
-
-		self.state = FluctuatingState(env, normal_dur_rv, slow_dur_rv)
+		self.speedometer = Speedometer(env, slowdown, fast_dur_rv, slow_dur_rv)
 		self.act = env.process(self.run())
 
 	def __repr__(self):
@@ -147,11 +154,7 @@ class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
 
 			req = msg.payload
 			if not req.probe:
-				speed = self.speed
-				if self.state.is_slow():
-					speed /= self.slowdown
-
-				t = req.serv_time / speed
+				t = req.serv_time / self.speedometer.speed()
 				slog(DEBUG, self.env, self, "serving", t=t)
 				yield self.env.timeout(t)
 				slog(DEBUG, self.env, self, "finished serving")
@@ -209,11 +212,11 @@ class Worker_probesOnlyWaitBehindActualReqs(Worker_base):
 		slog(DEBUG, self.env, self, "done")
 
 class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
-	def __init__(self, _id, env, speed, slowdown, normal_dur_rv, slow_dur_rv, out=None):
+	def __init__(self, _id, env, speed, slowdown, fast_dur_rv, slow_dur_rv, out=None):
 		super().__init__(_id, env, speed, out)
 		self.slowdown = slowdown
 
-		self.state = FluctuatingState(env, normal_dur_rv, slow_dur_rv)
+		self.speedometer = Speedometer(env, slowdown, fast_dur_rv, slow_dur_rv)
 
 		self.act = env.process(self.run())
 
@@ -227,11 +230,7 @@ class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
 
 			req = msg.payload
 			if not req.probe:
-				speed = self.speed
-				if self.state.is_slow():
-					speed /= self.slowdown
-
-				t = req.serv_time / speed
+				t = req.serv_time / sself.speedometer.speed()
 				slog(DEBUG, self.env, self, "serving", t=t)
 				yield self.env.timeout(t)
 				slog(DEBUG, self.env, self, "finished serving")
