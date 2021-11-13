@@ -13,19 +13,22 @@ class SpeedState(Enum):
 	FAST = 1
 	SLOW = 2
 
-class Speedometer():
+class Speedometer_base():
 	def __init__(self, env, slow_speed, fast_dur_rv, slow_dur_rv):
 		self.env = env
 		self.slow_speed = slow_speed
 		self.fast_dur_rv = fast_dur_rv
 		self.slow_dur_rv = slow_dur_rv
 
-		self.state = SpeedState.FAST
+class Speedometer_wSuddenSlowdown(Speedometer_base):
+	def __init__(self, env, slow_speed, fast_dur_rv, slow_dur_rv):
+		super().__init__(env, slow_speed, fast_dur_rv, slow_dur_rv)
 
+		self.state = SpeedState.FAST
 		self.act = env.process(self.run())
 
 	def __repr__(self):
-		return "Speedometer({})".format(self.state)
+		return "Speedometer_wSuddenSlowdown({})".format(self.state)
 
 	def speed(self):
 		if self.state == SpeedState.FAST:
@@ -45,6 +48,49 @@ class Speedometer():
 				dur = self.slow_dur_rv.sample()
 				slog(DEBUG, self.env, self, "will be slow", dur=dur)
 				yield self.env.timeout(dur)
+
+				self.state = SpeedState.FAST
+			else:
+				assert_("Unexpected state", state=self.state)
+
+class Speedometer_wGradualSlowdown(Speedometer_base):
+	def __init__(self, env, slow_speed, fast_dur_rv, slow_dur_rv):
+		super().__init__(env, slow_speed, fast_dur_rv, slow_dur_rv)
+
+		self.state = SpeedState.FAST
+		self.epoch_last_trans_to_slow = None
+		self.dur_last_slow = None
+
+		self.act = env.process(self.run())
+
+	def __repr__(self):
+		return "Speedometer_wGradualSlowdown({})".format(self.state)
+
+	def speed(self):
+		if self.state == SpeedState.FAST:
+			return 1
+		elif self.state == SpeedState.SLOW:
+			time_since_trans = self.env.now - self.epoch_trans_to_slow
+			half_dur = self.dur_last_slow / 2
+
+			if time_since_trans <= half_dur:
+				return 1 + (self.slow_speed - 1) * time_since_trans / half_dur
+			else:
+				return self.slow_speed - (self.slow_speed - 1) * (time_since_trans - half_dur_slow) / half_dur_slow
+
+	def run(self):
+		while True:
+			if self.state == SpeedState.FAST:
+				dur = self.fast_dur_rv.sample()
+				slog(DEBUG, self.env, self, "will be fast", dur=dur)
+				yield self.env.timeout(dur)
+
+				self.state = SpeedState.SLOW
+			elif self.state == SpeedState.SLOW:
+				self.epoch_trans_to_slow = self.env.now
+				self.dur_last_slow = self.slow_dur_rv.sample()
+				slog(DEBUG, self.env, self, "will be slow", dur=self.dur_last_slow)
+				yield self.env.timeout(self.dur_last_slow)
 
 				self.state = SpeedState.FAST
 			else:
@@ -141,7 +187,7 @@ class Worker_probesWaitBehindEachOther(Worker_base):
 class Worker_probesWaitBehindEachOther_fluctuatingSpeed(Worker_base):
 	def __init__(self, _id, env, speed, slowdown, fast_dur_rv, slow_dur_rv, out=None):
 		super().__init__(_id, env, speed, out)
-		self.speedometer = Speedometer(env, slowdown, fast_dur_rv, slow_dur_rv)
+		self.speedometer = Speedometer_wGradualSlowdown(env, slowdown, fast_dur_rv, slow_dur_rv)
 		self.act = env.process(self.run())
 
 	def __repr__(self):
@@ -216,7 +262,7 @@ class Worker_probesOnlyWaitBehindActualReqs_fluctuatingSpeed(Worker_base):
 		super().__init__(_id, env, speed, out)
 		self.slowdown = slowdown
 
-		self.speedometer = Speedometer(env, slowdown, fast_dur_rv, slow_dur_rv)
+		self.speedometer = Speedometer_wGradualSlowdown(env, slowdown, fast_dur_rv, slow_dur_rv)
 
 		self.act = env.process(self.run())
 
