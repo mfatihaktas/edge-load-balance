@@ -399,8 +399,8 @@ if __name__ == '__main__':
 
 	# plot_cdf_X_for_varying_config()
 
-	# plot_EX_vs_ro_for_varying_config(X='T')
-	plot_EX_vs_ro_for_varying_config(X='RW')
+	plot_EX_vs_ro_for_varying_config(X='T')
+	# plot_EX_vs_ro_for_varying_config(X='RW')
 
 	# plot_X_over_time_for_varying_config(X='T')
 

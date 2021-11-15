@@ -143,6 +143,76 @@ class GaussianThompsonSampling_resetWindowOnRareEvent():
 
 		return min_arm_id
 
+class GaussianThompsonSampling_resetWindowOnRareEvent_reduceBadRareOverTime():
+	def __init__(self, arm_id_l, threshold_prob_rare=0.9):
+		self.arm_id_l = arm_id_l
+		self.threshold_prob_rare = threshold_prob_rare
+
+		self.arm_id__n_mean_var_m = {i: (0, 0, 1) for i in arm_id_l}
+		self.bad_rare_arm_id_s = set()
+
+	def __repr__(self):
+		return 'GaussianThompsonSampling_resetWindowOnRareEvent_reduceBadRareOverTime(arm_id_l= {}, threshold_prob_rare= {})'.format(self.arm_id_l, self.threshold_prob_rare)
+
+	def record_cost(self, arm_id, cost):
+		n, _mean, _var = self.arm_id__n_mean_var_m[arm_id]
+
+		def record():
+			mean = (_mean * n + cost) / (n + 1)
+			## https://math.stackexchange.com/questions/102978/incremental-computation-of-standard-deviation
+			# elif n < 3:
+			# 	var = mean**2
+			if n == 0:
+				var = mean**2
+			else:
+				var = (n - 1)/n * _var + (cost - _mean)**2 / (n + 1)
+			self.arm_id__n_mean_var_m[arm_id] = (n + 1, mean, var)
+			if arm_id in self.bad_rare_arm_id_s:
+				self.bad_rare_arm_id_s.remove(arm_id)
+
+			log(DEBUG, "Recorded", cost=cost, n=n, _mean=_mean, _var=_var, mean=mean, var=var)
+
+		if n < 5:
+			record()
+			return
+
+		_stdev = math.sqrt(_var)
+		cost_rv = Normal(_mean, _stdev)
+		Pr_getting_larger_than_cost = cost_rv.tail(cost)
+		Pr_getting_smaller_than_cost = cost_rv.cdf(cost)
+		Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
+		if Pr_cost_is_rare >= self.threshold_prob_rare:
+			log(DEBUG, "Rare event detected", cost=cost, _mean=_mean, _stdev=_stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
+			self.arm_id__n_mean_var_m[arm_id] = (1, cost, cost**2)
+			if cost > _mean:
+				self.bad_rare_arm_id_s.add(arm_id)
+		else:
+			record()
+
+		log(DEBUG, "recorded", arm_id=arm_id, cost=cost)
+
+	def sample_arm(self):
+		log(DEBUG, "", arm_id__n_mean_var_m=self.arm_id__n_mean_var_m)
+
+		min_arm_id, min_sample = None, float('Inf')
+		for arm_id, (n, mean, var) in self.arm_id__n_mean_var_m.items():
+			stdev = math.sqrt(var) if var > 0 else 1
+			s = np.random.normal(loc=mean, scale=stdev)
+			if s < min_sample:
+				min_sample = s
+				min_arm_id = arm_id
+				log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, min_arm_id=min_arm_id)
+
+		if min_arm_id not in self.bad_rare_arm_id_s:
+			for arm_id in self.bad_rare_arm_id_s:
+				n, _mean, _var = self.arm_id__n_mean_var_m[arm_id]
+				check(n == 1, "Bad rare arm_id's should have n equal to 1")
+				mean = _mean * 0.98
+				log(DEBUG, "Updated bad rare mean", arm_id=arm_id, _mean=_mean, mean=mean)
+				self.arm_id__n_mean_var_m[arm_id] = (n, mean, mean**2)
+
+		return min_arm_id
+
 class Client_TS():
 	def __init__(self, i, _id, env, num_req_to_finish, win_len, inter_gen_time_rv, serv_time_rv, cl_l, out=None):
 		self.i = i
@@ -159,7 +229,7 @@ class Client_TS():
 
 		cl_id_l = [cl._id for cl in cl_l]
 		if win_len == 0:
-			self.ts = GaussianThompsonSampling_resetWindowOnRareEvent(cl_id_l)
+			self.ts = GaussianThompsonSampling_resetWindowOnRareEvent_reduceBadRareOverTime(cl_id_l)
 		elif win_len < 0:
 			win_len = abs(win_len)
 			self.ts = GaussianThompsonSampling_slidingWin(cl_id_l, win_len=len(cl_l)*win_len)
